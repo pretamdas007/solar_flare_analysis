@@ -1,0 +1,346 @@
+/* Solar Flare Analysis - Sun-Themed CSS */
+
+:root {
+  /* Solar Color Palette */
+  --deep-space-black: #0d0d0d;
+  --solar-gold: #fbbf24;
+  --coronal-orange: #f97316;
+  --solar-red: #dc2626;
+  --plasma-violet: #a855f7;
+  --aurora-blue: #3b82f6;
+  --stellar-white: #f8fafc;
+  --solar-yellow: #fde047;
+  --cosmic-purple: #7c3aed;
+  --nebula-pink: #ec4899;
+  
+  /* Gradients */
+  --solar-gradient: linear-gradient(135deg, var(--solar-gold), var(--coronal-orange), var(--solar-red));
+  --plasma-gradient: linear-gradient(135deg, var(--plasma-violet), var(--cosmic-purple));
+  --aurora-gradient: linear-gradient(135deg, var(--aurora-blue), var(--plasma-violet));
+  --stellar-gradient: linear-gradient(135deg, var(--deep-space-black), #1a1a1a, #2d2d2d);
+}
+
+/* Solar Animations */
+@keyframes solarPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px var(--solar-gold), 0 0 40px var(--coronal-orange), 0 0 60px var(--solar-red);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 30px var(--solar-gold), 0 0 50px var(--coronal-orange), 0 0 80px var(--solar-red);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes coronalWave {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Removed stellarRotation animation */
+
+@keyframes plasmaFlow {
+  0%, 100% {
+    background-position: 0% 0%;
+  }
+  25% {
+    background-position: 100% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+}
+
+@keyframes flareEruption {
+  0% {
+    opacity: 0.3;
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1.1);
+  }
+  100% {
+    opacity: 0.3;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes auroraShimmer {
+  0%, 100% {
+    opacity: 0.6;
+    filter: hue-rotate(0deg);
+  }
+  33% {
+    opacity: 0.8;
+    filter: hue-rotate(120deg);
+  }
+  66% {
+    opacity: 0.9;
+    filter: hue-rotate(240deg);
+  }
+}
+
+/* Solar UI Components */
+.solar-body {
+  background: var(--stellar-gradient);
+  background-size: 400% 400%;
+  animation: coronalWave 20s ease-in-out infinite;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.solar-body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 20%, var(--solar-gold)08, transparent 50%),
+              radial-gradient(circle at 80% 80%, var(--coronal-orange)06, transparent 50%),
+              radial-gradient(circle at 40% 90%, var(--plasma-violet)04, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.solar-card {
+  background: rgba(var(--deep-space-black), 0.4);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(var(--solar-gold), 0.2);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(var(--solar-gold), 0.1);
+  transition: all 0.3s ease;
+}
+
+.solar-card:hover {
+  border-color: rgba(var(--solar-gold), 0.4);
+  box-shadow: 0 12px 48px rgba(var(--solar-gold), 0.2);
+  transform: translateY(-4px);
+}
+
+.solar-button {
+  background: var(--solar-gradient);
+  border: none;
+  border-radius: 16px;
+  color: var(--stellar-white);
+  font-weight: 600;
+  padding: 12px 24px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.solar-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.solar-button:hover::before {
+  left: 100%;
+}
+
+.solar-button:hover {
+  animation: solarPulse 2s infinite;
+  transform: translateY(-2px);
+}
+
+.plasma-button {
+  background: var(--plasma-gradient);
+  border: 2px solid var(--plasma-violet);
+  border-radius: 16px;
+  color: var(--stellar-white);
+  font-weight: 600;
+  padding: 12px 24px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.plasma-button:hover {
+  border-color: var(--cosmic-purple);
+  box-shadow: 0 0 30px var(--plasma-violet);
+  transform: translateY(-2px);
+}
+
+.aurora-text {
+  background: var(--aurora-gradient);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: auroraShimmer 4s ease-in-out infinite;
+}
+
+.solar-progress {
+  background: rgba(var(--deep-space-black), 0.3);
+  border-radius: 10px;
+  height: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.solar-progress-bar {
+  background: var(--solar-gradient);
+  height: 100%;
+  border-radius: 10px;
+  position: relative;
+  animation: plasmaFlow 3s ease-in-out infinite;
+}
+
+.solar-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: coronalWave 2s ease-in-out infinite;
+}
+
+.flare-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--solar-red);
+  animation: flareEruption 1.5s ease-in-out infinite;
+  box-shadow: 0 0 10px var(--solar-red);
+}
+
+.stellar-icon {
+  filter: drop-shadow(0 0 8px var(--solar-gold));
+  transition: all 0.3s ease;
+}
+
+.stellar-icon:hover {
+  filter: drop-shadow(0 0 16px var(--coronal-orange));
+  transform: scale(1.1);
+}
+
+.cosmic-grid {
+  background-image: 
+    linear-gradient(rgba(var(--solar-gold), 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--solar-gold), 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+.solar-glassmorphism {
+  background: rgba(13, 13, 13, 0.25);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(251, 191, 36, 0.18);
+  border-radius: 20px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.37),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.plasma-glow {
+  box-shadow: 
+    0 0 20px var(--plasma-violet),
+    0 0 40px var(--cosmic-purple),
+    inset 0 0 20px rgba(var(--plasma-violet), 0.1);
+}
+
+.coronal-border {
+  border: 2px solid;
+  border-image: var(--solar-gradient) 1;
+  border-radius: 16px;
+}
+
+/* Solar Status Indicators */
+.status-online {
+  color: var(--solar-gold);
+  text-shadow: 0 0 10px var(--solar-gold);
+}
+
+.status-offline {
+  color: var(--solar-red);
+  text-shadow: 0 0 10px var(--solar-red);
+}
+
+.status-warning {
+  color: var(--coronal-orange);
+  text-shadow: 0 0 10px var(--coronal-orange);
+}
+
+.status-info {
+  color: var(--aurora-blue);
+  text-shadow: 0 0 10px var(--aurora-blue);
+}
+
+/* Solar Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--deep-space-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--solar-gradient);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--coronal-orange);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .solar-card {
+    border-radius: 16px;
+    padding: 16px;
+  }
+  
+  .solar-button, .plasma-button {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .solar-card {
+    border-width: 2px;
+    border-color: var(--solar-gold);
+  }
+  
+  .aurora-text {
+    color: var(--stellar-white);
+    text-shadow: 2px 2px 4px var(--deep-space-black);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .solar-body::before,
+  .solar-progress-bar,
+  .flare-indicator,
+  .stellar-icon {
+    animation: none;
+  }
+  
+  .solar-button:hover {
+    animation: none;
+  }
+}
