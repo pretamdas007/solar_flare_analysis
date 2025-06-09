@@ -14,12 +14,12 @@ XRS_CHANNELS = ['A', 'B']  # A: 0.05-0.4 nm(Higher-energy (shorter wavelength) s
 
 # Flare detection parameters
 DETECTION_PARAMS = {
-    'threshold_factor': 3.0,  # Standard deviations above moving median
-    'window_size': 25,  # Window size for moving median
-    'start_threshold': 0.01,  # Fraction of peak flux for start time
-    'end_threshold': 0.5,  # Fraction of peak flux for end time
-    'min_duration': '1min',  # Minimum flare duration
-    'max_duration': '3H',  # Maximum flare duration
+    'threshold_factor': 2.0,  # Standard deviations above moving median
+    'window_size': 10,  # Window size for moving median
+    'start_threshold': 1.5,  # Fraction of peak flux for start time
+    'end_threshold': 1.2,  # Fraction of peak flux for end time
+    'min_duration': '2min',  # Minimum flare duration
+    'max_duration': '4H',  # Maximum flare duration
 }
 
 # Background removal parameters

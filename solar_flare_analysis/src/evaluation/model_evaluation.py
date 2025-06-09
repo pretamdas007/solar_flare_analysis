@@ -57,7 +57,8 @@ def evaluate_flare_reconstruction(original, reconstructed, individual=None):
     metrics['peak_error'] = abs(original_peak - reconstructed_peak)
     metrics['relative_peak_error'] = metrics['peak_error'] / original_peak if original_peak > 0 else 0
     
-    # Energy conservation    original_energy = np.trapezoid(original)
+    # Energy conservation
+    original_energy = np.trapezoid(original)
     reconstructed_energy = np.trapezoid(reconstructed)
     metrics['energy_error'] = abs(original_energy - reconstructed_energy)
     metrics['relative_energy_error'] = metrics['energy_error'] / original_energy if original_energy > 0 else 0

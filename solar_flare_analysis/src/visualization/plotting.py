@@ -460,3 +460,310 @@ def plot_flare_statistics(flares_df, figsize=(15, 10)):
     plt.tight_layout()
     
     return fig
+
+
+class FlareVisualization:
+    """
+    Comprehensive flare visualization class for the API
+    """
+    
+    def __init__(self):
+        """Initialize the visualization class"""
+        self.default_figsize = (12, 8)
+        
+    def plot_flare_timeline(self, flares, nanoflares=None, figsize=None):
+        """
+        Plot a timeline of flares with different markers for nanoflares
+        
+        Parameters
+        ----------
+        flares : list
+            List of flare dictionaries
+        nanoflares : list, optional
+            List of nanoflare dictionaries
+        figsize : tuple, optional
+            Figure size
+            
+        Returns
+        -------
+        matplotlib.figure.Figure
+            Figure containing the plot
+        """
+        if figsize is None:
+            figsize = self.default_figsize
+            
+        fig, ax = plt.subplots(figsize=figsize)
+        
+        # Extract data from flares
+        timestamps = []
+        intensities = []
+        is_nano = []
+        
+        nano_timestamps = set()
+        if nanoflares:
+            nano_timestamps = {f.get('timestamp', '') for f in nanoflares}
+        
+        for flare in flares:
+            ts = flare.get('timestamp', '')
+            if ts:
+                try:
+                    # Parse ISO timestamp
+                    dt = pd.to_datetime(ts)
+                    timestamps.append(dt)
+                    intensities.append(flare.get('intensity', 0))
+                    is_nano.append(ts in nano_timestamps)
+                except:
+                    continue
+        
+        if not timestamps:
+            # Create empty plot
+            ax.text(0.5, 0.5, 'No valid timestamp data', 
+                   transform=ax.transAxes, ha='center', va='center')
+            ax.set_title('Flare Timeline (No Data)')
+            return fig
+        
+        # Separate regular flares and nanoflares
+        regular_times = [t for t, nano in zip(timestamps, is_nano) if not nano]
+        regular_intensities = [i for i, nano in zip(intensities, is_nano) if not nano]
+        nano_times = [t for t, nano in zip(timestamps, is_nano) if nano]
+        nano_intensities = [i for i, nano in zip(intensities, is_nano) if nano]
+        
+        # Plot regular flares
+        if regular_times:
+            ax.scatter(regular_times, regular_intensities, 
+                      c='blue', alpha=0.6, s=50, label='Regular Flares')
+        
+        # Plot nanoflares
+        if nano_times:
+            ax.scatter(nano_times, nano_intensities, 
+                      c='red', alpha=0.8, s=30, marker='^', label='Nanoflares')
+        
+        ax.set_xlabel('Time')
+        ax.set_ylabel('Intensity')
+        ax.set_title('Solar Flare Timeline')
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+        
+        # Format x-axis
+        ax.tick_params(axis='x', rotation=45)
+        
+        plt.tight_layout()
+        return fig
+    
+    def plot_energy_distribution(self, flares, bins=20, figsize=None):
+        """
+        Plot energy distribution histogram
+        
+        Parameters
+        ----------
+        flares : list
+            List of flare dictionaries
+        bins : int, optional
+            Number of histogram bins
+        figsize : tuple, optional
+            Figure size
+            
+        Returns
+        -------
+        matplotlib.figure.Figure
+            Figure containing the plot
+        """
+        if figsize is None:
+            figsize = self.default_figsize
+            
+        fig, ax = plt.subplots(figsize=figsize)
+        
+        # Extract energies
+        energies = [f.get('energy', 0) for f in flares if f.get('energy', 0) > 0]
+        
+        if not energies:
+            ax.text(0.5, 0.5, 'No energy data available', 
+                   transform=ax.transAxes, ha='center', va='center')
+            ax.set_title('Energy Distribution (No Data)')
+            return fig
+        
+        # Create histogram in log space
+        log_energies = np.log10(energies)
+        ax.hist(log_energies, bins=bins, alpha=0.7, color='skyblue', edgecolor='black')
+        
+        ax.set_xlabel('log₁₀(Energy) [erg]')
+        ax.set_ylabel('Count')
+        ax.set_title('Flare Energy Distribution')
+        ax.grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        return fig
+    
+    def plot_power_law(self, flares, figsize=None):
+        """
+        Plot cumulative energy distribution to show power law
+        
+        Parameters
+        ----------
+        flares : list
+            List of flare dictionaries
+        figsize : tuple, optional
+            Figure size
+            
+        Returns
+        -------
+        matplotlib.figure.Figure
+            Figure containing the plot
+        """
+        if figsize is None:
+            figsize = self.default_figsize
+            
+        fig, ax = plt.subplots(figsize=figsize)
+        
+        # Extract energies
+        energies = [f.get('energy', 0) for f in flares if f.get('energy', 0) > 0]
+        
+        if not energies:
+            ax.text(0.5, 0.5, 'No energy data available', 
+                   transform=ax.transAxes, ha='center', va='center')
+            ax.set_title('Power Law Distribution (No Data)')
+            return fig
+        
+        # Sort energies
+        sorted_energies = np.sort(energies)[::-1]  # Descending order
+        
+        # Create cumulative distribution
+        counts = np.arange(1, len(sorted_energies) + 1)
+        
+        # Plot on log-log scale
+        ax.loglog(sorted_energies, counts, 'bo-', alpha=0.6, markersize=4)
+        
+        # Try to fit a power law
+        if len(sorted_energies) > 5:
+            log_e = np.log10(sorted_energies)
+            log_c = np.log10(counts)
+            
+            # Linear fit in log space
+            coeffs = np.polyfit(log_e, log_c, 1)
+            power_law_index = coeffs[0]
+            
+            # Plot fit line
+            fit_line = 10**(coeffs[1]) * sorted_energies**coeffs[0]
+            ax.loglog(sorted_energies, fit_line, 'r-', 
+                     label=f'Power law fit: α = {power_law_index:.2f}')
+            ax.legend()
+        
+        ax.set_xlabel('Energy [erg]')
+        ax.set_ylabel('Cumulative Count')
+        ax.set_title('Cumulative Energy Distribution (Power Law)')
+        ax.grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        return fig
+    
+    def create_summary_plot(self, flares, nanoflares=None, figsize=(15, 10)):
+        """
+        Create a comprehensive summary plot with multiple panels
+        
+        Parameters
+        ----------
+        flares : list
+            List of flare dictionaries
+        nanoflares : list, optional
+            List of nanoflare dictionaries
+        figsize : tuple, optional
+            Figure size
+            
+        Returns
+        -------
+        matplotlib.figure.Figure
+            Figure containing the multi-panel plot
+        """
+        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=figsize)
+        
+        # Panel 1: Timeline
+        timestamps = []
+        intensities = []
+        nano_timestamps = set()
+        if nanoflares:
+            nano_timestamps = {f.get('timestamp', '') for f in nanoflares}
+        
+        for flare in flares:
+            ts = flare.get('timestamp', '')
+            if ts:
+                try:
+                    dt = pd.to_datetime(ts)
+                    timestamps.append(dt)
+                    intensities.append(flare.get('intensity', 0))
+                except:
+                    continue
+        
+        if timestamps:
+            is_nano = [ts.isoformat() + 'Z' in nano_timestamps for ts in timestamps]
+            regular_times = [t for t, nano in zip(timestamps, is_nano) if not nano]
+            regular_intensities = [i for i, nano in zip(intensities, is_nano) if not nano]
+            nano_times = [t for t, nano in zip(timestamps, is_nano) if nano]
+            nano_intensities = [i for i, nano in zip(intensities, is_nano) if nano]
+            
+            if regular_times:
+                ax1.scatter(regular_times, regular_intensities, 
+                           c='blue', alpha=0.6, s=30, label='Regular Flares')
+            if nano_times:
+                ax1.scatter(nano_times, nano_intensities, 
+                           c='red', alpha=0.8, s=20, marker='^', label='Nanoflares')
+            ax1.legend()
+        
+        ax1.set_title('Flare Timeline')
+        ax1.set_xlabel('Time')
+        ax1.set_ylabel('Intensity')
+        ax1.grid(True, alpha=0.3)
+        
+        # Panel 2: Energy distribution
+        energies = [f.get('energy', 0) for f in flares if f.get('energy', 0) > 0]
+        if energies:
+            log_energies = np.log10(energies)
+            ax2.hist(log_energies, bins=15, alpha=0.7, color='skyblue', edgecolor='black')
+        
+        ax2.set_title('Energy Distribution')
+        ax2.set_xlabel('log₁₀(Energy) [erg]')
+        ax2.set_ylabel('Count')
+        ax2.grid(True, alpha=0.3)
+        
+        # Panel 3: Power law
+        if energies:
+            sorted_energies = np.sort(energies)[::-1]
+            counts = np.arange(1, len(sorted_energies) + 1)
+            ax3.loglog(sorted_energies, counts, 'bo-', alpha=0.6, markersize=3)
+        
+        ax3.set_title('Power Law Distribution')
+        ax3.set_xlabel('Energy [erg]')
+        ax3.set_ylabel('Cumulative Count')
+        ax3.grid(True, alpha=0.3)
+        
+        # Panel 4: Statistics summary
+        total_flares = len(flares)
+        nano_count = len(nanoflares) if nanoflares else 0
+        total_energy = sum(energies) if energies else 0
+        avg_energy = np.mean(energies) if energies else 0
+        
+        stats_text = f"""
+        Total Flares: {total_flares}
+        Nanoflares: {nano_count}
+        Nanoflare %: {nano_count/total_flares*100:.1f}%
+        
+        Total Energy: {total_energy:.2e} erg
+        Average Energy: {avg_energy:.2e} erg
+        """
+        
+        ax4.text(0.1, 0.5, stats_text, transform=ax4.transAxes, 
+                fontsize=12, verticalalignment='center')
+        ax4.set_title('Summary Statistics')
+        ax4.axis('off')
+        
+        plt.tight_layout()
+        return fig
+
+
+# Additional utility classes for backward compatibility
+class SolarFlareVisualizer(FlareVisualization):
+    """Alias for FlareVisualization for backward compatibility"""
+    pass
+
+class FlareDataPlotter(FlareVisualization):
+    """Alias for FlareVisualization for backward compatibility"""
+    pass

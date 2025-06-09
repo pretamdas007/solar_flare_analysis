@@ -108,7 +108,7 @@ def download_goes_xrs_data(satellite, date, resolution, output_dir):
     month = date_obj.strftime('%m')
     
     # Construct URL
-    base_url = "https://data.ngdc.noaa.gov/platforms/solar-space-observing-satellites"
+    base_url = "https://data.ngdc.noaa.gov/platforms/solar-space-observing-satellites/goes/goes16/l2/data/xrsf-l2-avg1m_science"
     url = f"{base_url}/goes/goes{satellite[-2:]}/l2/{resolution}/{year}/{month}/{satellite}/"
     file_name = f"{satellite}_xrs_{resolution}_{date}_{date}.nc"
     file_url = f"{url}/{file_name}"

@@ -21,8 +21,8 @@ def detect_flare_peaks(time_series, flux_column, threshold_factor=3, window_size
         Name of the column containing flux data
     threshold_factor : float, optional
         Factor multiplied with the standard deviation to set the detection threshold
-    window_size : int, optional
-        Size of the window for peak detection
+    window_size : int or str, optional
+        Size of the window for peak detection. Can be integer or time string like '10min'
         
     Returns
     -------
@@ -33,16 +33,40 @@ def detect_flare_peaks(time_series, flux_column, threshold_factor=3, window_size
     flux = time_series[flux_column].values
     time_index = time_series.index
     
-    # Use scipy.signal.find_peaks for peak detection
-    median = signal.medfilt(flux, kernel_size=window_size)
+    # Convert window_size to integer if it's a string (time-based)
+    if isinstance(window_size, str):
+        # Convert time-based window to number of samples
+        # Assuming 1-minute sampling, convert minutes to samples
+        if 'min' in window_size.lower():
+            window_samples = int(window_size.lower().replace('min', ''))
+        elif 'h' in window_size.lower():
+            window_samples = int(window_size.lower().replace('h', '')) * 60
+        else:
+            window_samples = int(window_size)
+    else:
+        window_samples = int(window_size)
+    
+    # Ensure window size is odd and at least 3
+    if window_samples % 2 == 0:
+        window_samples += 1
+    window_samples = max(window_samples, 3)    # Use scipy.signal.find_peaks for peak detection
+    median = signal.medfilt(flux, kernel_size=window_samples)
     std_dev = np.std(flux)
     threshold = median + threshold_factor * std_dev
+    
+    # Debug output
+    print(f"  Window samples: {window_samples}")
+    print(f"  Flux range: {np.min(flux):.2e} to {np.max(flux):.2e}")
+    print(f"  Median flux: {np.mean(median):.2e}")
+    print(f"  Std dev: {std_dev:.2e}")
+    print(f"  Threshold range: {np.min(threshold):.2e} to {np.max(threshold):.2e}")
+    print(f"  Flux above threshold: {np.sum(flux > threshold)} points")
     
     # Find peaks above the threshold
     peaks, properties = signal.find_peaks(
         flux, 
         height=threshold,
-        distance=window_size // 2,  # Minimum distance between peaks
+        distance=window_samples // 2,  # Minimum distance between peaks
         prominence=std_dev,  # Minimum prominence for a peak
         width=3  # Minimum width for a peak
     )
@@ -231,9 +255,13 @@ def detect_overlapping_flares(flares_df, min_overlap='2min'):
     Returns
     -------
     list
-        List of tuples containing pairs of overlapping flare indices
-    """
+        List of tuples containing pairs of overlapping flare indices    """
     overlapping_pairs = []
+    
+    # Check if DataFrame is empty or doesn't have required columns
+    if flares_df.empty or 'start_time' not in flares_df.columns or 'end_time' not in flares_df.columns:
+        return overlapping_pairs
+    
     min_overlap_duration = pd.Timedelta(min_overlap)
     
     # Sort by start time to optimize comparison

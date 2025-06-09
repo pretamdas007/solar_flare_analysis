@@ -1,0 +1,81 @@
+# ====================================================================
+# DEVELOPMENT REQUIREMENTS - Solar Flare Analysis Project
+# Complete development environment setup
+# Install with: pip install -r requirements-dev.txt
+# ====================================================================
+
+# Include all base requirements
+-r requirements.txt
+
+# Development Tools
+black>=23.0.0
+flake8>=6.0.0
+isort>=5.12.0
+mypy>=1.4.0
+pre-commit>=3.3.0
+
+# Enhanced Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-xdist>=3.3.0
+pytest-mock>=3.11.0
+pytest-benchmark>=4.0.0
+
+# Documentation
+sphinx>=7.0.0
+sphinx-rtd-theme>=1.3.0
+myst-parser>=2.0.0
+sphinx-autodoc-typehints>=1.24.0
+nbsphinx>=0.9.0
+
+# Jupyter Enhanced
+jupyterlab>=4.0.0
+jupyterlab-git>=0.42.0
+jupyter-contrib-nbextensions>=0.7.0
+ipywidgets>=8.0.0
+
+# Performance Profiling
+memory-profiler>=0.61.0
+line-profiler>=4.0.0
+py-spy>=0.3.14
+
+# Code Quality
+bandit>=1.7.5
+safety>=2.3.0
+vulture>=2.7
+
+# Debugging
+pdb++>=0.10.3
+ipdb>=0.13.0
+
+# API Development
+swagger-ui-bundle>=0.1.0
+flasgger>=0.9.7
+httpx>=0.24.0
+
+# Database (for future features)
+sqlalchemy>=2.0.0
+alembic>=1.11.0
+
+# Configuration Management
+python-dotenv>=1.0.0
+click>=8.1.0
+
+# Logging Enhancement
+loguru>=0.7.0
+structlog>=23.1.0
+
+# File Monitoring (for development)
+watchdog>=3.0.0
+
+# GPU Support (optional)
+# cupy>=12.0.0  # Uncomment if CUDA is available
+
+# Alternative ML Frameworks (optional)
+# jax>=0.4.0
+# jaxlib>=0.4.0
+# optuna>=3.2.0
+
+# Windows-specific development tools
+pywin32>=306; sys_platform=="win32"
+colorama>=0.4.6; sys_platform=="win32"

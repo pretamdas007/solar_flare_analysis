@@ -88,61 +88,94 @@ def fit_power_law(data, xmin=None, xmax=None, n_bootstrap=1000, plot=False):
     Returns
     -------
     dict
-        Dictionary containing fit results and uncertainties
-    """
+        Dictionary containing fit results and uncertainties    """
     # Filter out non-positive values (required for power-law fitting)
     data = np.array(data)
     data = data[data > 0]
+    
+    # Check if we have enough data points
+    if len(data) == 0:
+        print("Warning: No positive data points available for power-law fitting")
+        return {
+            'alpha': np.nan,
+            'alpha_err': np.nan,
+            'xmin': np.nan,
+            'n_data': 0,
+            'fit_results': None
+        }
+    
+    if len(data) < 10:
+        print(f"Warning: Only {len(data)} data points available. Power-law fitting may be unreliable.")
+        if len(data) < 3:
+            return {
+                'alpha': np.nan,
+                'alpha_err': np.nan,
+                'xmin': np.nan,
+                'n_data': len(data),
+                'fit_results': None
+            }
     
     # Initial power-law fit
     results = powerlaw.Fit(data, xmin=xmin, xmax=xmax)
     alpha = results.alpha
     xmin_fit = results.xmin if xmin is None else xmin
-    
-    # Bootstrap for uncertainty estimation
+      # Bootstrap for uncertainty estimation (only if we have enough data)
     alpha_bootstraps = []
-    with NumpyRNGContext(42):  # For reproducibility
-        bootstrapped_samples = bootstrap(data, n_bootstrap)
+    if len(data) >= 10 and n_bootstrap > 0:
+        with NumpyRNGContext(42):  # For reproducibility
+            bootstrapped_samples = bootstrap(data, n_bootstrap)
+        
+        for bootstrap_sample in bootstrapped_samples:
+            try:
+                boot_fit = powerlaw.Fit(bootstrap_sample, xmin=xmin_fit, xmax=xmax)
+                alpha_bootstraps.append(boot_fit.alpha)
+            except:
+                # Skip failed fits
+                pass
+      # Calculate uncertainty from bootstrap results
+    alpha_err = np.std(alpha_bootstraps) if alpha_bootstraps else np.nan
     
-    for bootstrap_sample in bootstrapped_samples:
-        try:
-            boot_fit = powerlaw.Fit(bootstrap_sample, xmin=xmin_fit, xmax=xmax)
-            alpha_bootstraps.append(boot_fit.alpha)
-        except:
-            # Skip failed fits
-            pass
-    
-    # Calculate uncertainty from bootstrap results
-    alpha_err = np.std(alpha_bootstraps)
-    
-    # Compare with other distributions
-    R, p = results.distribution_compare('power_law', 'lognormal')
-    
-    # If requested, plot the results
-    if plot:
+    # Compare with other distributions (only if we have enough data)
+    try:
+        if len(data) >= 10:
+            R, p = results.distribution_compare('power_law', 'lognormal')
+        else:
+            R, p = np.nan, np.nan
+    except:
+        R, p = np.nan, np.nan
+      # If requested, plot the results
+    if plot and len(data) >= 3:
         plt.figure(figsize=(12, 8))
         
         # Plot data and fit
         plt.subplot(2, 1, 1)
         results.plot_pdf(color='b', label='Data')
         results.power_law.plot_pdf(color='r', linestyle='--', label='Power-law Fit')
-        plt.title(f'Power-law Fit: α = {alpha:.3f} ± {alpha_err:.3f}')
+        plt.title(f'Power-law Fit: α = {alpha:.3f} ± {alpha_err:.3f if not np.isnan(alpha_err) else "N/A"}')
         plt.legend()
         plt.grid(True)
         
-        # Plot bootstrap distribution of alpha
-        plt.subplot(2, 1, 2)
-        plt.hist(alpha_bootstraps, bins=30, alpha=0.7)
-        plt.axvline(alpha, color='r', linestyle='--', 
-                   label=f'α = {alpha:.3f} ± {alpha_err:.3f}')
-        plt.title('Bootstrap Distribution of Power-law Exponent')
-        plt.xlabel('α')
-        plt.ylabel('Frequency')
-        plt.legend()
-        plt.grid(True)
+        # Plot bootstrap distribution of alpha (only if we have bootstrap results)
+        if alpha_bootstraps:
+            plt.subplot(2, 1, 2)
+            plt.hist(alpha_bootstraps, bins=30, alpha=0.7)
+            plt.axvline(alpha, color='r', linestyle='--', 
+                       label=f'α = {alpha:.3f} ± {alpha_err:.3f}')
+            plt.title('Bootstrap Distribution of Power-law Exponent')
+            plt.xlabel('α')
+            plt.ylabel('Frequency')
+            plt.legend()
+            plt.grid(True)
+        else:
+            plt.subplot(2, 1, 2)
+            plt.text(0.5, 0.5, 'Insufficient data for bootstrap analysis', 
+                    ha='center', va='center', transform=plt.gca().transAxes)
+            plt.title('Bootstrap Distribution (Not Available)')
         
         plt.tight_layout()
         plt.show()
+    elif plot:
+        print(f"Insufficient data for plotting (only {len(data)} points)")
     
     # Return the results
     return {

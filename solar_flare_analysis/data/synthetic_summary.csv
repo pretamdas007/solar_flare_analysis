@@ -1,0 +1,2 @@
+generation_timestamp,n_samples,n_timesteps,n_features,enhanced_generation,input_shape,target_shape,input_mean,input_std,input_min,input_max,target_mean,target_std,target_min,target_max
+2025-06-07T13:07:35.921145,1000,256,2,False,"(1000, 256, 2)","(1000, 25)",0.26834429896803963,0.4162938140292483,-0.22910175134190006,3.218073227028921,0.16893004582576876,0.24821745904895223,0.0,0.9998982543861061
