@@ -1,10 +1,10 @@
 # Solar Flare Analysis with Machine Learning
 
-This project uses machine learning to analyze solar flare data from GOES XRS satellite .nc files. The goal is to separate temporally overlapping flares, accurately define flare characteristics, and compare the results to traditional analysis methods.
+This project uses machine learning to analyze solar flare data from GOES XRS satellite CSV files. The goal is to separate temporally overlapping flares, accurately define flare characteristics, and compare the results to traditional analysis methods.
 
 ## Project Structure
 
-- `data/`: Contains the GOES XRS data in .nc format
+- `data/`: Contains the GOES XRS data in csv format
 - `notebooks/`: Jupyter notebooks for interactive exploration and result visualization
 - `src/`: Source code for the project
   - `data_processing/`: Code for loading and preprocessing satellite data
@@ -23,7 +23,7 @@ This project uses machine learning to analyze solar flare data from GOES XRS sat
    pip install -r requirements.txt
    ```
 
-2. Place your GOES XRS .nc files in the `data/` directory
+2. Place your GOES XRSA and XRSB files in the `data/` directory
 
 3. Run the main analysis pipeline or explore the notebooks
 
