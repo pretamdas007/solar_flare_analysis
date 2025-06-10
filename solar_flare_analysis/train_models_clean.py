@@ -28,6 +28,186 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from main import EnhancedSolarFlareAnalyzer
 
 
+def preprocess_single_file(df, csv_file):
+    """
+    Preprocess a single CSV file for incremental training
+    
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Raw CSV data from single file
+    csv_file : str
+        Path to the CSV file
+        
+    Returns
+    -------
+    pandas.DataFrame
+        Preprocessed data
+    """
+    try:
+        print(f"   🔧 Preprocessing {os.path.basename(csv_file)}...")
+        
+        # Ensure there's a datetime column to use as index
+        if 'time' in df.columns:
+            df.set_index('time', inplace=True)
+        elif 'datetime' in df.columns:
+            df.set_index('datetime', inplace=True)
+        elif 'date' in df.columns:
+            df.set_index('date', inplace=True)
+        elif df.index.name in ['time', 'datetime', 'date']:
+            pass  # Already has datetime index
+        else:
+            # Try to find datetime-like column
+            date_cols = [col for col in df.columns if any(word in col.lower() for word in ['time', 'date', 'timestamp'])]
+            if date_cols:
+                df.set_index(date_cols[0], inplace=True)
+        
+        # Ensure the index is a DatetimeIndex
+        if not isinstance(df.index, pd.DatetimeIndex):
+            df.index = pd.to_datetime(df.index)
+        
+        # Standardize column names
+        df.columns = [col.lower().replace('-', '_').replace(' ', '_') for col in df.columns]
+        
+        # Check which type of data (XRS-A or XRS-B)
+        if 'xrsa' in csv_file.lower() or 'xrs_a' in csv_file.lower():
+            if not any('xrs_a' in col.lower() for col in df.columns):
+                # Add xrs_a column if not present
+                flux_col = [col for col in df.columns if 'flux' in col.lower() or 'irradiance' in col.lower()]
+                if flux_col:
+                    df.rename(columns={flux_col[0]: 'xrs_a'}, inplace=True)
+        
+        if 'xrsb' in csv_file.lower() or 'xrs_b' in csv_file.lower():
+            if not any('xrs_b' in col.lower() for col in df.columns):
+                # Add xrs_b column if not present
+                flux_col = [col for col in df.columns if 'flux' in col.lower() or 'irradiance' in col.lower()]
+                if flux_col:
+                    df.rename(columns={flux_col[0]: 'xrs_b'}, inplace=True)
+        
+        # Remove duplicates and sort by time
+        df = df[~df.index.duplicated(keep='first')].sort_index()
+        
+        # Identify XRS columns
+        xrs_cols = [col for col in df.columns if 'xrs' in col.lower()]
+        
+        if not xrs_cols:
+            print(f"   ⚠️ No XRS columns found in {os.path.basename(csv_file)}")
+            return None
+        
+        print(f"   Found XRS columns: {xrs_cols}")
+        
+        # Quality filtering
+        for col in xrs_cols:
+            # Remove null, negative and unreasonable values
+            mask = (
+                (df[col] > 0) &  # Positive values only
+                (~np.isnan(df[col])) &  # No NaNs
+                (~np.isinf(df[col])) &  # No infinities
+                (df[col] < 1e-2)  # Upper limit on reasonable values
+            )
+            df.loc[~mask, col] = np.nan
+            
+            # Basic outlier detection using IQR method
+            Q1 = df[col].quantile(0.25)
+            Q3 = df[col].quantile(0.75)
+            IQR = Q3 - Q1
+            lower_bound = Q1 - 1.5 * IQR
+            upper_bound = Q3 + 1.5 * IQR
+            
+            outlier_mask = (df[col] < lower_bound) | (df[col] > upper_bound)
+            df.loc[outlier_mask, col] = np.nan
+        
+        # Fill gaps
+        for col in xrs_cols:
+            df[col] = df[col].interpolate(method='time', limit=10)
+        
+        # Basic feature engineering
+        if len(xrs_cols) >= 2:
+            # XRS ratio features
+            df['xrs_ratio'] = df[xrs_cols[0]] / (df[xrs_cols[1]] + 1e-12)
+            df['xrs_sum'] = df[xrs_cols[0]] + df[xrs_cols[1]]
+            df['xrs_diff'] = df[xrs_cols[0]] - df[xrs_cols[1]]
+        
+        # Temporal features
+        for col in xrs_cols:
+            if col in df.columns:
+                # Moving averages
+                df[f'{col}_ma5'] = df[col].rolling(window=5, center=True).mean()
+                df[f'{col}_ma15'] = df[col].rolling(window=15, center=True).mean()
+                
+                # Derivatives (rate of change)
+                df[f'{col}_derivative'] = df[col].diff()
+                
+                # Log transform for better ML performance
+                df[f'{col}_log'] = np.log10(df[col] + 1e-12)
+        
+        # Remove infinite values and drop rows with too many missing values
+        df = df.replace([np.inf, -np.inf], np.nan)
+        df = df.dropna(thresh=len(df.columns) * 0.5)  # Keep rows with at least 50% valid data
+        
+        print(f"   ✅ Preprocessed to {len(df)} data points with {len(df.columns)} features")
+        return df
+        
+    except Exception as e:
+        print(f"   ❌ Error preprocessing {os.path.basename(csv_file)}: {e}")
+        return None
+
+
+def create_incremental_training_plots(training_history, output_dir):
+    """Create plots showing incremental training progress"""
+    if not training_history:
+        return
+    
+    fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+    fig.suptitle('Incremental Training Progress', fontsize=16)
+    
+    files = [item['file'] for item in training_history]
+    losses = [item['final_loss'] for item in training_history]
+    val_losses = [item.get('final_val_loss') for item in training_history if item.get('final_val_loss') is not None]
+    file_sizes = [item['file_size_mb'] for item in training_history]
+    data_points = [item['data_points'] for item in training_history]
+    
+    # Training loss progression
+    axes[0, 0].plot(range(len(losses)), losses, 'bo-', markersize=4)
+    axes[0, 0].set_title('Training Loss by File')
+    axes[0, 0].set_xlabel('File Number')
+    axes[0, 0].set_ylabel('Final Training Loss')
+    axes[0, 0].grid(True, alpha=0.3)
+    
+    # Validation loss progression (if available)
+    if val_losses and len(val_losses) > 1:
+        axes[0, 1].plot(range(len(val_losses)), val_losses, 'ro-', markersize=4)
+        axes[0, 1].set_title('Validation Loss by File')
+        axes[0, 1].set_xlabel('File Number')
+        axes[0, 1].set_ylabel('Final Validation Loss')
+        axes[0, 1].grid(True, alpha=0.3)
+    else:
+        axes[0, 1].text(0.5, 0.5, 'No validation loss data', 
+                       transform=axes[0, 1].transAxes, ha='center', va='center')
+        axes[0, 1].set_title('Validation Loss by File')
+    
+    # File size vs performance
+    if len(file_sizes) == len(losses):
+        axes[1, 0].scatter(file_sizes, losses, alpha=0.7)
+        axes[1, 0].set_title('Performance vs File Size')
+        axes[1, 0].set_xlabel('File Size (MB)')
+        axes[1, 0].set_ylabel('Final Training Loss')
+        axes[1, 0].grid(True, alpha=0.3)
+    
+    # Data points vs performance
+    if len(data_points) == len(losses):
+        axes[1, 1].scatter(data_points, losses, alpha=0.7, color='green')
+        axes[1, 1].set_title('Performance vs Data Points')
+        axes[1, 1].set_xlabel('Number of Data Points')
+        axes[1, 1].set_ylabel('Final Training Loss')
+        axes[1, 1].grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, 'incremental_training_progress.png'), dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"📊 Incremental training progress plot saved")
+
+
 def load_csv_data(xrsa_dir, xrsb_dir):
     """Load and combine CSV data from xrsa and xrsb directories"""
     print(f"\n🔄 Loading data from CSV files...")
@@ -765,6 +945,13 @@ def main():
     print("🚀 Enhanced Solar Flare Analysis Training Script")
     print("=" * 60)
     
+    # Add argument parser for training mode selection
+    import argparse
+    parser = argparse.ArgumentParser(description='Train solar flare analysis models')
+    parser.add_argument('--mode', choices=['bulk', 'incremental'], default='incremental',
+                       help='Training mode: bulk (load all files) or incremental (file-by-file)')
+    args = parser.parse_args()
+    
     # Check if xrsa and xrsb directories exist
     if not (os.path.exists(xrsa_dir) and os.path.isdir(xrsa_dir)):
         print(f"❌ Directory not found: {xrsa_dir}")
@@ -776,144 +963,300 @@ def main():
         print("Please create the xrsb directory in the data folder")
         return
     
+    # Find CSV files
+    xrsa_csv_files = [f for f in os.listdir(xrsa_dir) if f.endswith('.csv')]
+    xrsb_csv_files = [f for f in os.listdir(xrsb_dir) if f.endswith('.csv')]
+    
+    if not xrsa_csv_files and not xrsb_csv_files:
+        print(f"❌ No CSV files found in {xrsa_dir} or {xrsb_dir}")
+        print("Please add GOES XRS CSV files to these directories")
+        return
+    
+    print(f"📁 Found {len(xrsa_csv_files)} CSV files in xrsa directory")
+    print(f"📁 Found {len(xrsb_csv_files)} CSV files in xrsb directory")
+    print(f"🔧 Training mode: {args.mode}")
+    
     try:
-        # Step 1: Load CSV data
-        combined_data = load_csv_data(xrsa_dir, xrsb_dir)
-        
-        # Step 2: Advanced preprocessing
-        processed_data, xrs_cols = advanced_preprocessing(combined_data)
-        
-        # Step 3: Advanced feature engineering
-        enhanced_data = advanced_feature_engineering(processed_data, xrs_cols, output_dir)
-        
-        # Step 4: Anomaly detection
-        anomaly_results = apply_anomaly_detection(enhanced_data, xrs_cols, output_dir)
-        
-        # Step 5: PCA analysis
-        n_components, pca_model = perform_pca_analysis(enhanced_data, output_dir)
-        
-        # Step 6: Create visualizations
-        create_data_visualizations(combined_data, processed_data, xrs_cols, output_dir)
-        
-        # Step 7: Print data quality report
-        print_data_quality_report(enhanced_data)
-        
-        # Step 8: Initialize analyzer with processed data
-        analyzer = EnhancedSolarFlareAnalyzer(
-            data_path=base_data_dir,
-            output_dir=output_dir
-        )
-        
-        # Add processed data to analyzer
-        analyzer.results['raw_data'] = combined_data
-        analyzer.results['preprocessed_data'] = enhanced_data
-        
-        # Step 9: Enhanced ML model initialization
-        print(f"\n🧠 Initializing enhanced ML model...")
-        analyzer.initialize_ml_model(
-            sequence_length=256,  # Longer sequences for better pattern recognition
-            max_flares=5,         # Handle more complex overlapping scenarios
-            enhanced=True         # Use enhanced model architecture
-        )
-        
-        # Step 10: Enhanced training with multiple strategies
-        print(f"\n🎯 Enhanced training with real GOES CSV data...")
-        
-        # Strategy 1: Train with real data only
-        print("\n--- Training Strategy 1: Real Data Only ---")
-        history_real = analyzer.train_ml_model(
-            use_synthetic_data=False,
-            n_synthetic_samples=0,
-            validation_split=0.2,
-            epochs=30,                # More epochs for better convergence
-            batch_size=32,            # Optimal batch size
-            enhanced=True,
-            learning_rate=0.001,      # Conservative learning rate
-            early_stopping_patience=10,
-            reduce_lr_patience=5
-        )
-        
-        if history_real is not None:
-            print("✅ Real data training completed!")
+        if args.mode == 'incremental':
+            # ========== INCREMENTAL TRAINING MODE ==========
+            print(f"\n🔄 Starting incremental training mode...")
             
-            # Save real data model
-            real_model_path = os.path.join(output_dir, 'enhanced_real_data_model.h5')
+            # Prepare data paths for loading
+            all_csv_paths = []
+            for file in xrsa_csv_files:
+                all_csv_paths.append(os.path.join(xrsa_dir, file))
+            for file in xrsb_csv_files:
+                all_csv_paths.append(os.path.join(xrsb_dir, file))
+            
+            # Initialize analyzer
+            analyzer = EnhancedSolarFlareAnalyzer(
+                data_path=base_data_dir,
+                output_dir=output_dir
+            )
+            
+            # Initialize model once
+            print(f"\n🧠 Initializing enhanced ML model...")
+            analyzer.initialize_ml_model(
+                sequence_length=256,  # Longer sequences for better pattern recognition
+                max_flares=5,         # Handle more complex overlapping scenarios
+                enhanced=True         # Use enhanced model architecture
+            )
+            
+            # Train incrementally on one CSV file at a time
+            print(f"\n🔄 Training incrementally on CSV files...")
+            
+            training_history = []
+            total_files_processed = 0
+            
+            for file_idx, csv_file in enumerate(all_csv_paths):
+                try:
+                    print(f"\n📄 Processing file {file_idx + 1}/{len(all_csv_paths)}: {os.path.basename(csv_file)}")
+                    
+                    # Check file size first
+                    file_size_mb = os.path.getsize(csv_file) / (1024 * 1024)
+                    print(f"   File size: {file_size_mb:.1f} MB")
+                    
+                    # Load single CSV file with memory management
+                    if file_size_mb > 100:  # If file > 100MB, sample every 2nd row
+                        print(f"   Large file detected, sampling every 2nd row...")
+                        df = pd.read_csv(csv_file, skiprows=lambda x: x % 2 != 0 and x != 0, parse_dates=True)
+                    elif file_size_mb > 50:  # If file > 50MB, sample every 3rd row
+                        print(f"   Medium file detected, sampling every 3rd row...")
+                        df = pd.read_csv(csv_file, skiprows=lambda x: x % 3 != 0 and x != 0, parse_dates=True)
+                    else:
+                        df = pd.read_csv(csv_file, parse_dates=True)
+                    
+                    if len(df) == 0:
+                        print(f"   ⚠️ Empty file, skipping")
+                        continue
+                    
+                    print(f"   ✅ Loaded {len(df)} rows, {len(df.columns)} columns")
+                    
+                    # Preprocess single file
+                    processed_df = preprocess_single_file(df, csv_file)
+                    
+                    if processed_df is None or len(processed_df) < 100:
+                        print(f"   ⚠️ Insufficient data after preprocessing, skipping")
+                        continue
+                    
+                    # Store in analyzer for this iteration
+                    analyzer.results['raw_data'] = df
+                    analyzer.results['preprocessed_data'] = processed_df
+                    
+                    print(f"   🎯 Training on {len(processed_df)} processed data points...")
+                    
+                    # Train on this file's data
+                    history = analyzer.train_ml_model(
+                        use_synthetic_data=False,
+                        n_synthetic_samples=0,
+                        validation_split=0.2,
+                        epochs=5,  # Fewer epochs per file to avoid overfitting
+                        batch_size=16,
+                        enhanced=True,
+                        learning_rate=0.001,
+                        early_stopping_patience=3
+                    )
+                    
+                    if history is not None:
+                        training_history.append({
+                            'file': os.path.basename(csv_file),
+                            'file_size_mb': file_size_mb,
+                            'data_points': len(processed_df),
+                            'final_loss': history.history.get('loss', [float('inf')])[-1],
+                            'final_val_loss': history.history.get('val_loss', [float('inf')])[-1] if 'val_loss' in history.history else None
+                        })
+                        total_files_processed += 1
+                        print(f"   ✅ Training completed for {os.path.basename(csv_file)}")
+                        
+                        # Save intermediate model every 5 files
+                        if total_files_processed % 5 == 0:
+                            intermediate_model_path = os.path.join(output_dir, f'intermediate_model_after_{total_files_processed}_files.h5')
+                            if hasattr(analyzer.ml_model, 'save_model'):
+                                analyzer.ml_model.save_model(intermediate_model_path)
+                                print(f"   💾 Intermediate model saved after {total_files_processed} files")
+                    else:
+                        print(f"   ❌ Training failed for {os.path.basename(csv_file)}")
+                    
+                    # Memory cleanup
+                    del df, processed_df
+                    import gc
+                    gc.collect()
+                    
+                except Exception as e:
+                    print(f"   ❌ Error processing {csv_file}: {e}")
+                    continue
+            
+            if total_files_processed == 0:
+                print("❌ No files were successfully processed")
+                return
+            
+            print(f"\n✅ Incremental training completed on {total_files_processed} files")
+            
+            # Save final model
+            final_model_path = os.path.join(output_dir, 'final_incremental_model.h5')
             if hasattr(analyzer.ml_model, 'save_model'):
-                analyzer.ml_model.save_model(real_model_path)
-                print(f"💾 Real data model saved to: {real_model_path}")
+                analyzer.ml_model.save_model(final_model_path)
+                print(f"💾 Final model saved to: {final_model_path}")
             
-            # Plot training history
-            plot_training_history(history_real, output_dir, 'real_data_training')
-        
-        # Strategy 2: Hybrid training (synthetic + real data)
-        print("\n--- Training Strategy 2: Hybrid Training (Synthetic + Real) ---")
-        
-        # First train on synthetic data for initialization
-        print("Phase 1: Pre-training on synthetic data...")
-        analyzer.initialize_ml_model(
-            sequence_length=256,
-            max_flares=5,
-            enhanced=True
-        )
-        
-        history_synthetic = analyzer.train_ml_model(
-            use_synthetic_data=True,
-            n_synthetic_samples=5000,  # Generate synthetic data
-            validation_split=0.2,
-            epochs=20,                 # Fewer epochs for pre-training
-            batch_size=32,
-            enhanced=True,
-            learning_rate=0.002       # Slightly higher LR for synthetic data
-        )
-        
-        if history_synthetic is not None:
-            print("✅ Synthetic pre-training completed!")
+            # Save training summary
+            training_summary = {
+                'total_files_processed': total_files_processed,
+                'training_history': training_history,
+                'final_model_path': final_model_path
+            }
             
-            # Phase 2: Fine-tune on real data
-            print("Phase 2: Fine-tuning on real data...")
-            history_finetuned = analyzer.train_ml_model(
+            with open(os.path.join(output_dir, 'incremental_training_summary.json'), 'w') as f:
+                import json
+                json.dump(training_summary, f, indent=2, default=str)
+            
+            # Create training progress visualization
+            create_incremental_training_plots(training_history, output_dir)
+            
+            print(f"\n🎉 Incremental training pipeline completed!")
+            print(f"📁 Output files saved to: {output_dir}")
+            print(f"📊 Processed {total_files_processed} files successfully")
+            
+        else:
+            # ========== BULK TRAINING MODE (ORIGINAL) ==========
+            print(f"\n🔄 Starting bulk training mode...")
+            
+            # Step 1: Load CSV data
+            combined_data = load_csv_data(xrsa_dir, xrsb_dir)
+            
+            # Step 2: Advanced preprocessing
+            processed_data, xrs_cols = advanced_preprocessing(combined_data)
+            
+            # Step 3: Advanced feature engineering
+            enhanced_data = advanced_feature_engineering(processed_data, xrs_cols, output_dir)
+            
+            # Step 4: Anomaly detection
+            anomaly_results = apply_anomaly_detection(enhanced_data, xrs_cols, output_dir)
+            
+            # Step 5: PCA analysis
+            n_components, pca_model = perform_pca_analysis(enhanced_data, output_dir)
+            
+            # Step 6: Create visualizations
+            create_data_visualizations(combined_data, processed_data, xrs_cols, output_dir)
+            
+            # Step 7: Print data quality report
+            print_data_quality_report(enhanced_data)
+            
+            # Step 8: Initialize analyzer with processed data
+            analyzer = EnhancedSolarFlareAnalyzer(
+                data_path=base_data_dir,
+                output_dir=output_dir
+            )
+            
+            # Add processed data to analyzer
+            analyzer.results['raw_data'] = combined_data
+            analyzer.results['preprocessed_data'] = enhanced_data
+            
+            # Step 9: Enhanced ML model initialization
+            print(f"\n🧠 Initializing enhanced ML model...")
+            analyzer.initialize_ml_model(
+                sequence_length=256,  # Longer sequences for better pattern recognition
+                max_flares=5,         # Handle more complex overlapping scenarios
+                enhanced=True         # Use enhanced model architecture
+            )
+            
+            # Step 10: Enhanced training with multiple strategies
+            print(f"\n🎯 Enhanced training with real GOES CSV data...")
+            
+            # Strategy 1: Train with real data only
+            print("\n--- Training Strategy 1: Real Data Only ---")
+            history_real = analyzer.train_ml_model(
                 use_synthetic_data=False,
                 n_synthetic_samples=0,
                 validation_split=0.2,
-                epochs=15,                # Fine-tuning epochs
-                batch_size=16,            # Smaller batch for fine-tuning
+                epochs=30,                # More epochs for better convergence
+                batch_size=32,            # Optimal batch size
                 enhanced=True,
-                learning_rate=0.0005,     # Lower LR for fine-tuning
-                early_stopping_patience=8
+                learning_rate=0.001,      # Conservative learning rate
+                early_stopping_patience=10,
+                reduce_lr_patience=5
             )
             
-            if history_finetuned is not None:
-                print("✅ Fine-tuning completed!")
+            if history_real is not None:
+                print("✅ Real data training completed!")
                 
-                # Save hybrid model
-                hybrid_model_path = os.path.join(output_dir, 'enhanced_hybrid_model.h5')
+                # Save real data model
+                real_model_path = os.path.join(output_dir, 'enhanced_real_data_model.h5')
                 if hasattr(analyzer.ml_model, 'save_model'):
-                    analyzer.ml_model.save_model(hybrid_model_path)
-                    print(f"💾 Hybrid model saved to: {hybrid_model_path}")
+                    analyzer.ml_model.save_model(real_model_path)
+                    print(f"💾 Real data model saved to: {real_model_path}")
                 
-                # Plot combined training history
-                plot_combined_training_history(history_synthetic, history_finetuned, output_dir)
-        
-        # Strategy 3: Cross-validation training
-        print("\n--- Training Strategy 3: Cross-Validation Training ---")
-        cv_results = perform_cross_validation_training(analyzer, enhanced_data, output_dir)
-        
-        # Model evaluation and comparison
-        print("\n🔍 Performing comprehensive model evaluation...")
-        evaluation_report = evaluate_models(analyzer, enhanced_data, output_dir)
-        
-        # Generate enhanced analysis report
-        print(f"\n📊 Generating enhanced analysis report...")
-        results = analyzer.analyze_solar_flares(
-            plot_results=True,
-            save_results=True,
-            nanoflare_analysis=True,   # Enable advanced analysis
-            corona_heating=True        # Enable corona heating analysis
-        )
-        
-        print(f"\n🎉 Enhanced training pipeline completed successfully!")
-        print(f"📁 Output files saved to: {output_dir}")
-        print(f"📈 Training visualizations and reports available")
+                # Plot training history
+                plot_training_history(history_real, output_dir, 'real_data_training')
+            
+            # Strategy 2: Hybrid training (synthetic + real data)
+            print("\n--- Training Strategy 2: Hybrid Training (Synthetic + Real) ---")
+            
+            # First train on synthetic data for initialization
+            print("Phase 1: Pre-training on synthetic data...")
+            analyzer.initialize_ml_model(
+                sequence_length=256,
+                max_flares=5,
+                enhanced=True
+            )
+            
+            history_synthetic = analyzer.train_ml_model(
+                use_synthetic_data=True,
+                n_synthetic_samples=5000,  # Generate synthetic data
+                validation_split=0.2,
+                epochs=20,                 # Fewer epochs for pre-training
+                batch_size=32,
+                enhanced=True,
+                learning_rate=0.002       # Slightly higher LR for synthetic data
+            )
+            
+            if history_synthetic is not None:
+                print("✅ Synthetic pre-training completed!")
+                
+                # Phase 2: Fine-tune on real data
+                print("Phase 2: Fine-tuning on real data...")
+                history_finetuned = analyzer.train_ml_model(
+                    use_synthetic_data=False,
+                    n_synthetic_samples=0,
+                    validation_split=0.2,
+                    epochs=15,                # Fine-tuning epochs
+                    batch_size=16,            # Smaller batch for fine-tuning
+                    enhanced=True,
+                    learning_rate=0.0005,     # Lower LR for fine-tuning
+                    early_stopping_patience=8
+                )
+                
+                if history_finetuned is not None:
+                    print("✅ Fine-tuning completed!")
+                    
+                    # Save hybrid model
+                    hybrid_model_path = os.path.join(output_dir, 'enhanced_hybrid_model.h5')
+                    if hasattr(analyzer.ml_model, 'save_model'):
+                        analyzer.ml_model.save_model(hybrid_model_path)
+                        print(f"💾 Hybrid model saved to: {hybrid_model_path}")
+                    
+                    # Plot combined training history
+                    plot_combined_training_history(history_synthetic, history_finetuned, output_dir)
+            
+            # Strategy 3: Cross-validation training
+            print("\n--- Training Strategy 3: Cross-Validation Training ---")
+            cv_results = perform_cross_validation_training(analyzer, enhanced_data, output_dir)
+            
+            # Model evaluation and comparison
+            print("\n🔍 Performing comprehensive model evaluation...")
+            evaluation_report = evaluate_models(analyzer, enhanced_data, output_dir)
+            
+            # Generate enhanced analysis report
+            print(f"\n📊 Generating enhanced analysis report...")
+            results = analyzer.analyze_solar_flares(
+                plot_results=True,
+                save_results=True,
+                nanoflare_analysis=True,   # Enable advanced analysis
+                corona_heating=True        # Enable corona heating analysis
+            )
+            
+            print(f"\n🎉 Enhanced training pipeline completed successfully!")
+            print(f"📁 Output files saved to: {output_dir}")
+            print(f"📈 Training visualizations and reports available")
         
     except Exception as e:
         print(f"❌ Error during training: {e}")
