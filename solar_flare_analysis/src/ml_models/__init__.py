@@ -1,11 +1,12 @@
 """ML models package"""
 
 from .enhanced_flare_analysis import *
-from .simplified_flare_analysis import *
 from .bayesian_flare_analysis import *
+from .flare_decomposition import *
 
 __all__ = [
-    'EnhancedFlareAnalysis',
-    'SimplifiedFlareAnalysis', 
-    'BayesianFlareAnalysis'
+    'NanoflareDetector',
+    'FlareEnergyAnalyzer',
+    'BayesianFlareAnalysis',
+    'FlareDecompositionModel'
 ]

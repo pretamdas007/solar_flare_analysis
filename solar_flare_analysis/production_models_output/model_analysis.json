@@ -1,0 +1,103 @@
+{
+  "binary_flare_classifier.h5": {
+    "file_size_mb": 0.14955902099609375,
+    "input_shape": [
+      null,
+      128
+    ],
+    "output_shape": [
+      null,
+      1
+    ],
+    "total_params": 10369,
+    "trainable_params": "10369",
+    "layers": 4,
+    "optimizer": "Adam",
+    "loss": "<function binary_crossentropy at 0x00000264E380FA60>",
+    "compatible_with_xrs": false
+  },
+  "cnn_flare_detector.h5": {
+    "file_size_mb": 0.147735595703125,
+    "input_shape": [
+      null,
+      128,
+      1
+    ],
+    "output_shape": [
+      null,
+      1
+    ],
+    "total_params": 9701,
+    "trainable_params": "9701",
+    "layers": 6,
+    "optimizer": "Adam",
+    "loss": "<function binary_crossentropy at 0x00000264E380FA60>",
+    "compatible_with_xrs": true
+  },
+  "energy_regression_model.h5": {
+    "error": "Could not locate function 'mse'. Make sure custom classes are decorated with `@keras.saving.register_keras_serializable()`. Full object config: {'module': 'keras.metrics', 'class_name': 'function', 'config': 'mse', 'registered_name': 'mse'}"
+  },
+  "final_xrs_model.h5": {
+    "error": "Could not locate function 'mse'. Make sure custom classes are decorated with `@keras.saving.register_keras_serializable()`. Full object config: {'module': 'keras.metrics', 'class_name': 'function', 'config': 'mse', 'registered_name': 'mse'}"
+  },
+  "minimal_flare_model.h5": {
+    "file_size_mb": 0.14456939697265625,
+    "input_shape": [
+      null,
+      128
+    ],
+    "output_shape": [
+      null,
+      1
+    ],
+    "total_params": 10369,
+    "trainable_params": "10369",
+    "layers": 3,
+    "optimizer": "Adam",
+    "loss": "<function binary_crossentropy at 0x00000264E380FA60>",
+    "compatible_with_xrs": false
+  },
+  "multiclass_flare_classifier.h5": {
+    "file_size_mb": 0.317230224609375,
+    "input_shape": [
+      null,
+      128
+    ],
+    "output_shape": [
+      null,
+      4
+    ],
+    "total_params": 25028,
+    "trainable_params": "25028",
+    "layers": 4,
+    "optimizer": "Adam",
+    "loss": "<function sparse_categorical_crossentropy at 0x00000264E380F9C0>",
+    "compatible_with_xrs": false
+  },
+  "test_model.h5": {
+    "file_size_mb": 0.14959716796875,
+    "input_shape": [
+      null,
+      128
+    ],
+    "output_shape": [
+      null,
+      1
+    ],
+    "total_params": 9701,
+    "trainable_params": "9701",
+    "layers": 8,
+    "optimizer": "Adam",
+    "loss": "<function binary_crossentropy at 0x00000264E380FA60>",
+    "compatible_with_xrs": false
+  },
+  "xrs_model_after_2_files.h5": {
+    "error": "Could not locate function 'mse'. Make sure custom classes are decorated with `@keras.saving.register_keras_serializable()`. Full object config: {'module': 'keras.metrics', 'class_name': 'function', 'config': 'mse', 'registered_name': 'mse'}"
+  },
+  "xrs_model_after_4_files.h5": {
+    "error": "Could not locate function 'mse'. Make sure custom classes are decorated with `@keras.saving.register_keras_serializable()`. Full object config: {'module': 'keras.metrics', 'class_name': 'function', 'config': 'mse', 'registered_name': 'mse'}"
+  },
+  "xrs_model_after_6_files.h5": {
+    "error": "Could not locate function 'mse'. Make sure custom classes are decorated with `@keras.saving.register_keras_serializable()`. Full object config: {'module': 'keras.metrics', 'class_name': 'function', 'config': 'mse', 'registered_name': 'mse'}"
+  }
+}

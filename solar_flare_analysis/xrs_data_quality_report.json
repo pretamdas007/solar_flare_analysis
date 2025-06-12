@@ -1,0 +1,82 @@
+{
+  "processing_timestamp": "2025-06-12T01:17:14.818917",
+  "summary": {
+    "total_files_processed": 5,
+    "total_samples": 620390,
+    "time_range": {
+      "start": "2000-01-01 00:02:00",
+      "end": "2000-12-31 23:59:00",
+      "duration_hours": 8783.95
+    }
+  },
+  "file_details": [
+    {
+      "filename": "2017_xrsa_xrsb.csv",
+      "original_samples": 157440,
+      "final_samples": 142833,
+      "data_quality": 0.9072217987804878,
+      "flux_channels": [
+        "xrs_a",
+        "xrs_b"
+      ]
+    },
+    {
+      "filename": "2019_xrsa_xrsb.csv",
+      "original_samples": 175200,
+      "final_samples": 172450,
+      "data_quality": 0.9843036529680366,
+      "flux_channels": [
+        "xrs_a",
+        "xrs_b"
+      ]
+    },
+    {
+      "filename": "2020_xrsa_xrsb.csv",
+      "original_samples": 105408,
+      "final_samples": 99729,
+      "data_quality": 0.9461236338797814,
+      "flux_channels": [
+        "xrs_a",
+        "xrs_b"
+      ]
+    },
+    {
+      "filename": "2021_xrsa_xrsb.csv",
+      "original_samples": 105120,
+      "final_samples": 102108,
+      "data_quality": 0.9713470319634703,
+      "flux_channels": [
+        "xrs_a",
+        "xrs_b"
+      ]
+    },
+    {
+      "filename": "2022_xrsa_xrsb.csv",
+      "original_samples": 105120,
+      "final_samples": 103270,
+      "data_quality": 0.9824010654490106,
+      "flux_channels": [
+        "xrs_a",
+        "xrs_b"
+      ]
+    }
+  ],
+  "data_quality": {
+    "xrs_a": {
+      "valid_samples": 620390,
+      "valid_percentage": 100.0,
+      "mean_value": 6.378884972852592e-08,
+      "std_value": 2.073733535799053e-06,
+      "min_value": 1e-09,
+      "max_value": 0.0005949805
+    },
+    "xrs_b": {
+      "valid_samples": 620390,
+      "valid_percentage": 100.0,
+      "mean_value": 4.2988452727218005e-07,
+      "std_value": 6.244638783682191e-06,
+      "min_value": 1e-09,
+      "max_value": 0.0014662761
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "timestamp": "2025-06-12T23:49:05.225381",
+  "total_models": 4,
+  "successful_models": 1,
+  "failed_models": 3,
+  "success_rate": 25.0,
+  "data_statistics": {
+    "raw_data_points": 741575,
+    "sequence_samples": 11586,
+    "data_shape": [
+      741575,
+      2
+    ],
+    "sequence_shape": [
+      11586,
+      128,
+      2
+    ]
+  },
+  "training_parameters": {
+    "max_files_processed": 5,
+    "sample_rate": 0.3,
+    "sequence_length": 128,
+    "overlap": 0.5
+  },
+  "results_summary": {
+    "Bayesian Flare Analyzer": {
+      "status": "failed",
+      "training_time": 179.7864739894867,
+      "error": "BayesianFlareAnalyzer.build_bayesian_model.<locals>.posterior_fn() takes from 2 to 3 positional arguments but 5 were given"
+    },
+    "Enhanced Flare Models": {
+      "status": "failed",
+      "training_time": 0.1429445743560791,
+      "error": "'numpy.ndarray' object has no attribute 'get'"
+    },
+    "Flare Decomposition Model": {
+      "status": "success",
+      "training_time": 233.88978600502014,
+      "error": null
+    },
+    "Monte Carlo Simulator": {
+      "status": "failed",
+      "training_time": 0.48801350593566895,
+      "error": "Could not locate function 'mse'. Make sure custom classes are decorated with `@keras.saving.register_keras_serializable()`. Full object config: {'module': 'keras.metrics', 'class_name': 'function', 'config': 'mse', 'registered_name': 'mse'}"
+    }
+  }
+}

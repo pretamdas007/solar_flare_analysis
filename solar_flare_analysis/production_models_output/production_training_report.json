@@ -1,0 +1,142 @@
+{
+  "timestamp": "2025-06-12T01:19:56.064506",
+  "configuration": {
+    "max_files_processed": 5,
+    "sequence_length": 128,
+    "sequence_overlap": 0.5,
+    "quality_threshold": 0.95
+  },
+  "data_processing": {
+    "total_samples": 620390,
+    "training_sequences": 9692,
+    "average_quality": 1.0,
+    "time_range": {
+      "start": "2000-01-01 00:02:00",
+      "end": "2000-12-31 23:59:00",
+      "duration_hours": 8783.95
+    }
+  },
+  "model_analysis": {
+    "binary_flare_classifier.h5": {
+      "file_size_mb": 0.14955902099609375,
+      "input_shape": [
+        null,
+        128
+      ],
+      "output_shape": [
+        null,
+        1
+      ],
+      "total_params": 10369,
+      "trainable_params": "10369",
+      "layers": 4,
+      "optimizer": "Adam",
+      "loss": "<function binary_crossentropy at 0x00000264E380FA60>",
+      "compatible_with_xrs": false
+    },
+    "cnn_flare_detector.h5": {
+      "file_size_mb": 0.147735595703125,
+      "input_shape": [
+        null,
+        128,
+        1
+      ],
+      "output_shape": [
+        null,
+        1
+      ],
+      "total_params": 9701,
+      "trainable_params": "9701",
+      "layers": 6,
+      "optimizer": "Adam",
+      "loss": "<function binary_crossentropy at 0x00000264E380FA60>",
+      "compatible_with_xrs": true
+    },
+    "energy_regression_model.h5": {
+      "error": "Could not locate function 'mse'. Make sure custom classes are decorated with `@keras.saving.register_keras_serializable()`. Full object config: {'module': 'keras.metrics', 'class_name': 'function', 'config': 'mse', 'registered_name': 'mse'}"
+    },
+    "final_xrs_model.h5": {
+      "error": "Could not locate function 'mse'. Make sure custom classes are decorated with `@keras.saving.register_keras_serializable()`. Full object config: {'module': 'keras.metrics', 'class_name': 'function', 'config': 'mse', 'registered_name': 'mse'}"
+    },
+    "minimal_flare_model.h5": {
+      "file_size_mb": 0.14456939697265625,
+      "input_shape": [
+        null,
+        128
+      ],
+      "output_shape": [
+        null,
+        1
+      ],
+      "total_params": 10369,
+      "trainable_params": "10369",
+      "layers": 3,
+      "optimizer": "Adam",
+      "loss": "<function binary_crossentropy at 0x00000264E380FA60>",
+      "compatible_with_xrs": false
+    },
+    "multiclass_flare_classifier.h5": {
+      "file_size_mb": 0.317230224609375,
+      "input_shape": [
+        null,
+        128
+      ],
+      "output_shape": [
+        null,
+        4
+      ],
+      "total_params": 25028,
+      "trainable_params": "25028",
+      "layers": 4,
+      "optimizer": "Adam",
+      "loss": "<function sparse_categorical_crossentropy at 0x00000264E380F9C0>",
+      "compatible_with_xrs": false
+    },
+    "test_model.h5": {
+      "file_size_mb": 0.14959716796875,
+      "input_shape": [
+        null,
+        128
+      ],
+      "output_shape": [
+        null,
+        1
+      ],
+      "total_params": 9701,
+      "trainable_params": "9701",
+      "layers": 8,
+      "optimizer": "Adam",
+      "loss": "<function binary_crossentropy at 0x00000264E380FA60>",
+      "compatible_with_xrs": false
+    },
+    "xrs_model_after_2_files.h5": {
+      "error": "Could not locate function 'mse'. Make sure custom classes are decorated with `@keras.saving.register_keras_serializable()`. Full object config: {'module': 'keras.metrics', 'class_name': 'function', 'config': 'mse', 'registered_name': 'mse'}"
+    },
+    "xrs_model_after_4_files.h5": {
+      "error": "Could not locate function 'mse'. Make sure custom classes are decorated with `@keras.saving.register_keras_serializable()`. Full object config: {'module': 'keras.metrics', 'class_name': 'function', 'config': 'mse', 'registered_name': 'mse'}"
+    },
+    "xrs_model_after_6_files.h5": {
+      "error": "Could not locate function 'mse'. Make sure custom classes are decorated with `@keras.saving.register_keras_serializable()`. Full object config: {'module': 'keras.metrics', 'class_name': 'function', 'config': 'mse', 'registered_name': 'mse'}"
+    }
+  },
+  "fine_tuning_results": {
+    "cnn_flare_detector.h5": {
+      "original_path": "C:\\Users\\srabani\\Desktop\\goesflareenv\\solar_flare_analysis\\models\\cnn_flare_detector.h5",
+      "compatible": false,
+      "reason": "Shape mismatch",
+      "expected_shape": [
+        128,
+        1
+      ],
+      "actual_shape": [
+        128,
+        2
+      ]
+    }
+  },
+  "summary": {
+    "models_analyzed": 10,
+    "compatible_models": 1,
+    "successfully_fine_tuned": 0
+  }
+}

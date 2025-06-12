@@ -1,0 +1,38 @@
+2025-06-12 23:39:53,070 - INFO - ==================================================
+2025-06-12 23:39:53,214 - INFO - Starting comprehensive ML models training
+2025-06-12 23:39:53,313 - INFO - ==================================================
+2025-06-12 23:39:53,394 - INFO - Loading XRS data with enhanced processing...
+2025-06-12 23:39:53,457 - INFO - Loading XRS data from: data\XRS
+2025-06-12 23:39:53,509 - INFO - Found 0 CSV files
+2025-06-12 23:39:53,582 - ERROR - No data loaded successfully
+2025-06-12 23:39:53,680 - ERROR - No data loaded. Cannot proceed with training.
+2025-06-12 23:39:53,816 - INFO - 
+2025-06-12 23:39:53,893 - INFO - ============================================================
+2025-06-12 23:39:53,955 - INFO - ENHANCED TRAINING COMPLETED!
+2025-06-12 23:39:54,047 - INFO - ============================================================
+2025-06-12 23:39:54,347 - ERROR - Critical training failure: 'str' object has no attribute 'get'
+2025-06-12 23:39:54,414 - ERROR - Full traceback: Traceback (most recent call last):
+  File "c:\Users\srabani\Desktop\goesflareenv\solar_flare_analysis\train_production_fixed.py", line 948, in main
+    training_time = result.get('training_time_seconds', 0)
+                    ^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'get'
+
+2025-06-12 23:43:54,111 - INFO - ==================================================
+2025-06-12 23:43:54,111 - INFO - Starting comprehensive ML models training
+2025-06-12 23:43:54,111 - INFO - ==================================================
+2025-06-12 23:43:54,126 - INFO - Loading XRS data with enhanced processing...
+2025-06-12 23:43:54,126 - INFO - Loading XRS data from: data\XRS
+2025-06-12 23:43:54,126 - INFO - Found 0 CSV files
+2025-06-12 23:43:54,134 - ERROR - No data loaded successfully
+2025-06-12 23:43:54,135 - ERROR - No data loaded. Cannot proceed with training.
+2025-06-12 23:43:54,136 - INFO - 
+2025-06-12 23:43:54,137 - INFO - ============================================================
+2025-06-12 23:43:54,138 - INFO - ENHANCED TRAINING COMPLETED!
+2025-06-12 23:43:54,160 - INFO - ============================================================
+2025-06-12 23:43:54,241 - ERROR - Critical training failure: 'str' object has no attribute 'get'
+2025-06-12 23:43:54,265 - ERROR - Full traceback: Traceback (most recent call last):
+  File "c:\Users\srabani\Desktop\goesflareenv\solar_flare_analysis\train_production_fixed.py", line 948, in main
+    training_time = result.get('training_time_seconds', 0)
+                    ^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'get'
+
