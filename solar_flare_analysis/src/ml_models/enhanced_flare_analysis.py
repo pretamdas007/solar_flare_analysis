@@ -717,15 +717,14 @@ class FlareEnergyAnalyzer:
     def __init__(self):
         self.energy_distributions = {}
         self.power_law_fits = {}
-        
     def analyze_energy_distribution(self, flare_data, time_data=None):
         """
         Comprehensive analysis of flare energy distribution
         
         Parameters
         ----------
-        flare_data : dict
-            Dictionary containing flare parameters and energies
+        flare_data : dict or array-like
+            Dictionary containing flare parameters and energies, or array of energy values
         time_data : array-like, optional
             Time stamps for temporal analysis
             
@@ -742,8 +741,13 @@ class FlareEnergyAnalyzer:
             'corona_heating_assessment': {}
         }
         
-        # Extract energies
-        energies = flare_data.get('energies', [])
+        # Extract energies - handle both dict and array inputs
+        if isinstance(flare_data, dict):
+            energies = flare_data.get('energies', [])
+        else:
+            # Assume it's an array-like object
+            energies = np.array(flare_data).flatten()
+            
         if len(energies) == 0:
             return results
         

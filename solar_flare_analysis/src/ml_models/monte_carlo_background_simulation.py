@@ -61,39 +61,55 @@ class MonteCarloBackgroundSimulator:
         
         self._load_models()
         self._initialize_background_model()
-    
     def _load_models(self):
-        """Load pre-trained ML models"""
+        """Load pre-trained ML models with custom objects"""
         try:
             logger.info("Loading trained ML models...")
+            
+            # Define custom objects for model loading
+            custom_objects = {
+                'mse': keras.metrics.MeanSquaredError(),
+                'mae': keras.metrics.MeanAbsoluteError(),
+                'binary_crossentropy': keras.losses.BinaryCrossentropy(),
+                'categorical_crossentropy': keras.losses.CategoricalCrossentropy(),
+                'sparse_categorical_crossentropy': keras.losses.SparseCategoricalCrossentropy(),
+                'accuracy': keras.metrics.Accuracy(),
+                'precision': keras.metrics.Precision(),
+                'recall': keras.metrics.Recall()
+            }
             
             # Binary flare classifier
             binary_path = self.models_dir / 'binary_flare_classifier.h5'
             if binary_path.exists():
-                self.binary_classifier = keras.models.load_model(str(binary_path))
+                self.binary_classifier = keras.models.load_model(str(binary_path), custom_objects=custom_objects)
                 logger.info("Loaded binary flare classifier")
             
             # CNN flare detector
             cnn_path = self.models_dir / 'cnn_flare_detector.h5'
             if cnn_path.exists():
-                self.cnn_detector = keras.models.load_model(str(cnn_path))
+                self.cnn_detector = keras.models.load_model(str(cnn_path), custom_objects=custom_objects)
                 logger.info("Loaded CNN flare detector")
             
             # Multiclass classifier
             multiclass_path = self.models_dir / 'multiclass_flare_classifier.h5'
             if multiclass_path.exists():
-                self.multiclass_classifier = keras.models.load_model(str(multiclass_path))
+                self.multiclass_classifier = keras.models.load_model(str(multiclass_path), custom_objects=custom_objects)
                 logger.info("Loaded multiclass flare classifier")
             
             # Energy regression model
             energy_path = self.models_dir / 'energy_regression_model.h5'
             if energy_path.exists():
-                self.energy_regressor = keras.models.load_model(str(energy_path))
+                self.energy_regressor = keras.models.load_model(str(energy_path), custom_objects=custom_objects)
                 logger.info("Loaded energy regression model")
                 
         except Exception as e:
             logger.error(f"Error loading models: {e}")
-            raise
+            logger.warning("Continuing without pre-trained models - Monte Carlo simulation will use synthetic data only")
+            # Set models to None if loading fails
+            self.binary_classifier = None
+            self.cnn_detector = None
+            self.multiclass_classifier = None
+            self.energy_regressor = None
     
     def _initialize_background_model(self):
         """Initialize background noise model from GOES data"""

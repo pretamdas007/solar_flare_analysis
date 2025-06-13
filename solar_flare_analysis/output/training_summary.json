@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-06-12T23:49:05.225381",
+  "timestamp": "2025-06-14T01:50:59.270724",
   "total_models": 4,
   "successful_models": 1,
   "failed_models": 3,
@@ -24,24 +24,24 @@
     "overlap": 0.5
   },
   "results_summary": {
-    "Bayesian Flare Analyzer": {
-      "status": "failed",
-      "training_time": 179.7864739894867,
-      "error": "BayesianFlareAnalyzer.build_bayesian_model.<locals>.posterior_fn() takes from 2 to 3 positional arguments but 5 were given"
+    "SimpleBayesian Flare Analyzer": {
+      "status": "success",
+      "training_time": 306.6459541320801,
+      "error": null
     },
     "Enhanced Flare Models": {
       "status": "failed",
-      "training_time": 0.1429445743560791,
+      "training_time": 0.08208203315734863,
       "error": "'numpy.ndarray' object has no attribute 'get'"
     },
     "Flare Decomposition Model": {
-      "status": "success",
-      "training_time": 233.88978600502014,
-      "error": null
+      "status": "failed",
+      "training_time": 26.957484245300293,
+      "error": "[Errno 22] Unable to synchronously create file (unable to open file: name = 'models\\flare_decomposition.h5', errno = 22, error message = 'Invalid argument', flags = 13, o_flags = 302)"
     },
     "Monte Carlo Simulator": {
       "status": "failed",
-      "training_time": 0.48801350593566895,
+      "training_time": 0.38891100883483887,
       "error": "Could not locate function 'mse'. Make sure custom classes are decorated with `@keras.saving.register_keras_serializable()`. Full object config: {'module': 'keras.metrics', 'class_name': 'function', 'config': 'mse', 'registered_name': 'mse'}"
     }
   }

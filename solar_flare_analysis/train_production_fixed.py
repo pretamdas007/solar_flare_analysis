@@ -179,69 +179,253 @@ class ProductionMLTrainer:
         self.output_dir.mkdir(exist_ok=True)
         
         self.training_results = {}
-        
-    def train_bayesian_flare_analyzer(self, data):
-        """Train Bayesian Flare Analyzer with correct method calls"""
-        logger.info("Training Bayesian Flare Analyzer...")
+    def train_simple_bayesian_model(self, data):
+        """Train SimpleBayesianFlareAnalyzer with XRS data and advanced MCMC"""
+        logger.info("Training SimpleBayesianFlareAnalyzer with XRS data...")
         
         try:
-            from src.ml_models.bayesian_flare_analysis import BayesianFlareAnalyzer
+            # Import the correct model
+            sys.path.append('src/ml_models')
+            from src.ml_models.simple_bayesian_model import SimpleBayesianFlareAnalyzer
+            
+            # Convert data to proper format if needed
+            if len(data.shape) == 2:
+                # Create sequences from XRS data
+                sequence_length = 128
+                sequences = self._create_sequences_from_xrs_data(data, sequence_length)
+            else:
+                sequences = data
+            
+            logger.info(f"Using {len(sequences)} sequences for training")
             
             # Initialize analyzer
-            analyzer = BayesianFlareAnalyzer(
+            analyzer = SimpleBayesianFlareAnalyzer(
                 sequence_length=128,
-                n_features=2,
+                n_features=2,  # XRS-A and XRS-B channels
                 max_flares=3,
-                n_monte_carlo_samples=50,
-                sensor_noise_std=0.01
+                n_monte_carlo_samples=100
             )
             
             # Build model
-            logger.info("Building Bayesian neural network...")
-            model = analyzer.build_bayesian_model()
-            logger.info(f"Model built with {model.count_params():,} parameters")
+            logger.info("Building SimpleBayesian neural network...")
+            analyzer.build_bayesian_model()
+            logger.info(f"Model built successfully")
             
-            # Generate synthetic data for training
-            logger.info("Generating physics-based synthetic data...")
+            # Generate training data from XRS sequences and synthetic data
+            logger.info("Preparing training data from XRS and synthetic sources...")
+            
+            # Generate synthetic physics-based data
             X_synthetic, y_synthetic = analyzer.generate_synthetic_data_with_physics(
-                n_samples=2000, noise_level=0.02
+                n_samples=1500, noise_level=0.05
             )
+            logger.info(f"Synthetic data shapes: X={X_synthetic.shape}, y={y_synthetic.shape}")
             
-            # Train model
-            logger.info("Training with Monte Carlo data augmentation...")
+            # Combine with real XRS data if available
+            if len(sequences) > 0:
+                # Create targets from XRS data with correct shape
+                X_real, y_real = self._create_xrs_training_data_fixed(sequences, analyzer)
+                logger.info(f"Real data shapes: X={X_real.shape}, y={y_real.shape}")
+                
+                # Verify shapes match before combining
+                if y_synthetic.shape[1] == y_real.shape[1]:
+                    # Combine real and synthetic data
+                    X_combined = np.vstack([X_synthetic, X_real])
+                    y_combined = np.vstack([y_synthetic, y_real])
+                    logger.info(f"Combined dataset: {len(X_combined)} samples ({len(X_synthetic)} synthetic + {len(X_real)} real)")
+                else:
+                    logger.warning(f"Shape mismatch: synthetic y {y_synthetic.shape} vs real y {y_real.shape}. Using synthetic data only.")
+                    X_combined, y_combined = X_synthetic, y_synthetic
+            else:
+                X_combined, y_combined = X_synthetic, y_synthetic
+                logger.info(f"Using synthetic data only: {len(X_combined)} samples")
+              # Train model
+            logger.info("Training SimpleBayesian model...")
             history = analyzer.train_bayesian_model(
-                X_synthetic, y_synthetic,
+                X_combined, y_combined,
                 validation_split=0.2,
-                epochs=30,
-                batch_size=32,
-                augment_data=True
+                epochs=50,
+                batch_size=32
             )
             
-            # Test uncertainty quantification
+            # Test with Monte Carlo predictions
             logger.info("Testing uncertainty quantification...")
-            X_test = X_synthetic[-50:]
+            X_test = X_combined[-100:]
+            y_test = y_combined[-100:]
             
-            # Use monte_carlo_inference instead of analyze
-            inference_results = analyzer.monte_carlo_inference(
-                X_test, n_samples=100, chains=2
-            )
+            predictions = analyzer.monte_carlo_predict(X_test)
+            
+            # Nanoflare detection on test data
+            logger.info("Running nanoflare detection...")
+            nanoflare_results = analyzer.detect_nanoflares(X_test)
+            
+            # Advanced MCMC training (subset for computational efficiency)
+            mcmc_results = None
+            if len(X_combined) > 500:
+                logger.info("Running advanced MCMC sampling (reduced for efficiency)...")
+                mcmc_subset_size = min(200, len(X_combined) // 4)  # Reduced size
+                mcmc_indices = np.random.choice(len(X_combined), mcmc_subset_size, replace=False)
+                X_mcmc = X_combined[mcmc_indices]
+                y_mcmc = y_combined[mcmc_indices]
+                
+                try:
+                    # Run MCMC with HMC method (more stable)
+                    mcmc_results = analyzer.run_advanced_mcmc(
+                        X_mcmc, y_mcmc,
+                        method='HMC',
+                        num_samples=300,  # Reduced for efficiency
+                        num_burnin=150,
+                        step_size=0.01
+                    )
+                    logger.info("MCMC sampling completed successfully")
+                    
+                    # Create MCMC diagnostics plot
+                    if hasattr(analyzer, 'plot_mcmc_diagnostics'):
+                        analyzer.plot_mcmc_diagnostics(mcmc_results, 
+                                                     save_path=str(self.output_dir / 'mcmc_diagnostics.png'))
+                except Exception as mcmc_error:
+                    logger.warning(f"MCMC sampling failed: {mcmc_error}. Continuing without MCMC results.")
+                    mcmc_results = {'error': str(mcmc_error)}
+            
+            # Evaluate model performance
+            mse = np.mean((predictions['mean'] - y_test) ** 2)
+            mae = np.mean(np.abs(predictions['mean'] - y_test))
+            uncertainty_mean = np.mean(predictions['std'])
+            
+            logger.info(f"Model Performance - MSE: {mse:.6f}, MAE: {mae:.6f}, Avg Uncertainty: {uncertainty_mean:.6f}")
             
             # Save model
-            model_path = self.models_dir / 'bayesian_flare_analyzer.h5'
-            model.save(str(model_path))
-              # Create visualizations
-            self._plot_bayesian_results(inference_results, X_test)
+            model_path = self.models_dir / 'simple_bayesian_flare_analyzer.h5'
+            analyzer.model.save(str(model_path))
+            logger.info(f"Model saved to: {model_path}")
+            
+            # Create visualizations
+            self._plot_simple_bayesian_results(predictions, y_test, history, mcmc_results, nanoflare_results)
             
             return {
                 'model': analyzer,
                 'history': history,
-                'uncertainty_results': inference_results,
+                'predictions': predictions,
+                'mcmc_results': mcmc_results,
+                'nanoflare_results': nanoflare_results,
+                'evaluation': {
+                    'mse': mse,
+                    'mae': mae,
+                    'uncertainty_mean': uncertainty_mean
+                },
+                'training_samples': len(X_combined),
+                'real_data_samples': len(sequences) if len(sequences) > 0 else 0,
+                'synthetic_data_samples': len(X_synthetic),
                 'status': 'success'
             }
             
         except Exception as e:
-            logger.error(f"Error training Bayesian Flare Analyzer: {e}")
+            logger.error(f"Error training SimpleBayesianFlareAnalyzer: {e}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
             return {'error': str(e), 'status': 'failed'}
+    
+    def _create_sequences_from_xrs_data(self, data, sequence_length):
+        """Create sequences from XRS time series data"""
+        if len(data) < sequence_length:
+            logger.warning(f"Data too short ({len(data)}) for sequence length {sequence_length}")
+            return np.array([])
+        
+        sequences = []
+        step_size = sequence_length // 4  # 75% overlap
+        
+        for i in range(0, len(data) - sequence_length + 1, step_size):
+            seq = data[i:i + sequence_length]
+            sequences.append(seq)
+        
+        return np.array(sequences)
+    def _create_xrs_training_data_fixed(self, sequences, analyzer):
+        """Create training targets from XRS sequences with correct shape"""
+        logger.info("Creating training targets from XRS data with proper shape...")
+        
+        X = sequences
+        y = []
+        
+        for seq in sequences:
+            # Initialize target array with correct shape (max_flares * 5)
+            target = np.zeros(analyzer.max_flares * 5)
+            
+            # Simple flare detection based on flux increases
+            xrs_a = seq[:, 0]
+            xrs_b = seq[:, 1]
+            
+            # Detect significant flux increases (simplified flare detection)
+            a_increase = np.max(xrs_a) - np.min(xrs_a)
+            b_increase = np.max(xrs_b) - np.min(xrs_b)
+            
+            # Thresholds based on percentiles
+            a_threshold = np.percentile(xrs_a, 90) - np.percentile(xrs_a, 10)
+            b_threshold = np.percentile(xrs_b, 90) - np.percentile(xrs_b, 10)
+            
+            # Detect flare and estimate parameters
+            is_flare = (a_increase > a_threshold * 2) or (b_increase > b_threshold * 2)
+            
+            if is_flare:
+                # Estimate flare parameters for first flare
+                # [amplitude, peak_pos, rise_time, decay_time, background]
+                amplitude = max(a_increase, b_increase)
+                
+                # Find peak position
+                peak_idx_a = np.argmax(xrs_a)
+                peak_idx_b = np.argmax(xrs_b)
+                peak_pos = (peak_idx_a + peak_idx_b) / (2 * len(seq))
+                
+                # Estimate rise and decay times (normalized)
+                rise_time = peak_pos * 0.5  # Simplified estimate
+                decay_time = (1 - peak_pos) * 0.5  # Simplified estimate
+                background = min(np.min(xrs_a), np.min(xrs_b))
+                
+                # Store parameters for first flare
+                target[0:5] = [amplitude, peak_pos, rise_time, decay_time, background]
+            else:
+                # No flare detected - small background values
+                background = min(np.min(xrs_a), np.min(xrs_b))
+                target[0:5] = [background * 0.1, 0.5, 0.1, 0.1, background]
+            
+            # Add small random noise for regularization
+            noise = np.random.normal(0, 0.01, len(target))
+            target += noise
+            
+            y.append(target)
+        
+        logger.info(f"Created targets with shape: {np.array(y).shape}")
+        return X, np.array(y)
+    
+    def _create_xrs_training_data(self, sequences, analyzer):
+        """Create training targets from XRS sequences (legacy method)"""
+        logger.info("Creating training targets from XRS data...")
+        
+        X = sequences
+        y = []
+        
+        for seq in sequences:
+            # Simple flare detection based on flux increases
+            xrs_a = seq[:, 0]
+            xrs_b = seq[:, 1]
+            
+            # Detect significant flux increases (simplified flare detection)
+            a_increase = np.max(xrs_a) - np.min(xrs_a)
+            b_increase = np.max(xrs_b) - np.min(xrs_b)
+            
+            # Thresholds based on percentiles
+            a_threshold = np.percentile(xrs_a, 90) - np.percentile(xrs_a, 10)
+            b_threshold = np.percentile(xrs_b, 90) - np.percentile(xrs_b, 10)
+            
+            # Simple classification
+            is_flare = float((a_increase > a_threshold * 2) or (b_increase > b_threshold * 2))
+            flare_intensity = (a_increase + b_increase) / 2
+            
+            # Add noise for regularization
+            noise_factor = np.random.normal(0, 0.1, 2)
+            target = [is_flare + noise_factor[0], flare_intensity + noise_factor[1]]
+            
+            y.append(target)
+        
+        return X, np.array(y)
             
     def train_enhanced_flare_models(self, data):
         """Train Enhanced Flare Analysis models with improved error handling"""
@@ -402,23 +586,28 @@ class ProductionMLTrainer:
             # Generate training data
             logger.info("Generating synthetic training data...")
             X_train, y_train = model.generate_synthetic_data(n_samples=3000)
-            X_val, y_val = model.generate_synthetic_data(n_samples=500)
-            
+            X_val, y_val = model.generate_synthetic_data(n_samples=500)            
             # Train model (fix method call - no validation_data parameter)
+            # Use forward slashes and ensure proper path construction
+            save_path = self.models_dir / 'flare_decomposition.h5'
+            save_path = str(save_path).replace('\\', '/')
+            
             history = model.train(
                 X_train, y_train,
                 validation_split=0.2,  # Use validation_split instead
-                epochs=30,
+                epochs=10,
                 batch_size=32,
-                save_path=str(self.models_dir / 'flare_decomposition.h5')
+                save_path=save_path
             )
             
             # Evaluate model
             logger.info("Evaluating model...")
             eval_results = model.evaluate(X_val, y_val)
             
-            # Save model
-            model.save_model(str(self.models_dir / 'flare_decomposition_full.h5'))
+            # Save model with better path handling
+            full_save_path = self.models_dir / 'flare_decomposition_full.h5'
+            full_save_path = str(full_save_path).replace('\\', '/')
+            model.save_model(full_save_path)
             
             # Create visualizations
             self._plot_decomposition_results(history, eval_results)
@@ -491,6 +680,114 @@ class ProductionMLTrainer:
             logger.error(f"Error training Monte Carlo Simulator: {e}")
             return {'error': str(e), 'status': 'failed'}
             
+    def _plot_simple_bayesian_results(self, predictions, y_test, history, mcmc_results=None, nanoflare_results=None):
+        """Create comprehensive visualizations for SimpleBayesian analysis"""
+        fig, axes = plt.subplots(3, 2, figsize=(15, 18))
+        fig.suptitle('SimpleBayesian Flare Analysis Results', fontsize=16)
+        
+        mean_pred = predictions['mean']
+        std_pred = predictions['std']
+        
+        # Plot 1: Training history
+        if history and hasattr(history, 'history'):
+            axes[0, 0].plot(history.history['loss'], label='Training Loss', color='blue')
+            if 'val_loss' in history.history:
+                axes[0, 0].plot(history.history['val_loss'], label='Validation Loss', color='red')
+            axes[0, 0].set_title('Training History')
+            axes[0, 0].set_xlabel('Epoch')
+            axes[0, 0].set_ylabel('Loss')
+            axes[0, 0].legend()
+            axes[0, 0].grid(True, alpha=0.3)
+        
+        # Plot 2: Prediction uncertainty distribution
+        axes[0, 1].hist(std_pred.flatten(), bins=30, alpha=0.7, color='green')
+        axes[0, 1].set_title('Prediction Uncertainty Distribution')
+        axes[0, 1].set_xlabel('Standard Deviation')
+        axes[0, 1].set_ylabel('Frequency')
+        axes[0, 1].grid(True, alpha=0.3)
+        
+        # Plot 3: Predictions vs True Values (first parameter)
+        axes[1, 0].scatter(y_test[:, 0], mean_pred[:, 0], alpha=0.6, color='purple')
+        min_val = min(np.min(y_test[:, 0]), np.min(mean_pred[:, 0]))
+        max_val = max(np.max(y_test[:, 0]), np.max(mean_pred[:, 0]))
+        axes[1, 0].plot([min_val, max_val], [min_val, max_val], 'r--', alpha=0.8)
+        axes[1, 0].set_title('Predictions vs True Values (First Parameter)')
+        axes[1, 0].set_xlabel('True Values')
+        axes[1, 0].set_ylabel('Predicted Values')
+        axes[1, 0].grid(True, alpha=0.3)
+        
+        # Plot 4: Confidence intervals for sample predictions
+        sample_size = min(50, len(mean_pred))
+        sample_indices = np.arange(sample_size)
+        ci = predictions['confidence_intervals']
+        
+        axes[1, 1].fill_between(sample_indices, 
+                              ci['2.5th'][:sample_size, 0], 
+                              ci['97.5th'][:sample_size, 0], 
+                              alpha=0.3, label='95% CI', color='lightblue')
+        axes[1, 1].plot(sample_indices, mean_pred[:sample_size, 0], 'b-', 
+                       label='Mean Prediction', linewidth=2)
+        axes[1, 1].plot(sample_indices, y_test[:sample_size, 0], 'ro', 
+                       label='True Values', markersize=4)
+        axes[1, 1].set_title('Prediction Confidence Intervals')
+        axes[1, 1].set_xlabel('Sample Index')
+        axes[1, 1].set_ylabel('Parameter Value')
+        axes[1, 1].legend()
+        axes[1, 1].grid(True, alpha=0.3)
+        
+        # Plot 5: Nanoflare detection results
+        if nanoflare_results and 'nanoflare_count' in nanoflare_results:
+            nanoflare_count = nanoflare_results['nanoflare_count']
+            total_flares = len(mean_pred)
+            regular_flares = total_flares - nanoflare_count;
+            
+            labels = ['Nanoflares', 'Regular Flares']
+            counts = [nanoflare_count, regular_flares]
+            colors = ['orange', 'skyblue']
+            
+            axes[2, 0].pie(counts, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90)
+            axes[2, 0].set_title(f'Flare Classification\n(Total: {total_flares})')
+        else:
+            axes[2, 0].text(0.5, 0.5, 'Nanoflare detection\nresults not available', 
+                           ha='center', va='center', transform=axes[2, 0].transAxes,
+                           fontsize=12, bbox=dict(boxstyle='round', facecolor='lightgray'))
+            axes[2, 0].set_title('Nanoflare Detection')
+        
+        # Plot 6: MCMC diagnostics summary
+        if mcmc_results and 'error' not in mcmc_results:
+            # Plot acceptance rate and effective sample size
+            diagnostics = mcmc_results.get('diagnostics', {})
+            acceptance_rate = diagnostics.get('acceptance_rate', 0)
+            eff_sample_size = diagnostics.get('effective_sample_size', {})
+            
+            # Create summary text
+            summary_text = f"MCMC Results:\n"
+            summary_text += f"Acceptance Rate: {acceptance_rate:.3f}\n"
+            if isinstance(eff_sample_size, dict):
+                for key, value in eff_sample_size.items():
+                    if isinstance(value, (int, float)):
+                        summary_text += f"ESS ({key}): {value:.0f}\n"
+            
+            axes[2, 1].text(0.1, 0.7, summary_text, transform=axes[2, 1].transAxes,
+                           fontsize=10, verticalalignment='top',
+                           bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.8))
+            axes[2, 1].set_title('MCMC Diagnostics')
+            axes[2, 1].set_xlim(0, 1)
+            axes[2, 1].set_ylim(0, 1)
+            axes[2, 1].axis('off')
+        else:
+            mcmc_error = mcmc_results.get('error', 'MCMC not run') if mcmc_results else 'MCMC not run'
+            axes[2, 1].text(0.5, 0.5, f'MCMC Results:\n{mcmc_error}', 
+                           ha='center', va='center', transform=axes[2, 1].transAxes,
+                           fontsize=10, bbox=dict(boxstyle='round', facecolor='lightcoral', alpha=0.8))
+            axes[2, 1].set_title('MCMC Diagnostics')
+            axes[2, 1].axis('off')
+        
+        plt.tight_layout()
+        plt.savefig(self.output_dir / 'simple_bayesian_results.png', dpi=300, bbox_inches='tight')
+        plt.close()
+        logger.info("SimpleBayesian visualization saved: output/simple_bayesian_results.png")
+    
     def _plot_bayesian_results(self, results, test_data):
         """Create visualizations for Bayesian analysis"""
         fig, axes = plt.subplots(2, 2, figsize=(15, 10))
@@ -711,10 +1008,9 @@ class ProductionMLTrainer:
             return {'error': f'Data loading failed: {str(e)}', 'status': 'failed'}
         
         results = {}
-        
-        # Enhanced model training with better error handling
+          # Enhanced model training with better error handling
         models_to_train = [
-            ("Bayesian Flare Analyzer", self.train_bayesian_flare_analyzer),
+            ("SimpleBayesian Flare Analyzer", self.train_simple_bayesian_model),
             ("Enhanced Flare Models", self.train_enhanced_flare_models),
             ("Flare Decomposition Model", self.train_flare_decomposition_model),
             ("Monte Carlo Simulator", self.train_monte_carlo_simulator)
