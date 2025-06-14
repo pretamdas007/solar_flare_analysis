@@ -1,9 +1,9 @@
 {
-  "timestamp": "2025-06-14T01:50:59.270724",
+  "timestamp": "2025-06-14T02:50:50.446806",
   "total_models": 4,
-  "successful_models": 1,
-  "failed_models": 3,
-  "success_rate": 25.0,
+  "successful_models": 2,
+  "failed_models": 2,
+  "success_rate": 50.0,
   "data_statistics": {
     "raw_data_points": 741575,
     "sequence_samples": 11586,
@@ -25,24 +25,24 @@
   },
   "results_summary": {
     "SimpleBayesian Flare Analyzer": {
-      "status": "success",
-      "training_time": 306.6459541320801,
-      "error": null
+      "status": "failed",
+      "training_time": 196.586811542511,
+      "error": "Wedge sizes 'x' must be non negative values"
     },
     "Enhanced Flare Models": {
-      "status": "failed",
-      "training_time": 0.08208203315734863,
-      "error": "'numpy.ndarray' object has no attribute 'get'"
+      "status": "success",
+      "training_time": 2909.256675720215,
+      "error": null
     },
     "Flare Decomposition Model": {
-      "status": "failed",
-      "training_time": 26.957484245300293,
-      "error": "[Errno 22] Unable to synchronously create file (unable to open file: name = 'models\\flare_decomposition.h5', errno = 22, error message = 'Invalid argument', flags = 13, o_flags = 302)"
+      "status": "success",
+      "training_time": 68.45779180526733,
+      "error": null
     },
     "Monte Carlo Simulator": {
       "status": "failed",
-      "training_time": 0.38891100883483887,
-      "error": "Could not locate function 'mse'. Make sure custom classes are decorated with `@keras.saving.register_keras_serializable()`. Full object config: {'module': 'keras.metrics', 'class_name': 'function', 'config': 'mse', 'registered_name': 'mse'}"
+      "training_time": 0.4115328788757324,
+      "error": "'MonteCarloBackgroundSimulator' object has no attribute 'generate_background_data'"
     }
   }
 }

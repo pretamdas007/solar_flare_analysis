@@ -571,3 +571,86 @@ ValueError: Wedge sizes 'x' must be non negative values
 2025-06-14 02:38:00,124 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
 2025-06-14 02:38:56,580 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
 2025-06-14 02:40:42,580 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-14 02:46:26,321 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-14 02:47:35,904 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-14 02:49:35,883 - INFO - Nanoflare detector saved successfully
+2025-06-14 02:49:35,883 - INFO - Energy analyzer saved successfully
+2025-06-14 02:49:35,883 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-14 02:49:36,419 - INFO - Enhanced decomposition model saved successfully
+2025-06-14 02:49:41,562 - INFO - ✓ Enhanced Flare Models training completed successfully in 2909.3s
+2025-06-14 02:49:41,562 - INFO - 
+2025-06-14 02:49:41,562 - INFO - ========================================
+2025-06-14 02:49:41,562 - INFO - Training: Flare Decomposition Model
+2025-06-14 02:49:41,562 - INFO - ========================================
+2025-06-14 02:49:41,577 - INFO - Training Flare Decomposition Model...
+2025-06-14 02:49:42,347 - INFO - Model built with 251,439 parameters
+2025-06-14 02:49:42,347 - INFO - Generating synthetic training data...
+2025-06-14 02:50:01,984 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-14 02:50:06,817 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-14 02:50:16,024 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-14 02:50:20,735 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-14 02:50:35,460 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-14 02:50:40,735 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-14 02:50:45,305 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-14 02:50:45,426 - INFO - Evaluating model...
+2025-06-14 02:50:48,426 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-14 02:50:50,035 - INFO - ✓ Flare Decomposition Model training completed successfully in 68.5s
+2025-06-14 02:50:50,035 - INFO - 
+2025-06-14 02:50:50,035 - INFO - ========================================
+2025-06-14 02:50:50,035 - INFO - Training: Monte Carlo Simulator
+2025-06-14 02:50:50,035 - INFO - ========================================
+2025-06-14 02:50:50,035 - INFO - Training Monte Carlo Background Simulator...
+2025-06-14 02:50:50,155 - INFO - Loading trained ML models...
+2025-06-14 02:50:50,301 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-06-14 02:50:50,324 - INFO - Loaded binary flare classifier
+2025-06-14 02:50:50,412 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-06-14 02:50:50,419 - INFO - Loaded energy regression model
+2025-06-14 02:50:50,419 - INFO - Initializing background model...
+2025-06-14 02:50:50,428 - WARNING - No GOES data files found, using synthetic background
+2025-06-14 02:50:50,428 - INFO - Creating synthetic background model
+2025-06-14 02:50:50,445 - INFO - Initializing simulation environment...
+2025-06-14 02:50:50,445 - WARNING - Could not load pre-trained models: 'MonteCarloBackgroundSimulator' object has no attribute 'load_models'
+2025-06-14 02:50:50,446 - INFO - Continuing with simulation-only training...
+2025-06-14 02:50:50,446 - INFO - Generating background simulations...
+2025-06-14 02:50:50,446 - ERROR - Error training Monte Carlo Simulator: 'MonteCarloBackgroundSimulator' object has no attribute 'generate_background_data'
+2025-06-14 02:50:50,446 - ERROR - ✗ Monte Carlo Simulator training failed: 'MonteCarloBackgroundSimulator' object has no attribute 'generate_background_data'
+2025-06-14 02:50:50,446 - INFO - Enhanced training summary saved: output\training_summary.json
+2025-06-14 02:50:52,044 - INFO - Training overview visualization saved: output/training_overview.png
+2025-06-14 02:50:52,044 - INFO - 
+2025-06-14 02:50:52,044 - INFO - ============================================================
+2025-06-14 02:50:52,044 - INFO - ENHANCED TRAINING COMPLETED!
+2025-06-14 02:50:52,059 - INFO - ============================================================
+2025-06-14 02:50:52,059 - INFO - Success Rate: 2/4 (50.0%)
+2025-06-14 02:50:52,059 - INFO - Data Processed: 741,575 points -> 11,586 sequences
+2025-06-14 02:50:52,066 - INFO - 
+2025-06-14 02:50:52,066 - INFO - ============================================================
+2025-06-14 02:50:52,066 - INFO - ENHANCED TRAINING COMPLETED!
+2025-06-14 02:50:52,068 - INFO - ============================================================
+2025-06-14 21:27:30,316 - INFO - Starting Monte Carlo model integration test...
+2025-06-14 21:27:30,316 - INFO - Initializing ProductionMLTrainer...
+2025-06-14 21:27:30,316 - INFO - Testing Monte Carlo model training...
+2025-06-14 21:27:30,331 - INFO - Training Monte Carlo Enhanced Solar Flare Model...
+2025-06-14 21:27:53,252 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-14 21:27:57,376 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-14 21:28:00,672 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-14 21:28:02,211 - INFO - Loading XRS data for training...
+2025-06-14 21:28:02,211 - INFO - Loading XRS data from: data/XRS
+2025-06-14 21:28:02,211 - INFO - Found 5 CSV files
+2025-06-14 21:28:04,179 - WARNING - No valid data loaded. Using synthetic data.
+2025-06-14 21:28:04,179 - INFO - Generating synthetic training data
+2025-06-14 21:28:05,140 - INFO - Loaded data shapes: X=(10000, 128, 2), detection=(10000,), classification=(10000,), regression=(10000,)
+2025-06-14 21:28:05,140 - INFO - Building Monte Carlo model architecture...
+2025-06-14 21:28:05,140 - INFO - Building Monte Carlo Solar Flare ML Model
+2025-06-14 21:28:05,658 - INFO - Model built successfully: 137512 parameters
+2025-06-14 21:28:05,658 - INFO - Starting model training...
+2025-06-14 21:28:05,673 - INFO - Starting model training
+2025-06-14 21:28:05,673 - INFO - Loading XRS data from: data/XRS
+2025-06-14 21:28:05,673 - INFO - Found 8 CSV files
+2025-06-14 21:28:08,710 - WARNING - No valid data loaded. Using synthetic data.
+2025-06-14 21:28:08,710 - INFO - Generating synthetic training data
+2025-06-14 21:30:30,436 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-14 21:32:22,228 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-14 21:36:05,042 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 

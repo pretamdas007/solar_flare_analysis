@@ -622,63 +622,85 @@ class ProductionMLTrainer:
         except Exception as e:
             logger.error(f"Error training Flare Decomposition Model: {e}")
             return {'error': str(e), 'status': 'failed'}
-            
     def train_monte_carlo_simulator(self, data):
-        """Train Monte Carlo Background Simulator"""
-        logger.info("Training Monte Carlo Background Simulator...")
+        """Train Monte Carlo Enhanced Solar Flare Model"""
+        logger.info("Training Monte Carlo Enhanced Solar Flare Model...")
         
         try:
-            from src.ml_models.monte_carlo_background_simulation import MonteCarloBackgroundSimulator
+            from src.ml_models.monte_carlo_enhanced_model import MonteCarloSolarFlareModel
             
-            # Initialize simulator
-            simulator = MonteCarloBackgroundSimulator()
-            
-            # Load models without MSE metric issue
-            logger.info("Initializing simulation environment...")
-            try:
-                simulator.load_models()
-            except Exception as model_load_error:
-                logger.warning(f"Could not load pre-trained models: {model_load_error}")
-                logger.info("Continuing with simulation-only training...")
-            
-            # Generate background data
-            logger.info("Generating background simulations...")
-            background_data = simulator.generate_background_data(
-                n_samples=1000,
-                duration_hours=24
+            # Initialize the enhanced model
+            model = MonteCarloSolarFlareModel(
+                sequence_length=128,
+                n_features=2,
+                n_classes=6,
+                mc_samples=100,
+                dropout_rate=0.3,
+                learning_rate=0.001
             )
             
-            # Run Monte Carlo simulations
-            logger.info("Running Monte Carlo simulations...")
-            simulation_results = simulator.run_monte_carlo_simulation(
-                background_data,
-                n_iterations=100,
-                add_flare_events=True
+            # Load XRS data
+            logger.info("Loading XRS data for training...")
+            X, y_detection, y_classification, y_regression = model.load_xrs_data(
+                data_dir="data/XRS", 
+                max_files=5
             )
             
-            # Save simulation results
-            with open(self.models_dir / 'monte_carlo_results.json', 'w') as f:
-                # Convert numpy arrays to lists for JSON serialization
-                serializable_results = {}
-                for key, value in simulation_results.items():
-                    if isinstance(value, np.ndarray):
-                        serializable_results[key] = value.tolist()
-                    else:
-                        serializable_results[key] = value
-                json.dump(serializable_results, f, indent=2)
+            logger.info(f"Loaded data shapes: X={X.shape}, detection={y_detection.shape}, "
+                       f"classification={y_classification.shape}, regression={y_regression.shape}")
             
-            # Create visualizations
-            self._plot_monte_carlo_results(simulation_results)
+            # Build the Monte Carlo model
+            logger.info("Building Monte Carlo model architecture...")
+            model.build_monte_carlo_model()
+            
+            # Train the model
+            logger.info("Starting model training...")
+            history = model.train_model(
+                validation_split=0.2,
+                epochs=20,
+                batch_size=32,
+                use_callbacks=True
+            )
+            
+            # Evaluate the model
+            logger.info("Evaluating model performance...")
+            evaluation_results = model.evaluate_model()
+            
+            # Make predictions with uncertainty
+            logger.info("Generating predictions with uncertainty quantification...")
+            if hasattr(model, 'X_test') and model.X_test is not None:
+                mc_predictions = model.predict_with_uncertainty(
+                    model.X_test[:100],  # Sample for demonstration
+                    return_std=True,
+                    n_samples=50
+                )
+            
+            # Save the trained model
+            logger.info("Saving trained model...")
+            model_path = "models/monte_carlo_enhanced_model.h5"
+            model.save_model(model_path)
+            
+            # Generate training plots
+            logger.info("Generating training visualization...")
+            plot_path = "output/monte_carlo_training_history.png"
+            model.plot_training_history(save_path=plot_path)
             
             return {
-                'simulator': simulator,
-                'simulation_results': simulation_results,
+                'model': model,
+                'training_history': history,
+                'evaluation_results': evaluation_results,
+                'model_path': model_path,
+                'plot_path': plot_path,
                 'status': 'success'
             }
-            
         except Exception as e:
-            logger.error(f"Error training Monte Carlo Simulator: {e}")
-            return {'error': str(e), 'status': 'failed'}
+            logger.error(f"Monte Carlo model training failed: {e}")
+            import traceback
+            traceback.print_exc()
+            return {
+                'error': str(e),
+                'status': 'failed'
+            }
             
     def _plot_simple_bayesian_results(self, predictions, y_test, history, mcmc_results=None, nanoflare_results=None):
         """Create comprehensive visualizations for SimpleBayesian analysis"""
@@ -734,18 +756,23 @@ class ProductionMLTrainer:
         axes[1, 1].set_ylabel('Parameter Value')
         axes[1, 1].legend()
         axes[1, 1].grid(True, alpha=0.3)
-        
-        # Plot 5: Nanoflare detection results
+          # Plot 5: Nanoflare detection results
         if nanoflare_results and 'nanoflare_count' in nanoflare_results:
-            nanoflare_count = nanoflare_results['nanoflare_count']
+            nanoflare_count = max(0, nanoflare_results['nanoflare_count'])  # Ensure non-negative
             total_flares = len(mean_pred)
-            regular_flares = total_flares - nanoflare_count;
+            regular_flares = max(0, total_flares - nanoflare_count)  # Ensure non-negative
             
             labels = ['Nanoflares', 'Regular Flares']
             counts = [nanoflare_count, regular_flares]
             colors = ['orange', 'skyblue']
             
-            axes[2, 0].pie(counts, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90)
+            # Only create pie chart if we have valid positive data
+            if sum(counts) > 0:
+                axes[2, 0].pie(counts, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90)
+            else:
+                axes[2, 0].text(0.5, 0.5, 'No flares detected\nfor classification', 
+                               ha='center', va='center', transform=axes[2, 0].transAxes,
+                               fontsize=12, bbox=dict(boxstyle='round', facecolor='lightgray'))
             axes[2, 0].set_title(f'Flare Classification\n(Total: {total_flares})')
         else:
             axes[2, 0].text(0.5, 0.5, 'Nanoflare detection\nresults not available', 
@@ -1111,17 +1138,22 @@ class ProductionMLTrainer:
         """Create comprehensive training overview visualization"""
         fig, axes = plt.subplots(2, 3, figsize=(18, 12))
         fig.suptitle('ML Models Training Overview', fontsize=16)
-        
-        # Training status overview
+          # Training status overview
         model_names = list(results.keys())
         statuses = [results[name].get('status', 'unknown') for name in model_names]
-        success_count = sum(1 for s in statuses if s == 'success')
-        failed_count = sum(1 for s in statuses if s == 'failed')
+        success_count = max(0, sum(1 for s in statuses if s == 'success'))  # Ensure non-negative
+        failed_count = max(0, sum(1 for s in statuses if s == 'failed'))    # Ensure non-negative
         
-        axes[0, 0].pie([success_count, failed_count], 
-                      labels=['Successful', 'Failed'],
-                      colors=['lightgreen', 'lightcoral'],
-                      autopct='%1.1f%%')
+        # Only create pie chart if we have valid data
+        if success_count + failed_count > 0:
+            axes[0, 0].pie([success_count, failed_count], 
+                          labels=['Successful', 'Failed'],
+                          colors=['lightgreen', 'lightcoral'],
+                          autopct='%1.1f%%')
+        else:
+            axes[0, 0].text(0.5, 0.5, 'No training\nresults available', 
+                           ha='center', va='center', transform=axes[0, 0].transAxes,
+                           fontsize=12, bbox=dict(boxstyle='round', facecolor='lightgray'))
         axes[0, 0].set_title('Training Success Rate')
         
         # Training times
@@ -1239,8 +1271,13 @@ def main():
         successful = 0
         failed = 0
         total_training_time = 0
-        
         for model_name, result in results.items():
+            # Handle case where result might be a string (error message) instead of dict
+            if isinstance(result, str):
+                result = {'status': 'failed', 'error': result, 'training_time_seconds': 0}
+            elif not isinstance(result, dict):
+                result = {'status': 'failed', 'error': 'Invalid result format', 'training_time_seconds': 0}
+            
             training_time = result.get('training_time_seconds', 0)
             total_training_time += training_time
             
