@@ -151,7 +151,6 @@ class MonteCarloSolarFlareModel:
         
         X, y_detection, y_classification, y_regression = self._process_xrs_data(combined_df)
         return X, y_detection, y_classification, y_regression
-    
     def _process_xrs_data(self, df):
         """Process XRS data into sequences and multi-task targets"""
         logger.info("Processing XRS data into ML-ready format")
@@ -160,13 +159,25 @@ class MonteCarloSolarFlareModel:
         if 'xrsa_flux' not in df.columns or 'xrsb_flux' not in df.columns:
             raise ValueError("Required columns 'xrsa_flux' and 'xrsb_flux' not found")
         
-        # Clean and sort data
+        # Clean and convert data to numeric, handling any string values
+        df = df.copy()
+        df['xrsa_flux'] = pd.to_numeric(df['xrsa_flux'], errors='coerce')
+        df['xrsb_flux'] = pd.to_numeric(df['xrsb_flux'], errors='coerce')
+        
+        # Remove any NaN or invalid values
         df = df.dropna(subset=['xrsa_flux', 'xrsb_flux'])
         df = df[(df['xrsa_flux'] > 0) & (df['xrsb_flux'] > 0)]
         
+        # Ensure data is finite
+        df = df[np.isfinite(df['xrsa_flux']) & np.isfinite(df['xrsb_flux'])]
+        
+        if len(df) < self.sequence_length * 2:
+            logger.warning(f"Insufficient clean data ({len(df)} samples), using synthetic data")
+            return self._generate_synthetic_training_data()
+        
         # Take log transform for better numerical stability
-        df['xrsa_log'] = np.log10(df['xrsa_flux'])
-        df['xrsb_log'] = np.log10(df['xrsb_flux'])
+        df['xrsa_log'] = np.log10(df['xrsa_flux'].astype(np.float32))
+        df['xrsb_log'] = np.log10(df['xrsb_flux'].astype(np.float32))
         
         # Create sequences
         X = []
@@ -179,27 +190,33 @@ class MonteCarloSolarFlareModel:
         
         # Create sliding windows
         for i in range(len(df) - self.sequence_length + 1):
-            # Input sequence
-            seq = df[['xrsa_log', 'xrsb_log']].iloc[i:i + self.sequence_length].values
+            # Input sequence - ensure float32 type
+            seq = df[['xrsa_log', 'xrsb_log']].iloc[i:i + self.sequence_length].values.astype(np.float32)
+            
+            # Check for any NaN or infinite values in sequence
+            if not np.all(np.isfinite(seq)):
+                continue
+                
             X.append(seq)
             
             # Detection target (binary: flare or no flare)
-            max_flux = df['xrsb_flux'].iloc[i:i + self.sequence_length].max()
+            max_flux = float(df['xrsb_flux'].iloc[i:i + self.sequence_length].max())
             has_flare = int(max_flux > 1e-6)  # C-class threshold
             y_detection.append(has_flare)
             
             # Classification target (flare class)
-            max_class = flare_classes.iloc[i:i + self.sequence_length].max()
+            max_class = int(flare_classes.iloc[i:i + self.sequence_length].max())
             y_classification.append(max_class)
             
             # Regression target (log peak flux)
-            peak_flux = df['xrsb_flux'].iloc[i:i + self.sequence_length].max()
-            y_regression.append(np.log10(peak_flux))
+            peak_flux = float(df['xrsb_flux'].iloc[i:i + self.sequence_length].max())
+            y_regression.append(float(np.log10(peak_flux)))
         
-        X = np.array(X)
-        y_detection = np.array(y_detection)
-        y_classification = np.array(y_classification)
-        y_regression = np.array(y_regression)
+        # Convert to numpy arrays with explicit dtypes
+        X = np.array(X, dtype=np.float32)
+        y_detection = np.array(y_detection, dtype=np.float32)
+        y_classification = np.array(y_classification, dtype=np.int32)
+        y_regression = np.array(y_regression, dtype=np.float32)
         
         logger.info(f"Created {len(X)} sequences, {np.sum(y_detection)} with flares")
         return X, y_detection, y_classification, y_regression
@@ -221,7 +238,6 @@ class MonteCarloSolarFlareModel:
             classes[flux_values >= threshold] = class_num
             
         return pd.Series(classes)
-    
     def _generate_synthetic_training_data(self):
         """Generate synthetic training data when real data unavailable"""
         logger.info("Generating synthetic training data")
@@ -234,7 +250,7 @@ class MonteCarloSolarFlareModel:
         
         for i in range(n_samples):
             # Generate base quiet background
-            seq = np.random.lognormal(-8, 0.5, (self.sequence_length, 2))
+            seq = np.random.lognormal(-8, 0.5, (self.sequence_length, 2)).astype(np.float32)
             
             # Randomly add flares
             if np.random.random() < 0.3:  # 30% chance of flare
@@ -262,17 +278,26 @@ class MonteCarloSolarFlareModel:
                 
                 y_detection.append(1)
                 y_classification.append(flare_class)
-                y_regression.append(np.log10(peak_intensity))
+                y_regression.append(float(np.log10(peak_intensity)))
             else:
                 y_detection.append(0)
                 y_classification.append(0)
-                y_regression.append(np.log10(np.max(seq[:, 1])))
+                y_regression.append(float(np.log10(np.max(seq[:, 1]))))
             
-            # Log transform
+            # Log transform and ensure finite values
             seq = np.log10(seq)
-            X.append(seq)
+            if np.all(np.isfinite(seq)):
+                X.append(seq)
+            else:
+                # If any infinite values, regenerate this sample
+                i -= 1
+                continue
         
-        return np.array(X), np.array(y_detection), np.array(y_classification), np.array(y_regression)
+        # Convert to proper numpy arrays with explicit dtypes
+        return (np.array(X, dtype=np.float32), 
+                np.array(y_detection, dtype=np.float32), 
+                np.array(y_classification, dtype=np.int32), 
+                np.array(y_regression, dtype=np.float32))
     
     def build_monte_carlo_model(self):
         """Build the complete Monte Carlo ML model with uncertainty quantification"""
@@ -419,13 +444,26 @@ class MonteCarloSolarFlareModel:
         )
         
         return self.bayesian_model
-    
     def train_model(self, validation_split=0.2, epochs=10, batch_size=32, use_callbacks=True):
         """Train the Monte Carlo model on XRS data"""
         logger.info("Starting model training")
         
         # Load training data
         X, y_detection, y_classification, y_regression = self.load_xrs_data()
+        
+        # Ensure all data is float32 numpy arrays
+        X = np.array(X, dtype=np.float32)
+        y_detection = np.array(y_detection, dtype=np.float32)
+        y_classification = np.array(y_classification, dtype=np.int32)
+        y_regression = np.array(y_regression, dtype=np.float32)
+        
+        logger.info(f"Data shapes: X={X.shape}, y_det={y_detection.shape}, y_class={y_classification.shape}, y_reg={y_regression.shape}")
+        logger.info(f"Data types: X={X.dtype}, y_det={y_detection.dtype}, y_class={y_classification.dtype}, y_reg={y_regression.dtype}")
+        
+        # Check for any NaN or infinite values
+        if not np.all(np.isfinite(X)):
+            logger.error("Found NaN or infinite values in X")
+            raise ValueError("Input data contains NaN or infinite values")
         
         # Preprocess data
         X_scaled = self._preprocess_features(X)
@@ -434,23 +472,23 @@ class MonteCarloSolarFlareModel:
         # Split data
         split_idx = int(len(X_scaled) * (1 - validation_split))
         
-        self.X_train = X_scaled[:split_idx]
-        self.X_val = X_scaled[split_idx:]
+        self.X_train = X_scaled[:split_idx].astype(np.float32)
+        self.X_val = X_scaled[split_idx:].astype(np.float32)
         
-        self.y_detection_train = y_detection[:split_idx]
-        self.y_detection_val = y_detection[split_idx:]
+        self.y_detection_train = y_detection[:split_idx].astype(np.float32)
+        self.y_detection_val = y_detection[split_idx:].astype(np.float32)
         
-        self.y_class_train = y_classification[:split_idx]
-        self.y_class_val = y_classification[split_idx:]
+        self.y_class_train = y_classification[:split_idx].astype(np.int32)
+        self.y_class_val = y_classification[split_idx:].astype(np.int32)
         
-        self.y_reg_train = y_reg_scaled[:split_idx]
-        self.y_reg_val = y_reg_scaled[split_idx:]
+        self.y_reg_train = y_reg_scaled[:split_idx].astype(np.float32)
+        self.y_reg_val = y_reg_scaled[split_idx:].astype(np.float32)
         
         # Build model if not exists
         if self.model is None:
             self.build_monte_carlo_model()
         
-        # Prepare training data
+        # Prepare training data with explicit type checking
         train_data = {
             'detection_output': self.y_detection_train,
             'classification_output': self.y_class_train,
@@ -462,6 +500,13 @@ class MonteCarloSolarFlareModel:
             'classification_output': self.y_class_val,
             'regression_output': self.y_reg_val
         }
+        
+        # Verify all data types before training
+        for key, value in train_data.items():
+            logger.info(f"Train {key}: shape={value.shape}, dtype={value.dtype}")
+            if not np.all(np.isfinite(value)):
+                logger.error(f"Found non-finite values in {key}")
+                raise ValueError(f"Training data {key} contains NaN or infinite values")
         
         # Setup callbacks
         callback_list = []
@@ -493,18 +538,33 @@ class MonteCarloSolarFlareModel:
         logger.info("Model training completed")
         
         return history
-    
     def _preprocess_features(self, X):
         """Preprocess input features"""
+        # Ensure input is float32
+        X = np.array(X, dtype=np.float32)
+        
+        # Check for NaN or infinite values
+        if not np.all(np.isfinite(X)):
+            logger.warning("Found non-finite values in features, replacing with median")
+            X = np.where(np.isfinite(X), X, np.nanmedian(X))
+        
         X_reshaped = X.reshape(-1, X.shape[-1])
-        X_scaled = self.scaler_X.fit_transform(X_reshaped)
+        X_scaled = self.scaler_X.fit_transform(X_reshaped).astype(np.float32)
         X_scaled = X_scaled.reshape(X.shape)
         return X_scaled
     
     def _preprocess_targets(self, y_regression):
         """Preprocess regression targets"""
+        # Ensure input is float32
+        y_regression = np.array(y_regression, dtype=np.float32)
+        
+        # Check for NaN or infinite values
+        if not np.all(np.isfinite(y_regression)):
+            logger.warning("Found non-finite values in regression targets, replacing with median")
+            y_regression = np.where(np.isfinite(y_regression), y_regression, np.nanmedian(y_regression))
+        
         y_reshaped = y_regression.reshape(-1, 1)
-        y_scaled = self.scaler_y_reg.fit_transform(y_reshaped)
+        y_scaled = self.scaler_y_reg.fit_transform(y_reshaped).astype(np.float32)
         return y_scaled.flatten()
     
     def predict_with_uncertainty(self, X, return_std=True, n_samples=None):
