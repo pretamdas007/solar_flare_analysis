@@ -622,85 +622,63 @@ class ProductionMLTrainer:
         except Exception as e:
             logger.error(f"Error training Flare Decomposition Model: {e}")
             return {'error': str(e), 'status': 'failed'}
+            
     def train_monte_carlo_simulator(self, data):
-        """Train Monte Carlo Enhanced Solar Flare Model"""
-        logger.info("Training Monte Carlo Enhanced Solar Flare Model...")
+        """Train Monte Carlo Background Simulator"""
+        logger.info("Training Monte Carlo Background Simulator...")
         
         try:
-            from src.ml_models.monte_carlo_enhanced_model import MonteCarloSolarFlareModel
+            from src.ml_models.monte_carlo_enhanced_model import MonteCarloBackgroundSimulator
             
-            # Initialize the enhanced model
-            model = MonteCarloSolarFlareModel(
-                sequence_length=128,
-                n_features=2,
-                n_classes=6,
-                mc_samples=100,
-                dropout_rate=0.3,
-                learning_rate=0.001
+            # Initialize simulator
+            simulator = MonteCarloBackgroundSimulator()
+            
+            # Load models without MSE metric issue
+            logger.info("Initializing simulation environment...")
+            try:
+                simulator.load_models()
+            except Exception as model_load_error:
+                logger.warning(f"Could not load pre-trained models: {model_load_error}")
+                logger.info("Continuing with simulation-only training...")
+            
+            # Generate background data
+            logger.info("Generating background simulations...")
+            background_data = simulator.generate_background_data(
+                n_samples=1000,
+                duration_hours=24
             )
             
-            # Load XRS data
-            logger.info("Loading XRS data for training...")
-            X, y_detection, y_classification, y_regression = model.load_xrs_data(
-                data_dir="data/XRS", 
-                max_files=5
+            # Run Monte Carlo simulations
+            logger.info("Running Monte Carlo simulations...")
+            simulation_results = simulator.run_monte_carlo_simulation(
+                background_data,
+                n_iterations=100,
+                add_flare_events=True
             )
             
-            logger.info(f"Loaded data shapes: X={X.shape}, detection={y_detection.shape}, "
-                       f"classification={y_classification.shape}, regression={y_regression.shape}")
+            # Save simulation results
+            with open(self.models_dir / 'monte_carlo_results.json', 'w') as f:
+                # Convert numpy arrays to lists for JSON serialization
+                serializable_results = {}
+                for key, value in simulation_results.items():
+                    if isinstance(value, np.ndarray):
+                        serializable_results[key] = value.tolist()
+                    else:
+                        serializable_results[key] = value
+                json.dump(serializable_results, f, indent=2)
             
-            # Build the Monte Carlo model
-            logger.info("Building Monte Carlo model architecture...")
-            model.build_monte_carlo_model()
-            
-            # Train the model
-            logger.info("Starting model training...")
-            history = model.train_model(
-                validation_split=0.2,
-                epochs=20,
-                batch_size=32,
-                use_callbacks=True
-            )
-            
-            # Evaluate the model
-            logger.info("Evaluating model performance...")
-            evaluation_results = model.evaluate_model()
-            
-            # Make predictions with uncertainty
-            logger.info("Generating predictions with uncertainty quantification...")
-            if hasattr(model, 'X_test') and model.X_test is not None:
-                mc_predictions = model.predict_with_uncertainty(
-                    model.X_test[:100],  # Sample for demonstration
-                    return_std=True,
-                    n_samples=50
-                )
-            
-            # Save the trained model
-            logger.info("Saving trained model...")
-            model_path = "models/monte_carlo_enhanced_model.h5"
-            model.save_model(model_path)
-            
-            # Generate training plots
-            logger.info("Generating training visualization...")
-            plot_path = "output/monte_carlo_training_history.png"
-            model.plot_training_history(save_path=plot_path)
+            # Create visualizations
+            self._plot_monte_carlo_results(simulation_results)
             
             return {
-                'model': model,
-                'training_history': history,
-                'evaluation_results': evaluation_results,
-                'model_path': model_path,
-                'plot_path': plot_path,
+                'simulator': simulator,
+                'simulation_results': simulation_results,
                 'status': 'success'
             }
+            
         except Exception as e:
-            logger.error(f"Monte Carlo model training failed: {e}")
-            import traceback
-            traceback.print_exc()
-            return {
-                'error': str(e),
-                'status': 'failed'
-            }
+            logger.error(f"Error training Monte Carlo Simulator: {e}")
+            return {'error': str(e), 'status': 'failed'}
             
     def _plot_simple_bayesian_results(self, predictions, y_test, history, mcmc_results=None, nanoflare_results=None):
         """Create comprehensive visualizations for SimpleBayesian analysis"""
