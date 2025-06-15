@@ -25,8 +25,45 @@ from src.data_processing.data_loader import GOESDataLoader, load_goes_data, prep
 from src.flare_detection.traditional_detection import (detect_flare_peaks, define_flare_bounds, 
                                                     detect_overlapping_flares)
 from src.ml_models.flare_decomposition import FlareDecompositionModel, reconstruct_flares
-from src.ml_models.bayesian_flare_analysis import BayesianFlareAnalyzer 
-from src.ml_models.bayesian_flare_analysis import BayesianFlareEnergyEstimator
+
+# Try to import new models with error handling
+try:
+    from src.ml_models.simple_bayesian_model import SimpleBayesianFlareAnalyzer, create_bayesian_flare_analyzer
+    SIMPLE_BAYESIAN_AVAILABLE = True
+except ImportError as e:
+    print(f"Simple Bayesian model not available: {e}")
+    SimpleBayesianFlareAnalyzer = None
+    create_bayesian_flare_analyzer = None
+    SIMPLE_BAYESIAN_AVAILABLE = False
+
+try:
+    from src.ml_models.monte_carlo_enhanced_model import MonteCarloSolarFlareModel
+    MONTE_CARLO_AVAILABLE = True
+except ImportError as e:
+    print(f"Monte Carlo model not available: {e}")
+    MonteCarloSolarFlareModel = None
+    MONTE_CARLO_AVAILABLE = False
+
+# Legacy imports for compatibility (try to import from old location if available)
+try:
+    from src.ml_models.simple_bayesian_model import BayesianFlareAnalyzer, BayesianFlareEnergyEstimator
+    LEGACY_BAYESIAN_AVAILABLE = True
+except ImportError:
+    try:
+        # Alternative: use SimpleBayesianFlareAnalyzer as BayesianFlareAnalyzer for compatibility
+        if SIMPLE_BAYESIAN_AVAILABLE:
+            BayesianFlareAnalyzer = SimpleBayesianFlareAnalyzer
+            BayesianFlareEnergyEstimator = None  # Not available in simple model
+            LEGACY_BAYESIAN_AVAILABLE = True
+        else:
+            BayesianFlareAnalyzer = None
+            BayesianFlareEnergyEstimator = None
+            LEGACY_BAYESIAN_AVAILABLE = False
+    except:
+        BayesianFlareAnalyzer = None
+        BayesianFlareEnergyEstimator = None
+        LEGACY_BAYESIAN_AVAILABLE = False
+
 from src.analysis.power_law import calculate_flare_energy, fit_power_law, compare_flare_populations
 from src.visualization.plotting import (plot_xrs_time_series, plot_detected_flares, 
                                       plot_flare_decomposition, plot_power_law_comparison, FlareVisualization)
@@ -43,6 +80,17 @@ except ImportError:
     print("Enhanced models not available - falling back to basic models")
     ENHANCED_MODELS_AVAILABLE = False
 
+# Model availability flags (set during imports above)
+# SIMPLE_BAYESIAN_AVAILABLE, MONTE_CARLO_AVAILABLE, ENHANCED_MODELS_AVAILABLE, LEGACY_BAYESIAN_AVAILABLE
+
+def print_model_status():
+    """Print detailed model availability status."""
+    print(f"Model availability:")
+    print(f"  Simple Bayesian: {'✓' if SIMPLE_BAYESIAN_AVAILABLE else '✗'}")
+    print(f"  Monte Carlo: {'✓' if MONTE_CARLO_AVAILABLE else '✗'}")
+    print(f"  Enhanced Models: {'✓' if ENHANCED_MODELS_AVAILABLE else '✗'}")
+    print(f"  Legacy Bayesian: {'✓' if LEGACY_BAYESIAN_AVAILABLE else '✗'}")
+
 
 def parse_args():
     """Parse command line arguments."""
@@ -54,9 +102,15 @@ def parse_args():
     parser.add_argument('--train', action='store_true', 
                        help='Train the ML model with synthetic data')
     parser.add_argument('--train-enhanced', action='store_true',
-                       help='Train the enhanced ML model with advanced features')
+                       help='Train the enhanced ML model with advanced features')    
     parser.add_argument('--train-bayesian', action='store_true',
                        help='Train the Bayesian ML model with Monte Carlo sampling')
+    parser.add_argument('--train-monte-carlo', action='store_true',
+                       help='Train the Monte Carlo enhanced model with uncertainty quantification')
+    parser.add_argument('--train-simple-bayesian', action='store_true',
+                       help='Train the simplified Bayesian model')
+    parser.add_argument('--compare-models', action='store_true',
+                       help='Compare all available ML models')
     parser.add_argument('--model', type=str, 
                        help='Path to save/load model',
                        default=os.path.join(settings.MODEL_DIR, 'flare_decomposition_model'))
@@ -241,7 +295,7 @@ class EnhancedSolarFlareAnalyzer:
             self.ml_model.model.summary()
     
     def train_ml_model(self, use_synthetic_data=True, n_synthetic_samples=5000,
-                      validation_split=0.2, epochs=1, batch_size=32, enhanced=False):
+                      validation_split=0.2, epochs=5, batch_size=32, enhanced=False):
         """
         Train the ML model
         
@@ -768,7 +822,7 @@ def train_enhanced_model(args):
     history = analyzer.train_ml_model(
         use_synthetic_data=True,
         n_synthetic_samples=5000,
-        epochs=settings.ML_PARAMS.get('epochs', 100),
+        epochs=settings.ML_PARAMS.get('epochs', 5),
         batch_size=settings.ML_PARAMS.get('batch_size', 32),
         enhanced=True
     )
@@ -1297,82 +1351,612 @@ def train_bayesian_model(args):
     """Train the enhanced Bayesian flare analysis model."""
     print("\n=== Training Enhanced Bayesian Flare Analysis Model ===")
     
-    # Initialize enhanced Bayesian analyzer
-    analyzer = BayesianFlareAnalyzer(
-        sequence_length=128,
-        n_features=2,
-        max_flares=3,
-        n_monte_carlo_samples=100,
-        sensor_noise_std=0.01
-    )
+    # Check if Bayesian analyzer is available
+    if not LEGACY_BAYESIAN_AVAILABLE or BayesianFlareAnalyzer is None:
+        print("❌ Enhanced Bayesian analyzer not available.")
+        print("Falling back to Simple Bayesian model if available...")
+        
+        if SIMPLE_BAYESIAN_AVAILABLE:
+            return train_simple_bayesian_model(args)
+        else:
+            print("❌ No Bayesian models available.")
+            return None
     
-    print("Building enhanced Bayesian neural network...")
-    model = analyzer.build_bayesian_model()
-    print(f"Model built with {model.count_params():,} parameters")
-    
-    # Generate physics-based synthetic data
-    print("Generating synthetic solar flare data with physics constraints...")
-    X_synthetic, y_synthetic = analyzer.generate_synthetic_data_with_physics(
-        n_samples=2000, noise_level=0.02
-    )
-    print(f"Generated {X_synthetic.shape[0]} synthetic samples")
-    
-    # Train with Monte Carlo data augmentation
-    print("Training with Monte Carlo data augmentation...")
-    history = analyzer.train_bayesian_model(
-        X_synthetic, y_synthetic,
-        validation_split=0.2,
-        epochs=50,
-        batch_size=32,
-        augment_data=True
-    )
-    
-    # Save the trained model
-    model_path = os.path.join(args.output, 'enhanced_bayesian_flare_model')
-    analyzer.save_bayesian_model(model_path)
-    print(f"Enhanced Bayesian model saved to {model_path}")
-    
-    # Demonstrate uncertainty quantification
-    print("\nDemonstrating uncertainty quantification...")
-    X_test = X_synthetic[-100:]
-    y_test = y_synthetic[-100:]
-    
-    # Monte Carlo predictions
-    predictions = analyzer.monte_carlo_predict(X_test, n_samples=100)
-    print(f"Mean uncertainty: {np.mean(predictions['std']):.6f}")
-    
-    # Separate epistemic and aleatoric uncertainty
-    uncertainty_components = analyzer.quantify_epistemic_aleatoric_uncertainty(
-        X_test[:20], n_epistemic=30, n_aleatoric=50
-    )
-    
-    print(f"Epistemic uncertainty: {np.mean(uncertainty_components['epistemic_uncertainty']):.6f}")
-    print(f"Aleatoric uncertainty: {np.mean(uncertainty_components['aleatoric_uncertainty']):.6f}")
-    
-    # MCMC sampling
     try:
-        print("Performing MCMC sampling...")
-        mcmc_results = analyzer.mcmc_sampling(
-            X_test[:10], y_test[:10],
-            n_samples=200, n_burnin=100
-        )
-        print(f"MCMC acceptance rate: {mcmc_results['acceptance_rate']:.3f}")
+        # Initialize enhanced Bayesian analyzer
+        if hasattr(BayesianFlareAnalyzer, '__init__'):
+            # Use the original BayesianFlareAnalyzer if available
+            analyzer = BayesianFlareAnalyzer(
+                sequence_length=128,
+                n_features=2,
+                max_flares=3,
+                n_monte_carlo_samples=100,
+                sensor_noise_std=0.01
+            )
+        else:
+            # Fall back to SimpleBayesianFlareAnalyzer
+            analyzer = create_bayesian_flare_analyzer(
+                sequence_length=128,
+                n_features=2,
+                max_flares=3
+            )
+        print("Building enhanced Bayesian neural network...")
+        
+        # Try to build model with original interface
+        if hasattr(analyzer, 'build_bayesian_model'):
+            model = analyzer.build_bayesian_model()
+            print(f"Model built with {model.count_params():,} parameters")
+        else:
+            # SimpleBayesianFlareAnalyzer builds model differently
+            model = analyzer.model
+            if model is None:
+                print("Model not built, building now...")
+                analyzer.build_bayesian_model()
+                model = analyzer.model
+            print(f"Model built successfully")
+        
+        # Generate physics-based synthetic data
+        print("Generating synthetic solar flare data with physics constraints...")
+        if hasattr(analyzer, 'generate_synthetic_data_with_physics'):
+            X_synthetic, y_synthetic = analyzer.generate_synthetic_data_with_physics(
+                n_samples=2000, noise_level=0.02
+            )
+        else:
+            # Fallback for SimpleBayesianFlareAnalyzer
+            X_synthetic, y_synthetic = analyzer.generate_synthetic_data_with_physics(
+                n_samples=2000, noise_level=0.02
+            )
+        print(f"Generated {X_synthetic.shape[0]} synthetic samples")
+        
+        # Train with appropriate method
+        print("Training Bayesian model...")
+        if hasattr(analyzer, 'train_bayesian_model'):
+            # Check if the method accepts augment_data parameter
+            import inspect
+            sig = inspect.signature(analyzer.train_bayesian_model)
+            if 'augment_data' in sig.parameters:
+                history = analyzer.train_bayesian_model(
+                    X_synthetic, y_synthetic,
+                    validation_split=0.2,
+                    epochs=5,
+                    batch_size=32,
+                    augment_data=True
+                )
+            else:
+                history = analyzer.train_bayesian_model(
+                    X_synthetic, y_synthetic,
+                    validation_split=0.2,
+                    epochs=5,
+                    batch_size=32
+                )
+        else:
+            print("No training method available")
+            return None
+        
+        # Save the trained model
+        model_path = os.path.join(args.output, 'enhanced_bayesian_flare_model')
+        if hasattr(analyzer, 'save_bayesian_model'):
+            analyzer.save_bayesian_model(model_path)
+        elif hasattr(analyzer, 'model') and analyzer.model:
+            analyzer.model.save(model_path + '.h5')
+        print(f"Enhanced Bayesian model saved to {model_path}")
+        
+        # Demonstrate uncertainty quantification
+        print("\nDemonstrating uncertainty quantification...")
+        X_test = X_synthetic[-100:]
+        y_test = y_synthetic[-100:]
+        
+        # Monte Carlo predictions
+        if hasattr(analyzer, 'monte_carlo_predict'):
+            predictions = analyzer.monte_carlo_predict(X_test, n_samples=100)
+            print(f"Mean uncertainty: {np.mean(predictions['std']):.6f}")
+        else:
+            print("Monte Carlo predictions not available")
+        
+        # Handle different uncertainty quantification methods
+        if hasattr(analyzer, 'quantify_epistemic_aleatoric_uncertainty'):
+            uncertainty_components = analyzer.quantify_epistemic_aleatoric_uncertainty(
+                X_test[:20], n_epistemic=30, n_aleatoric=50
+            )
+            print(f"Epistemic uncertainty: {np.mean(uncertainty_components['epistemic_uncertainty']):.6f}")
+            print(f"Aleatoric uncertainty: {np.mean(uncertainty_components['aleatoric_uncertainty']):.6f}")
+        
+        # MCMC sampling if available
+        if hasattr(analyzer, 'mcmc_sampling') or hasattr(analyzer, 'run_advanced_mcmc'):
+            try:
+                print("Performing MCMC sampling...")
+                if hasattr(analyzer, 'run_advanced_mcmc'):
+                    mcmc_results = analyzer.run_advanced_mcmc(
+                        X_test[:10], y_test[:10],
+                        method='HMC',
+                        num_samples=200, num_burnin=100
+                    )
+                else:
+                    mcmc_results = analyzer.mcmc_sampling(
+                        X_test[:10], y_test[:10],
+                        n_samples=200, n_burnin=100
+                    )
+                
+                if mcmc_results and 'diagnostics' in mcmc_results:
+                    print(f"MCMC acceptance rate: {mcmc_results['diagnostics']['acceptance_rate']:.3f}")
+                elif mcmc_results and 'acceptance_rate' in mcmc_results:
+                    print(f"MCMC acceptance rate: {mcmc_results['acceptance_rate']:.3f}")
+            except Exception as e:
+                print(f"MCMC sampling issue: {e}")
+        
+        # Visualization
+        if hasattr(analyzer, 'plot_uncertainty_analysis') and 'predictions' in locals():
+            try:
+                fig = analyzer.plot_uncertainty_analysis(X_test, predictions, y_test)
+                fig.savefig(os.path.join(args.output, 'bayesian_uncertainty_analysis.png'), 
+                           dpi=300, bbox_inches='tight')
+                plt.close(fig)
+            except Exception as e:
+                print(f"Plotting issue: {e}")
+        
+        print("Enhanced Bayesian model training completed!")
+        return analyzer
+        
     except Exception as e:
-        print(f"MCMC sampling issue: {e}")
-    
-    # Visualization
-    fig = analyzer.plot_uncertainty_analysis(X_test, predictions, y_test)
-    plt.savefig(os.path.join(args.output, 'bayesian_uncertainty_analysis.png'), dpi=300, bbox_inches='tight')
-    plt.close()
-    
-    print("Enhanced Bayesian model training completed!")
-    return analyzer
+        print(f"Error training enhanced Bayesian model: {e}")
+        traceback.print_exc()
+        
+        # Try fallback to simple Bayesian model
+        if SIMPLE_BAYESIAN_AVAILABLE:
+            print("Attempting fallback to Simple Bayesian model...")
+            return train_simple_bayesian_model(args)
+        
+        return None
 
 
+def train_monte_carlo_model(args):
+    """Train the Monte Carlo enhanced flare analysis model."""
+    print("\n=== Training Monte Carlo Enhanced Model ===")
+    
+    # Check if Monte Carlo model is available
+    if not MONTE_CARLO_AVAILABLE or MonteCarloSolarFlareModel is None:
+        print("❌ Monte Carlo enhanced model not available.")
+        print("Please ensure src/ml_models/monte_carlo_enhanced_model.py exists and is properly implemented.")
+        return None
+    
+    # Initialize Monte Carlo model
+    try:
+        mc_model = MonteCarloSolarFlareModel(
+            sequence_length=128,
+            n_features=2,
+            n_classes=6,
+            mc_samples=100,
+            dropout_rate=0.3,
+            learning_rate=0.001
+        )
+        
+        print("Building Monte Carlo neural network...")
+        model = mc_model.build_monte_carlo_model()
+        print(f"Model built with {model.count_params():,} parameters")
+        
+        # Train the model
+        print("Training Monte Carlo model...")
+        history = mc_model.train_model(
+            validation_split=0.2,
+            epochs=5,
+            batch_size=32,
+            use_callbacks=True
+        )
+        
+        # Save the trained model
+        model_path = os.path.join(args.output, 'monte_carlo_flare_model.h5')
+        mc_model.save_model(model_path)
+        print(f"Monte Carlo model saved to {model_path}")
+        
+        # Demonstrate uncertainty quantification
+        print("\nDemonstrating uncertainty quantification...")
+        # Generate test data for demonstration
+        X_test = np.random.randn(10, 128, 2)
+        predictions = mc_model.predict_with_uncertainty(X_test, n_samples=50)
+        
+        print(f"Mean detection uncertainty: {np.mean(predictions['detection']['std']):.6f}")
+        print(f"Mean regression uncertainty: {np.mean(predictions['regression']['std']):.6f}")
+          # Evaluate model
+        try:
+            evaluation = mc_model.evaluate_model()
+            if evaluation and 'monte_carlo_metrics' in evaluation:
+                print(f"Model evaluation completed")
+                print(f"Monte Carlo uncertainty metrics available")
+            else:
+                print("Model evaluation completed with limited metrics")
+        except Exception as e:
+            print(f"Model evaluation failed: {e}")
+            print("Continuing without detailed evaluation...")
+        
+        # Plot training history
+        if hasattr(mc_model, 'training_history') and mc_model.training_history:
+            fig = mc_model.plot_training_history()
+            if fig:
+                fig.savefig(os.path.join(args.output, 'monte_carlo_training_history.png'), 
+                           dpi=300, bbox_inches='tight')
+                plt.close(fig)
+        
+        print("Monte Carlo model training completed successfully!")
+        return mc_model
+        
+    except Exception as e:
+        print(f"Error training Monte Carlo model: {e}")
+        traceback.print_exc()
+        return None
+
+
+def train_simple_bayesian_model(args):
+    """Train the simplified Bayesian flare analysis model."""
+    print("\n=== Training Simple Bayesian Model ===")
+    
+    # Check if Simple Bayesian model is available
+    if not SIMPLE_BAYESIAN_AVAILABLE or SimpleBayesianFlareAnalyzer is None or create_bayesian_flare_analyzer is None:
+        print("❌ Simple Bayesian model not available.")
+        print("Please ensure src/ml_models/simple_bayesian_model.py exists and is properly implemented.")
+        return None
+    
+    try:
+        # Create simple Bayesian analyzer
+        analyzer = create_bayesian_flare_analyzer(
+            sequence_length=128,
+            n_features=2,
+            max_flares=3
+        )
+        
+        print("Building simple Bayesian neural network...")
+        print(f"Model built successfully")
+        
+        # Generate training data
+        print("Generating synthetic training data...")
+        X_train, y_train = analyzer.generate_synthetic_data_with_physics(
+            n_samples=2000, noise_level=0.05
+        )
+        print(f"Generated {X_train.shape[0]} training samples")
+        
+        # Train the model
+        print("Training simple Bayesian model...")
+        history = analyzer.train_bayesian_model(
+            X_train, y_train,
+            validation_split=0.2,
+            epochs=5,
+            batch_size=32
+        )
+        
+        print("Model training completed!")
+        
+        # Demonstrate Monte Carlo predictions
+        print("\nDemonstrating uncertainty quantification...")
+        X_test = X_train[-100:]
+        y_test = y_train[-100:]
+        
+        predictions = analyzer.monte_carlo_predict(X_test, n_samples=100)
+        print(f"Mean prediction uncertainty: {np.mean(predictions['std']):.6f}")
+        
+        # Detect nanoflares
+        nanoflare_results = analyzer.detect_nanoflares(
+            X_test, amplitude_threshold=2e-9, n_samples=50
+        )
+        print(f"Detected {nanoflare_results['nanoflare_count']} nanoflares")
+        
+        # Plot uncertainty analysis
+        fig = analyzer.plot_uncertainty_analysis(X_test, predictions, y_test)
+        if fig:
+            fig.savefig(os.path.join(args.output, 'simple_bayesian_uncertainty.png'), 
+                       dpi=300, bbox_inches='tight')
+            plt.close(fig)
+        
+        # Test MCMC capabilities
+        print("\nTesting MCMC sampling capabilities...")
+        try:
+            mcmc_results = analyzer.run_advanced_mcmc(
+                X_test[:20], y_test[:20],
+                method='HMC', 
+                num_samples=200, 
+                num_burnin=100
+            )
+            if mcmc_results and 'diagnostics' in mcmc_results:
+                print(f"MCMC acceptance rate: {mcmc_results['diagnostics']['acceptance_rate']:.3f}")
+        except Exception as e:
+            print(f"MCMC sampling note: {e}")
+        
+        print("Simple Bayesian model training completed successfully!")
+        return analyzer
+        
+    except Exception as e:
+        print(f"Error training simple Bayesian model: {e}")
+        traceback.print_exc()
+        return None
+
+
+def compare_all_models(args):
+    """Compare all available ML models."""
+    print("\n=== Comprehensive Model Comparison ===")
+    
+    # Check model availability
+    available_models = []
+    if FlareDecompositionModel:
+        available_models.append('basic')
+    if MONTE_CARLO_AVAILABLE and MonteCarloSolarFlareModel:
+        available_models.append('monte_carlo')
+    if SIMPLE_BAYESIAN_AVAILABLE and SimpleBayesianFlareAnalyzer and create_bayesian_flare_analyzer:
+        available_models.append('simple_bayesian')
+    
+    print(f"Available models for comparison: {available_models}")
+    
+    if len(available_models) < 2:
+        print("❌ Need at least 2 models for comparison.")
+        print("Please ensure the required model files are available.")
+        print(f"Model status:")
+        print(f"  Basic Model: {'✓' if FlareDecompositionModel else '✗'}")
+        print(f"  Monte Carlo: {'✓' if MONTE_CARLO_AVAILABLE else '✗'}")
+        print(f"  Simple Bayesian: {'✓' if SIMPLE_BAYESIAN_AVAILABLE else '✗'}")
+        return None, None
+    
+    models = {}
+    results = {}
+    
+    # Generate common test dataset
+    print("Generating common test dataset...")
+    if 'simple_bayesian' in available_models:
+        test_analyzer = create_bayesian_flare_analyzer(sequence_length=128, n_features=2, max_flares=3)
+        X_test, y_test = test_analyzer.generate_synthetic_data_with_physics(n_samples=200, noise_level=0.05)
+    else:
+        # Fallback to basic synthetic data
+        X_test = np.random.randn(200, 128, 2)
+        y_test = np.random.randn(200, 15)  # 3 flares * 5 parameters
+    
+    X_train, y_train = X_test[:150], y_test[:150]
+    X_eval, y_eval = X_test[150:], y_test[150:]
+    
+    print(f"Test dataset: {X_test.shape[0]} samples")
+    
+    # Train and evaluate basic model
+    if 'basic' in available_models:
+        print("\n1. Training Basic Flare Decomposition Model...")
+        try:
+            basic_model = FlareDecompositionModel(
+                sequence_length=128,
+                n_features=2,
+                max_flares=3
+            )
+            basic_model.build_model()
+            
+            # Generate training data for basic model
+            X_basic, y_basic = basic_model.generate_synthetic_data(n_samples=1000)
+            basic_model.train(X_basic, y_basic, epochs=5, batch_size=32)
+            
+            models['basic'] = basic_model
+            results['basic'] = {'trained': True, 'type': 'deterministic'}
+            print("✓ Basic model trained successfully")
+        except Exception as e:
+            print(f"✗ Basic model failed: {e}")
+            results['basic'] = {'trained': False, 'error': str(e)}
+    
+    # Train and evaluate Monte Carlo model
+    if 'monte_carlo' in available_models:
+        print("\n2. Training Monte Carlo Enhanced Model...")
+        try:
+            mc_model = MonteCarloSolarFlareModel(
+                sequence_length=128,
+                n_features=2,
+                mc_samples=50
+            )
+            mc_model.build_monte_carlo_model()
+            
+            # Use synthetic data for training
+            mc_history = mc_model.train_model(epochs=5, batch_size=32)
+            
+            models['monte_carlo'] = mc_model
+            results['monte_carlo'] = {'trained': True, 'type': 'uncertainty'}
+            print("✓ Monte Carlo model trained successfully")
+        except Exception as e:
+            print(f"✗ Monte Carlo model failed: {e}")
+            results['monte_carlo'] = {'trained': False, 'error': str(e)}
+    
+    # Train and evaluate Simple Bayesian model
+    if 'simple_bayesian' in available_models:
+        print("\n3. Training Simple Bayesian Model...")
+        try:
+            bayesian_analyzer = create_bayesian_flare_analyzer(
+                sequence_length=128,
+                n_features=2,
+                max_flares=3
+            )
+            
+            bayesian_analyzer.train_bayesian_model(X_train, y_train, epochs=5, batch_size=32)
+            
+            models['simple_bayesian'] = bayesian_analyzer
+            results['simple_bayesian'] = {'trained': True, 'type': 'bayesian'}
+            print("✓ Simple Bayesian model trained successfully")
+        except Exception as e:
+            print(f"✗ Simple Bayesian model failed: {e}")
+            results['simple_bayesian'] = {'trained': False, 'error': str(e)}
+    
+    # Continue with evaluation code...
+    # [Rest of the function remains the same]
+    
+    # Evaluate all trained models
+    print("\n=== Model Evaluation and Comparison ===")
+    
+    evaluation_results = {}
+    
+    for model_name, model in models.items():
+        print(f"\nEvaluating {model_name} model...")
+        try:
+            if model_name == 'basic':
+                # Basic model evaluation
+                predictions = model.model.predict(X_eval)
+                mse = np.mean((predictions.flatten() - y_eval.flatten())**2)
+                evaluation_results[model_name] = {
+                    'mse': mse,
+                    'has_uncertainty': False
+                }
+                
+            elif model_name == 'monte_carlo':
+                # Monte Carlo model evaluation
+                mc_predictions = model.predict_with_uncertainty(X_eval, n_samples=30)
+                mean_pred = mc_predictions['regression']['mean']
+                uncertainty = mc_predictions['regression']['std']
+                
+                mse = np.mean((mean_pred.flatten() - y_eval.flatten())**2)
+                mean_uncertainty = np.mean(uncertainty)
+                
+                evaluation_results[model_name] = {
+                    'mse': mse,
+                    'mean_uncertainty': mean_uncertainty,
+                    'has_uncertainty': True
+                }
+                
+            elif model_name == 'simple_bayesian':
+                # Simple Bayesian model evaluation
+                bay_predictions = model.monte_carlo_predict(X_eval, n_samples=30)
+                mean_pred = bay_predictions['mean']
+                uncertainty = bay_predictions['std']
+                
+                mse = np.mean((mean_pred.flatten() - y_eval.flatten())**2)
+                mean_uncertainty = np.mean(uncertainty)
+                
+                evaluation_results[model_name] = {
+                    'mse': mse,
+                    'mean_uncertainty': mean_uncertainty,
+                    'has_uncertainty': True
+                }
+                
+                # Additional Bayesian-specific metrics
+                nanoflare_results = model.detect_nanoflares(X_eval[:10])
+                evaluation_results[model_name]['nanoflare_count'] = nanoflare_results['nanoflare_count']
+            
+            print(f"✓ {model_name} evaluation completed")
+            
+        except Exception as e:
+            print(f"✗ {model_name} evaluation failed: {e}")
+            evaluation_results[model_name] = {'error': str(e)}
+    
+    # Print comparison results
+    print("\n" + "="*60)
+    print("MODEL COMPARISON RESULTS")
+    print("="*60)
+    
+    print(f"{'Model':<20} {'MSE':<12} {'Uncertainty':<15} {'Special Features'}")
+    print("-"*70)
+    
+    for model_name, results in evaluation_results.items():
+        if 'error' not in results:
+            mse_str = f"{results['mse']:.6f}" if 'mse' in results else "N/A"
+            uncertainty_str = f"{results.get('mean_uncertainty', 0):.6f}" if results.get('has_uncertainty', False) else "N/A"
+            
+            special_features = []
+            if model_name == 'monte_carlo':
+                special_features.append("Multi-task")
+            elif model_name == 'simple_bayesian':
+                special_features.append("MCMC")
+                if 'nanoflare_count' in results:
+                    special_features.append(f"Nanoflares: {results['nanoflare_count']}")
+            
+            features_str = ", ".join(special_features) if special_features else "Basic"
+            
+            print(f"{model_name:<20} {mse_str:<12} {uncertainty_str:<15} {features_str}")
+        else:
+            print(f"{model_name:<20} {'FAILED':<12} {'N/A':<15} {results['error'][:30]}")
+    
+    # Create comparison visualization
+    print(f"\nGenerating comparison plots...")
+    try:
+        fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+        axes = axes.ravel()
+        
+        # Plot 1: MSE Comparison
+        model_names = [name for name in evaluation_results.keys() if 'mse' in evaluation_results[name]]
+        mse_values = [evaluation_results[name]['mse'] for name in model_names]
+        
+        axes[0].bar(model_names, mse_values, color=['blue', 'green', 'red'][:len(model_names)])
+        axes[0].set_title('Model MSE Comparison')
+        axes[0].set_ylabel('Mean Squared Error')
+        axes[0].tick_params(axis='x', rotation=45)
+        
+        # Plot 2: Uncertainty Comparison
+        uncertain_models = [name for name in evaluation_results.keys() 
+                           if evaluation_results[name].get('has_uncertainty', False)]
+        if uncertain_models:
+            uncertainty_values = [evaluation_results[name]['mean_uncertainty'] for name in uncertain_models]
+            axes[1].bar(uncertain_models, uncertainty_values, color=['green', 'red'][:len(uncertain_models)])
+            axes[1].set_title('Uncertainty Quantification')
+            axes[1].set_ylabel('Mean Uncertainty')
+            axes[1].tick_params(axis='x', rotation=45)
+        else:
+            axes[1].text(0.5, 0.5, 'No uncertainty data', ha='center', va='center')
+            axes[1].set_title('Uncertainty Quantification')
+        
+        # Plot 3: Sample Predictions
+        if 'simple_bayesian' in models:
+            bay_pred = models['simple_bayesian'].monte_carlo_predict(X_eval[:20], n_samples=20)
+            axes[2].errorbar(range(20), bay_pred['mean'][:20], yerr=bay_pred['std'][:20], 
+                            fmt='o-', label='Bayesian', alpha=0.7)
+            axes[2].plot(range(20), y_eval[:20], 'r-', label='True', alpha=0.8)
+            axes[2].set_title('Sample Predictions with Uncertainty')
+            axes[2].legend()
+        else:
+            axes[2].text(0.5, 0.5, 'No Bayesian model', ha='center', va='center')
+            axes[2].set_title('Sample Predictions')
+        
+        # Plot 4: Model Complexity
+        model_params = {}
+        for name, model in models.items():
+            if hasattr(model, 'model') and hasattr(model.model, 'count_params'):
+                model_params[name] = model.model.count_params()
+            elif hasattr(model, 'count_params'):
+                model_params[name] = model.count_params()
+        
+        if model_params:
+            axes[3].bar(list(model_params.keys()), list(model_params.values()))
+            axes[3].set_title('Model Complexity (Parameters)')
+            axes[3].set_ylabel('Number of Parameters')
+            axes[3].tick_params(axis='x', rotation=45)
+        else:
+            axes[3].text(0.5, 0.5, 'Parameter count unavailable', ha='center', va='center')
+            axes[3].set_title('Model Complexity')
+        
+        plt.tight_layout()
+        plt.savefig(os.path.join(args.output, 'model_comparison.png'), dpi=300, bbox_inches='tight')
+        plt.close(fig)
+        print("✓ Comparison plots saved")
+        
+    except Exception as e:
+        print(f"✗ Plotting failed: {e}")
+    
+    # Save detailed results
+    results_path = os.path.join(args.output, 'model_comparison_results.txt')
+    with open(results_path, 'w') as f:
+        f.write("Model Comparison Results\n")
+        f.write("="*50 + "\n\n")
+        
+        for model_name, result in evaluation_results.items():
+            f.write(f"{model_name.upper()} MODEL:\n")
+            f.write("-" * 30 + "\n")
+            if 'error' not in result:
+                for key, value in result.items():
+                    f.write(f"{key}: {value}\n")
+            else:
+                f.write(f"Error: {result['error']}\n")
+            f.write("\n")
+    
+    print(f"✓ Detailed results saved to: {results_path}")
+    print(f"\n{'='*60}")
+    print("MODEL COMPARISON COMPLETE")
+    print(f"{'='*60}")
+    
+    return models, evaluation_results
+
+
+# ...existing code...
 def main():
     """Enhanced main entry point with comprehensive analysis options."""
     print("Enhanced Solar Flare Analysis Pipeline")
     print("=====================================")
+    
+    # Print model availability status
+    print_model_status()
+    print()
     
     # Parse command line arguments
     args = parse_args()
@@ -1414,10 +1998,24 @@ def main():
                 print("\nRunning analysis with newly trained model...")
                 analyze_flares(args)
             return
-        
-        # Train Bayesian model if requested
+          # Train Bayesian model if requested
         if args.train_bayesian:
             train_bayesian_model(args)
+            return
+        
+        # Train Monte Carlo model if requested
+        if args.train_monte_carlo:
+            train_monte_carlo_model(args)
+            return
+        
+        # Train Simple Bayesian model if requested
+        if args.train_simple_bayesian:
+            train_simple_bayesian_model(args)
+            return
+        
+        # Compare all models if requested
+        if args.compare_models:
+            compare_all_models(args)
             return
         
         # Run specific analysis types
@@ -1428,12 +2026,15 @@ def main():
         # Default: run basic flare analysis
         if args.data:
             analyze_flares(args)
-        else:
+        else:            
             print("No analysis specified. Use --help for options.")
             print("\nAvailable analysis modes:")
             print("  --generate-synthetic : Generate synthetic data and save to CSV")
             print("  --comprehensive      : Full analysis with all features")
             print("  --train-enhanced     : Train enhanced ML model")
+            print("  --train-monte-carlo  : Train Monte Carlo enhanced model")
+            print("  --train-simple-bayesian : Train simplified Bayesian model")
+            print("  --compare-models     : Compare all available ML models")
             print("  --nanoflare-analysis : Focus on nanoflare detection")
             print("  --corona-heating     : Assess corona heating contribution")
             print("  --train              : Train basic ML model")
