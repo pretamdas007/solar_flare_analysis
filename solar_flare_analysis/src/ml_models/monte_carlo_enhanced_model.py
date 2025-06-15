@@ -792,7 +792,7 @@ class MonteCarloSolarFlareModel:
         
         logger.info(f"Model loaded from {filepath}")
     
-  def plot_prediction_uncertainty(self, X, predictions_dict=None, true_values=None, save_path=None):
+    def plot_prediction_uncertainty(self, X, predictions_dict=None, true_values=None, save_path=None):
         """
         Plot prediction uncertainty analysis with modern seaborn visualizations
         
