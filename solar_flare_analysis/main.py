@@ -44,25 +44,13 @@ except ImportError as e:
     MonteCarloSolarFlareModel = None
     MONTE_CARLO_AVAILABLE = False
 
-# Legacy imports for compatibility (try to import from old location if available)
-try:
-    from src.ml_models.simple_bayesian_model import BayesianFlareAnalyzer, BayesianFlareEnergyEstimator
+# Set up compatibility aliases for the simple Bayesian model
+if SIMPLE_BAYESIAN_AVAILABLE:
+    BayesianFlareAnalyzer = SimpleBayesianFlareAnalyzer
     LEGACY_BAYESIAN_AVAILABLE = True
-except ImportError:
-    try:
-        # Alternative: use SimpleBayesianFlareAnalyzer as BayesianFlareAnalyzer for compatibility
-        if SIMPLE_BAYESIAN_AVAILABLE:
-            BayesianFlareAnalyzer = SimpleBayesianFlareAnalyzer
-            BayesianFlareEnergyEstimator = None  # Not available in simple model
-            LEGACY_BAYESIAN_AVAILABLE = True
-        else:
-            BayesianFlareAnalyzer = None
-            BayesianFlareEnergyEstimator = None
-            LEGACY_BAYESIAN_AVAILABLE = False
-    except:
-        BayesianFlareAnalyzer = None
-        BayesianFlareEnergyEstimator = None
-        LEGACY_BAYESIAN_AVAILABLE = False
+else:
+    BayesianFlareAnalyzer = None
+    LEGACY_BAYESIAN_AVAILABLE = False
 
 from src.analysis.power_law import calculate_flare_energy, fit_power_law, compare_flare_populations
 from src.visualization.plotting import (plot_xrs_time_series, plot_detected_flares, 
@@ -1348,19 +1336,17 @@ def analyze_flares(args):
 
 
 def train_bayesian_model(args):
-    """Train the enhanced Bayesian flare analysis model."""
-    print("\n=== Training Enhanced Bayesian Flare Analysis Model ===")
+    """Train the Bayesian flare analysis model (redirects to simple Bayesian model)."""
+    print("\n=== Training Bayesian Flare Analysis Model ===")
+    print("Note: Using the Simple Bayesian model implementation.")
     
-    # Check if Bayesian analyzer is available
-    if not LEGACY_BAYESIAN_AVAILABLE or BayesianFlareAnalyzer is None:
-        print("❌ Enhanced Bayesian analyzer not available.")
-        print("Falling back to Simple Bayesian model if available...")
-        
-        if SIMPLE_BAYESIAN_AVAILABLE:
-            return train_simple_bayesian_model(args)
-        else:
-            print("❌ No Bayesian models available.")
-            return None
+    # Since the old complex Bayesian model has been removed, redirect to simple Bayesian
+    if SIMPLE_BAYESIAN_AVAILABLE:
+        return train_simple_bayesian_model(args)
+    else:
+        print("❌ Simple Bayesian model not available.")
+        print("Please ensure src/ml_models/simple_bayesian_model.py exists and is properly implemented.")
+        return None
     
     try:
         # Initialize enhanced Bayesian analyzer

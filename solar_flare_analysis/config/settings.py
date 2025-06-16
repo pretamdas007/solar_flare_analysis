@@ -6,6 +6,7 @@ import os
 
 # Data settings
 DATA_DIR = 'c:\\Users\\srabani\\Desktop\\goesflareenv\\solar_flare_analysis\\data'
+XRS_DATA_DIR = 'c:\\Users\\srabani\\Desktop\\goesflareenv\\solar_flare_analysis\\data\\XRS'
 OUTPUT_DIR = 'c:\\Users\\srabani\\Desktop\\goesflareenv\\solar_flare_analysis\\output'
 MODEL_DIR = 'c:\\Users\\srabani\\Desktop\\goesflareenv\\solar_flare_analysis\\models'
 

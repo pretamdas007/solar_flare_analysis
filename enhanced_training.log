@@ -1,0 +1,165 @@
+2025-06-16 18:40:02,156 - INFO - ============================================================
+2025-06-16 18:40:02,156 - INFO - Enhanced XRS Data Training Pipeline
+2025-06-16 18:40:02,156 - INFO - ============================================================
+2025-06-16 18:40:02,156 - INFO - Step 1: Loading and processing XRS data...
+2025-06-16 18:40:02,156 - INFO - Enhanced XRS data loading from: data\XRS
+2025-06-16 18:40:02,171 - ERROR - Data directory does not exist: data\XRS
+2025-06-16 18:40:02,171 - ERROR - No XRS data loaded. Cannot proceed with training.
+2025-06-16 18:43:44,042 - INFO - ============================================================
+2025-06-16 18:43:44,042 - INFO - Enhanced XRS Data Training Pipeline
+2025-06-16 18:43:44,042 - INFO - ============================================================
+2025-06-16 18:43:44,042 - INFO - Step 1: Loading and processing XRS data...
+2025-06-16 18:43:44,042 - INFO - Enhanced XRS data loading from: solar_flare_analysis\data\XRS
+2025-06-16 18:43:44,042 - INFO - Processing 5 XRS CSV files...
+2025-06-16 18:43:44,042 - INFO - Processing file 1/5: 2017_xrsa_xrsb.csv
+2025-06-16 18:43:44,427 - INFO -     Sampled 330624 points from 330624 (rate: 0.7)
+2025-06-16 18:43:44,560 - INFO -   ✓ Processed 298922 samples
+2025-06-16 18:43:44,560 - INFO - Processing file 2/5: 2019_xrsa_xrsb.csv
+2025-06-16 18:43:44,941 - INFO -     Sampled 367920 points from 367920 (rate: 0.7)
+2025-06-16 18:43:45,074 - INFO -   ✓ Processed 361337 samples
+2025-06-16 18:43:45,074 - INFO - Processing file 3/5: 2020_xrsa_xrsb.csv
+2025-06-16 18:43:45,540 - INFO -     Sampled 368928 points from 368928 (rate: 0.7)
+2025-06-16 18:43:45,687 - INFO -   ✓ Processed 348054 samples
+2025-06-16 18:43:45,687 - INFO - Processing file 4/5: 2021_xrsa_xrsb.csv
+2025-06-16 18:43:46,277 - INFO -     Sampled 367920 points from 367920 (rate: 0.7)
+2025-06-16 18:43:46,450 - INFO -   ✓ Processed 356256 samples
+2025-06-16 18:43:46,450 - INFO - Processing file 5/5: 2022_xrsa_xrsb.csv
+2025-06-16 18:43:46,989 - INFO -     Sampled 367920 points from 367920 (rate: 0.7)
+2025-06-16 18:43:47,120 - INFO -   ✓ Processed 360293 samples
+2025-06-16 18:43:47,135 - INFO - ✓ Successfully loaded 1,724,862 XRS data points from 5 files
+2025-06-16 18:43:47,152 - INFO - Applying final preprocessing for ML training...
+2025-06-16 18:43:47,304 - INFO - ✓ Data preprocessing completed. Shape: (1724862, 2)
+2025-06-16 18:43:47,304 - INFO - Step 2: Creating training sequences...
+2025-06-16 18:43:47,304 - INFO - Creating sequences: length=128, step=32, data_len=1724862
+2025-06-16 18:43:51,396 - INFO - ✓ Created 53898 training sequences
+2025-06-16 18:43:51,396 - INFO - Step 3: Splitting data for training and validation...
+2025-06-16 18:43:51,539 - INFO - Training data: (43118, 128, 2), Validation data: (10780, 128, 2)
+2025-06-16 18:43:51,540 - INFO - Flare ratio - Train: 0.435, Val: 0.435
+2025-06-16 18:43:51,540 - INFO - Step 4: Training enhanced ML models...
+2025-06-16 18:44:01,965 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-16 18:44:04,727 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-16 18:44:06,950 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-16 18:44:08,669 - INFO - ✓ Successfully imported enhanced models
+2025-06-16 18:44:08,669 - INFO - Training TransformerFlareModel...
+2025-06-16 18:48:49,935 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-16 18:53:19,807 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-16 19:06:44,011 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-16 19:06:44,224 - INFO - ✓ Transformer model training completed
+2025-06-16 19:06:44,224 - INFO - Training ConvolutionalTransformerModel...
+2025-06-16 19:06:44,296 - ERROR - ✗ Convolutional Transformer training failed: A KerasTensor cannot be used as input to a TensorFlow function. A KerasTensor is a symbolic placeholder for a shape and dtype, used when constructing Keras Functional models or Keras Functions. You can only use it as input to a Keras layer or a Keras operation (from the namespaces `keras.layers` and `keras.ops`). You are likely doing something like:
+
+```
+x = Input(...)
+...
+tf_fn(x)  # Invalid.
+```
+
+What you should do instead is wrap `tf_fn` in a layer:
+
+```
+class MyLayer(Layer):
+    def call(self, x):
+        return tf_fn(x)
+
+x = MyLayer()(x)
+```
+
+2025-06-16 19:06:44,296 - INFO - Training MonteCarloSolarFlareModel...
+2025-06-16 19:06:44,296 - ERROR - ✗ Monte Carlo training failed: 'MonteCarloSolarFlareModel' object has no attribute 'build_model'
+2025-06-16 19:06:44,296 - INFO - Training ContrastiveLearningModel...
+2025-06-16 19:06:44,426 - ERROR - ✗ Contrastive learning training failed: A KerasTensor cannot be used as input to a TensorFlow function. A KerasTensor is a symbolic placeholder for a shape and dtype, used when constructing Keras Functional models or Keras Functions. You can only use it as input to a Keras layer or a Keras operation (from the namespaces `keras.layers` and `keras.ops`). You are likely doing something like:
+
+```
+x = Input(...)
+...
+tf_fn(x)  # Invalid.
+```
+
+What you should do instead is wrap `tf_fn` in a layer:
+
+```
+class MyLayer(Layer):
+    def call(self, x):
+        return tf_fn(x)
+
+x = MyLayer()(x)
+```
+
+2025-06-16 19:06:44,426 - INFO - Step 5: Creating visualizations...
+2025-06-16 19:06:44,426 - INFO - Creating enhanced visualizations...
+2025-06-16 19:06:47,111 - INFO - ✓ Enhanced visualizations saved to enhanced_output
+2025-06-16 19:06:47,111 - INFO - ✓ Training metadata saved to enhanced_output\enhanced_training_metadata.json
+2025-06-16 20:12:52,506 - INFO - ============================================================
+2025-06-16 20:12:52,506 - INFO - Enhanced XRS Data Training Pipeline
+2025-06-16 20:12:52,506 - INFO - ============================================================
+2025-06-16 20:12:52,506 - INFO - Step 1: Loading and processing XRS data...
+2025-06-16 20:12:52,506 - INFO - Enhanced XRS data loading from: solar_flare_analysis\data\XRS
+2025-06-16 20:12:52,506 - INFO - Processing 5 XRS CSV files...
+2025-06-16 20:12:52,506 - INFO - Processing file 1/5: 2017_xrsa_xrsb.csv
+2025-06-16 20:12:52,887 - INFO -     Sampled 330624 points from 330624 (rate: 0.7)
+2025-06-16 20:12:52,995 - INFO -   ✓ Processed 298922 samples
+2025-06-16 20:12:52,995 - INFO - Processing file 2/5: 2019_xrsa_xrsb.csv
+2025-06-16 20:12:53,384 - INFO -     Sampled 367920 points from 367920 (rate: 0.7)
+2025-06-16 20:12:53,511 - INFO -   ✓ Processed 361337 samples
+2025-06-16 20:12:53,511 - INFO - Processing file 3/5: 2020_xrsa_xrsb.csv
+2025-06-16 20:12:53,932 - INFO -     Sampled 368928 points from 368928 (rate: 0.7)
+2025-06-16 20:12:54,078 - INFO -   ✓ Processed 348054 samples
+2025-06-16 20:12:54,078 - INFO - Processing file 4/5: 2021_xrsa_xrsb.csv
+2025-06-16 20:12:54,544 - INFO -     Sampled 367920 points from 367920 (rate: 0.7)
+2025-06-16 20:12:54,691 - INFO -   ✓ Processed 356256 samples
+2025-06-16 20:12:54,691 - INFO - Processing file 5/5: 2022_xrsa_xrsb.csv
+2025-06-16 20:12:55,116 - INFO -     Sampled 367920 points from 367920 (rate: 0.7)
+2025-06-16 20:12:55,243 - INFO -   ✓ Processed 360293 samples
+2025-06-16 20:12:55,278 - INFO - ✓ Successfully loaded 1,724,862 XRS data points from 5 files
+2025-06-16 20:12:55,279 - INFO - Applying final preprocessing for ML training...
+2025-06-16 20:12:55,424 - INFO - ✓ Data preprocessing completed. Shape: (1724862, 2)
+2025-06-16 20:12:55,424 - INFO - Step 2: Creating training sequences...
+2025-06-16 20:12:55,424 - INFO - Creating sequences: length=128, step=32, data_len=1724862
+2025-06-16 20:12:59,284 - INFO - ✓ Created 53898 training sequences
+2025-06-16 20:12:59,299 - INFO - Step 3: Splitting data for training and validation...
+2025-06-16 20:12:59,410 - INFO - Training data: (43118, 128, 2), Validation data: (10780, 128, 2)
+2025-06-16 20:12:59,410 - INFO - Flare ratio - Train: 0.435, Val: 0.435
+2025-06-16 20:12:59,410 - INFO - Step 4: Training enhanced ML models...
+2025-06-16 20:13:08,948 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-16 20:13:11,453 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-16 20:13:13,278 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-16 20:13:14,669 - INFO - ✓ Successfully imported enhanced models
+2025-06-16 20:13:14,669 - INFO - Training TransformerFlareModel...
+2025-06-16 20:17:56,803 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-16 20:22:25,248 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-16 20:26:53,959 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-16 20:35:49,557 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-16 20:35:49,769 - INFO - ✓ Transformer model training completed
+2025-06-16 20:35:49,770 - INFO - Training ConvolutionalTransformerModel...
+2025-06-16 21:01:32,675 - INFO - ✓ Convolutional Transformer training completed
+2025-06-16 21:01:32,675 - INFO - Training MonteCarloSolarFlareModel...
+2025-06-16 21:01:32,675 - ERROR - ✗ Monte Carlo training failed: 'MonteCarloSolarFlareModel' object has no attribute 'build_model'
+2025-06-16 21:01:32,689 - INFO - Training ContrastiveLearningModel...
+2025-06-16 21:01:32,844 - ERROR - ✗ Contrastive learning training failed: A KerasTensor cannot be used as input to a TensorFlow function. A KerasTensor is a symbolic placeholder for a shape and dtype, used when constructing Keras Functional models or Keras Functions. You can only use it as input to a Keras layer or a Keras operation (from the namespaces `keras.layers` and `keras.ops`). You are likely doing something like:
+
+```
+x = Input(...)
+...
+tf_fn(x)  # Invalid.
+```
+
+What you should do instead is wrap `tf_fn` in a layer:
+
+```
+class MyLayer(Layer):
+    def call(self, x):
+        return tf_fn(x)
+
+x = MyLayer()(x)
+```
+
+2025-06-16 21:01:32,859 - INFO - Step 5: Creating visualizations...
+2025-06-16 21:01:32,859 - INFO - Creating enhanced visualizations...
+2025-06-16 21:01:35,592 - INFO - ✓ Enhanced visualizations saved to enhanced_output
+2025-06-16 21:01:35,592 - INFO - ✓ Training metadata saved to enhanced_output\enhanced_training_metadata.json
