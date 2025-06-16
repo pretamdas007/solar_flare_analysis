@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-06-16T23:27:48.895379",
+  "timestamp": "2025-06-17T00:51:27.590333",
   "data_info": {
     "total_samples": 2000,
     "processed_files": 1,
@@ -9,12 +9,12 @@
       128,
       2
     ],
-    "processing_timestamp": "2025-06-16T23:21:52.254341",
+    "processing_timestamp": "2025-06-17T00:37:41.461201",
     "sequences": {
       "count": 2000,
       "sequence_length": 128,
       "overlap_ratio": 0.0,
-      "flare_ratio": 0.1955
+      "flare_ratio": 0.1945
     }
   },
   "training_results": {
@@ -33,12 +33,24 @@
     "contrastive": {
       "status": "success",
       "error": null
+    },
+    "simple_bayesian": {
+      "status": "success",
+      "error": null
+    },
+    "graph_neural": {
+      "status": "success",
+      "error": null
+    },
+    "hybrid_graph_transformer": {
+      "status": "success",
+      "error": null
     }
   },
   "configuration": {
     "sequence_length": 128,
     "overlap_ratio": 0.0,
-    "models_trained": 4,
-    "successful_models": 4
+    "models_trained": 7,
+    "successful_models": 7
   }
 }

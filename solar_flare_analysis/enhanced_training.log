@@ -700,3 +700,252 @@ ValueError: The name "noise_aug" is used 2 times in the model. All operation nam
 2025-06-16 23:27:45,549 - INFO - Creating enhanced visualizations...
 2025-06-16 23:27:48,889 - INFO - ✓ Enhanced visualizations saved to enhanced_output
 2025-06-16 23:27:48,898 - INFO - ✓ Training metadata saved to enhanced_output\enhanced_training_metadata.json
+2025-06-16 23:46:24,849 - INFO - ============================================================
+2025-06-16 23:46:24,849 - INFO - Enhanced XRS Data Training Pipeline
+2025-06-16 23:46:24,849 - INFO - ============================================================
+2025-06-16 23:46:24,849 - INFO - Step 1: Loading and processing XRS data...
+2025-06-16 23:46:24,849 - INFO - Enhanced XRS data loading from: solar_flare_analysis\data\XRS
+2025-06-16 23:46:24,849 - ERROR - Data directory does not exist: solar_flare_analysis\data\XRS
+2025-06-16 23:46:24,849 - WARNING - No XRS data loaded. Using synthetic data for demonstration...
+2025-06-16 23:46:24,849 - INFO - Generating synthetic XRS data for training...
+2025-06-16 23:46:25,223 - INFO - Generated 2000 synthetic sequences, 400 with flares
+2025-06-16 23:46:25,251 - INFO - Synthetic training data: (1600, 128, 2), Validation data: (400, 128, 2)
+2025-06-16 23:46:25,252 - INFO - Flare ratio - Train: 0.200, Val: 0.200
+2025-06-16 23:47:19,248 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-16 23:47:26,727 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-16 23:47:29,275 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-16 23:47:43,106 - INFO - ✓ Successfully imported ALL enhanced models
+2025-06-16 23:47:43,106 - INFO - Training TransformerFlareModel...
+2025-06-16 23:48:12,024 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-16 23:48:32,732 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-16 23:48:45,471 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-16 23:49:08,201 - INFO - ✓ Transformer model training completed
+2025-06-16 23:49:08,201 - INFO - Training ConvolutionalTransformerModel...
+2025-06-16 23:50:35,475 - INFO - ✓ Convolutional Transformer training completed
+2025-06-16 23:50:35,476 - INFO - Training MonteCarloSolarFlareModel...
+2025-06-16 23:50:35,476 - INFO - Building Monte Carlo Solar Flare ML Model
+2025-06-16 23:50:35,694 - INFO - Model built successfully: 137380 parameters
+2025-06-16 23:53:29,894 - INFO - ✓ Monte Carlo model training completed
+2025-06-16 23:53:29,894 - INFO - Training ContrastiveLearningModel...
+2025-06-16 23:53:30,036 - INFO - Starting contrastive pretraining...
+2025-06-16 23:53:49,879 - INFO - Starting fine-tuning...
+2025-06-16 23:53:53,273 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-16 23:53:56,080 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-16 23:53:56,176 - INFO - ✓ Contrastive learning training completed
+2025-06-16 23:53:56,176 - INFO - Training SimpleBayesianFlareAnalyzer...
+2025-06-16 23:53:56,257 - INFO - Training Bayesian model...
+2025-06-16 23:54:04,607 - INFO - Testing Bayesian uncertainty predictions...
+2025-06-16 23:54:05,208 - INFO - ✓ Simple Bayesian model training completed
+2025-06-16 23:54:05,208 - INFO - Training GraphNeuralFlareModel...
+2025-06-16 23:54:05,538 - INFO - Training Graph Neural Network...
+2025-06-16 23:54:46,950 - ERROR - ✗ Graph Neural Network training failed: Graph execution error:
+
+Detected at node StatefulPartitionedCall/gradient_tape/functional_4_1/gat_layer_1_1/dense_21_1/MatMul/MatMul_1 defined at (most recent call last):
+<stack traces unavailable>
+OOM when allocating tensor with shape[8,128,128,128,512] and type float on /job:localhost/replica:0/task:0/device:CPU:0 by allocator mklcpu
+	 [[{{node StatefulPartitionedCall/gradient_tape/functional_4_1/gat_layer_1_1/dense_21_1/MatMul/MatMul_1}}]]
+Hint: If you want to see a list of allocated tensors when OOM happens, add report_tensor_allocations_upon_oom to RunOptions for current allocation info. This isn't available when running in Eager mode.
+ [Op:__inference_multi_step_on_iterator_147026]
+2025-06-16 23:54:46,986 - ERROR - Traceback: Traceback (most recent call last):
+  File "C:\Users\srabani\Desktop\goesflareenv\solar_flare_analysis\enhanced_train_production.py", line 711, in _train_enhanced_models_with_xrs
+    graph_history = graph_model.train(
+                    ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\srabani\Desktop\goesflareenv\solar_flare_analysis\src\ml_models\graph_neural_model.py", line 257, in train
+    self.history = self.model.fit(
+                   ^^^^^^^^^^^^^^^
+  File "C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\keras\src\utils\traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow\python\eager\execute.py", line 59, in quick_execute
+    except TypeError as e:
+tensorflow.python.framework.errors_impl.ResourceExhaustedError: Graph execution error:
+
+Detected at node StatefulPartitionedCall/gradient_tape/functional_4_1/gat_layer_1_1/dense_21_1/MatMul/MatMul_1 defined at (most recent call last):
+<stack traces unavailable>
+OOM when allocating tensor with shape[8,128,128,128,512] and type float on /job:localhost/replica:0/task:0/device:CPU:0 by allocator mklcpu
+	 [[{{node StatefulPartitionedCall/gradient_tape/functional_4_1/gat_layer_1_1/dense_21_1/MatMul/MatMul_1}}]]
+Hint: If you want to see a list of allocated tensors when OOM happens, add report_tensor_allocations_upon_oom to RunOptions for current allocation info. This isn't available when running in Eager mode.
+ [Op:__inference_multi_step_on_iterator_147026]
+
+2025-06-16 23:54:46,998 - INFO - Training HybridGraphTransformerModel...
+2025-06-16 23:54:47,669 - ERROR - ✗ Hybrid Graph-Transformer training failed: 'HybridGraphTransformerModel' object has no attribute 'preprocess_data'
+2025-06-16 23:54:47,669 - ERROR - Traceback: Traceback (most recent call last):
+  File "C:\Users\srabani\Desktop\goesflareenv\solar_flare_analysis\enhanced_train_production.py", line 745, in _train_enhanced_models_with_xrs
+    X_train_processed = hybrid_model.preprocess_data(X_train)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'HybridGraphTransformerModel' object has no attribute 'preprocess_data'
+
+2025-06-16 23:54:47,669 - INFO - Creating enhanced visualizations...
+2025-06-16 23:54:54,118 - INFO - ✓ Enhanced visualizations saved to enhanced_output
+2025-06-16 23:54:54,118 - INFO - ✓ Training metadata saved to enhanced_output\enhanced_training_metadata.json
+2025-06-17 00:01:58,977 - INFO - ============================================================
+2025-06-17 00:01:58,977 - INFO - Enhanced XRS Data Training Pipeline
+2025-06-17 00:01:58,977 - INFO - ============================================================
+2025-06-17 00:01:58,977 - INFO - Step 1: Loading and processing XRS data...
+2025-06-17 00:01:58,977 - INFO - Enhanced XRS data loading from: solar_flare_analysis\data\XRS
+2025-06-17 00:01:58,977 - ERROR - Data directory does not exist: solar_flare_analysis\data\XRS
+2025-06-17 00:01:58,977 - WARNING - No XRS data loaded. Using synthetic data for demonstration...
+2025-06-17 00:01:58,977 - INFO - Generating synthetic XRS data for training...
+2025-06-17 00:01:59,211 - INFO - Generated 2000 synthetic sequences, 409 with flares
+2025-06-17 00:01:59,211 - INFO - Synthetic training data: (1600, 128, 2), Validation data: (400, 128, 2)
+2025-06-17 00:01:59,211 - INFO - Flare ratio - Train: 0.204, Val: 0.205
+2025-06-17 00:02:14,782 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-17 00:02:17,963 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-17 00:02:20,153 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-17 00:02:22,269 - INFO - ✓ Successfully imported ALL enhanced models
+2025-06-17 00:02:22,269 - INFO - Training TransformerFlareModel...
+2025-06-17 00:02:46,918 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-17 00:02:58,350 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-17 00:03:31,153 - INFO - ✓ Transformer model training completed
+2025-06-17 00:03:31,168 - INFO - Training ConvolutionalTransformerModel...
+2025-06-17 00:04:49,495 - INFO - ✓ Convolutional Transformer training completed
+2025-06-17 00:04:49,495 - INFO - Training MonteCarloSolarFlareModel...
+2025-06-17 00:04:49,496 - INFO - Building Monte Carlo Solar Flare ML Model
+2025-06-17 00:04:49,688 - INFO - Model built successfully: 137380 parameters
+2025-06-17 00:07:41,166 - INFO - ✓ Monte Carlo model training completed
+2025-06-17 00:07:41,166 - INFO - Training ContrastiveLearningModel...
+2025-06-17 00:07:41,309 - INFO - Starting contrastive pretraining...
+2025-06-17 00:08:00,923 - INFO - Starting fine-tuning...
+2025-06-17 00:08:04,309 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-17 00:08:06,949 - INFO - ✓ Contrastive learning training completed
+2025-06-17 00:08:06,949 - INFO - Training SimpleBayesianFlareAnalyzer...
+2025-06-17 00:08:07,024 - INFO - Training Bayesian model...
+2025-06-17 00:08:14,806 - INFO - Testing Bayesian uncertainty predictions...
+2025-06-17 00:08:15,394 - INFO - ✓ Simple Bayesian model training completed
+2025-06-17 00:08:15,394 - INFO - Training GraphNeuralFlareModel...
+2025-06-17 00:08:15,807 - INFO - Training Graph Neural Network...
+2025-06-17 00:08:19,200 - ERROR - ✗ Graph Neural Network training failed: Input 0 of layer "functional_4" is incompatible with the layer: expected shape=(None, 64, 2), found shape=(4, 128, 2)
+2025-06-17 00:08:19,200 - ERROR - Traceback: Traceback (most recent call last):
+  File "C:\Users\srabani\Desktop\goesflareenv\solar_flare_analysis\enhanced_train_production.py", line 710, in _train_enhanced_models_with_xrs
+    graph_history = graph_model.train(
+                    ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\srabani\Desktop\goesflareenv\solar_flare_analysis\src\ml_models\graph_neural_model.py", line 285, in train
+    self.history = self.model.fit(
+                   ^^^^^^^^^^^^^^^
+  File "C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\keras\src\utils\traceback_utils.py", line 122, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\keras\src\layers\input_spec.py", line 245, in assert_input_compatibility
+    raise ValueError(
+ValueError: Input 0 of layer "functional_4" is incompatible with the layer: expected shape=(None, 64, 2), found shape=(4, 128, 2)
+
+2025-06-17 00:08:19,210 - INFO - Training HybridGraphTransformerModel...
+2025-06-17 00:08:19,211 - INFO - Training Hybrid Graph-Transformer...
+2025-06-17 00:08:22,560 - ERROR - ✗ Hybrid Graph-Transformer training failed: 'NoneType' object has no attribute 'fit'
+2025-06-17 00:08:22,560 - ERROR - Traceback: Traceback (most recent call last):
+  File "C:\Users\srabani\Desktop\goesflareenv\solar_flare_analysis\enhanced_train_production.py", line 743, in _train_enhanced_models_with_xrs
+    hybrid_history = hybrid_model.train(
+                     ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\srabani\Desktop\goesflareenv\solar_flare_analysis\src\ml_models\graph_neural_model.py", line 455, in train
+    history = self.model.fit(
+              ^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'fit'
+
+2025-06-17 00:08:22,575 - INFO - Creating enhanced visualizations...
+2025-06-17 00:08:26,980 - INFO - ✓ Enhanced visualizations saved to enhanced_output
+2025-06-17 00:08:26,995 - INFO - ✓ Training metadata saved to enhanced_output\enhanced_training_metadata.json
+2025-06-17 00:17:12,861 - INFO - ============================================================
+2025-06-17 00:17:12,861 - INFO - Enhanced XRS Data Training Pipeline
+2025-06-17 00:17:12,861 - INFO - ============================================================
+2025-06-17 00:17:12,861 - INFO - Step 1: Loading and processing XRS data...
+2025-06-17 00:17:12,861 - INFO - Enhanced XRS data loading from: solar_flare_analysis\data\XRS
+2025-06-17 00:17:12,861 - ERROR - Data directory does not exist: solar_flare_analysis\data\XRS
+2025-06-17 00:17:12,861 - WARNING - No XRS data loaded. Using synthetic data for demonstration...
+2025-06-17 00:17:12,876 - INFO - Generating synthetic XRS data for training...
+2025-06-17 00:17:13,150 - INFO - Generated 2000 synthetic sequences, 395 with flares
+2025-06-17 00:17:13,150 - INFO - Synthetic training data: (1600, 128, 2), Validation data: (400, 128, 2)
+2025-06-17 00:17:13,150 - INFO - Flare ratio - Train: 0.198, Val: 0.198
+2025-06-17 00:17:23,764 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-17 00:17:26,769 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-17 00:17:28,944 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-17 00:17:30,469 - INFO - ✓ Successfully imported ALL enhanced models
+2025-06-17 00:17:30,469 - INFO - Training TransformerFlareModel...
+2025-06-17 00:17:54,907 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-17 00:18:35,497 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-17 00:18:48,399 - INFO - ✓ Transformer model training completed
+2025-06-17 00:18:48,399 - INFO - Training ConvolutionalTransformerModel...
+2025-06-17 00:20:14,064 - INFO - ✓ Convolutional Transformer training completed
+2025-06-17 00:20:14,064 - INFO - Training MonteCarloSolarFlareModel...
+2025-06-17 00:20:14,064 - INFO - Building Monte Carlo Solar Flare ML Model
+2025-06-17 00:20:14,279 - INFO - Model built successfully: 137380 parameters
+2025-06-17 00:23:03,288 - INFO - ✓ Monte Carlo model training completed
+2025-06-17 00:23:03,290 - INFO - Training ContrastiveLearningModel...
+2025-06-17 00:23:03,414 - INFO - Starting contrastive pretraining...
+2025-06-17 00:23:24,971 - INFO - Starting fine-tuning...
+2025-06-17 00:23:28,686 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-17 00:23:31,025 - INFO - ✓ Contrastive learning training completed
+2025-06-17 00:23:31,026 - INFO - Training SimpleBayesianFlareAnalyzer...
+2025-06-17 00:23:31,094 - INFO - Training Bayesian model...
+2025-06-17 00:23:38,934 - INFO - Testing Bayesian uncertainty predictions...
+2025-06-17 00:23:39,552 - INFO - ✓ Simple Bayesian model training completed
+2025-06-17 00:23:39,553 - INFO - Training GraphNeuralFlareModel...
+2025-06-17 00:23:40,061 - INFO - Training Graph Neural Network...
+2025-06-17 00:24:37,937 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-17 00:26:44,066 - INFO - ✓ Graph Neural Network training completed
+2025-06-17 00:26:44,066 - INFO - Training HybridGraphTransformerModel...
+2025-06-17 00:26:44,531 - INFO - Training Hybrid Graph-Transformer...
+2025-06-17 00:30:26,919 - INFO - ✓ Hybrid Graph-Transformer training completed
+2025-06-17 00:30:26,919 - INFO - Creating enhanced visualizations...
+2025-06-17 00:30:32,393 - INFO - ✓ Enhanced visualizations saved to enhanced_output
+2025-06-17 00:30:32,393 - INFO - ✓ Training metadata saved to enhanced_output\enhanced_training_metadata.json
+2025-06-17 00:37:41,184 - INFO - ============================================================
+2025-06-17 00:37:41,184 - INFO - Enhanced XRS Data Training Pipeline
+2025-06-17 00:37:41,184 - INFO - ============================================================
+2025-06-17 00:37:41,184 - INFO - Step 1: Loading and processing XRS data...
+2025-06-17 00:37:41,184 - INFO - Enhanced XRS data loading from: solar_flare_analysis\data\XRS
+2025-06-17 00:37:41,184 - ERROR - Data directory does not exist: solar_flare_analysis\data\XRS
+2025-06-17 00:37:41,184 - WARNING - No XRS data loaded. Using synthetic data for demonstration...
+2025-06-17 00:37:41,184 - INFO - Generating synthetic XRS data for training...
+2025-06-17 00:37:41,461 - INFO - Generated 2000 synthetic sequences, 389 with flares
+2025-06-17 00:37:41,476 - INFO - Synthetic training data: (1600, 128, 2), Validation data: (400, 128, 2)
+2025-06-17 00:37:41,476 - INFO - Flare ratio - Train: 0.194, Val: 0.195
+2025-06-17 00:37:54,035 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-17 00:37:57,478 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-17 00:38:00,123 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-17 00:38:01,988 - INFO - ✓ Successfully imported ALL enhanced models
+2025-06-17 00:38:01,988 - INFO - Training TransformerFlareModel...
+2025-06-17 00:38:26,143 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-17 00:38:37,684 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-17 00:38:49,894 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-17 00:39:12,247 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-17 00:39:12,461 - INFO - ✓ Transformer model training completed
+2025-06-17 00:39:12,461 - INFO - Training ConvolutionalTransformerModel...
+2025-06-17 00:40:56,122 - INFO - ✓ Convolutional Transformer training completed
+2025-06-17 00:40:56,122 - INFO - Training MonteCarloSolarFlareModel...
+2025-06-17 00:40:56,122 - INFO - Building Monte Carlo Solar Flare ML Model
+2025-06-17 00:40:56,341 - INFO - Model built successfully: 137380 parameters
+2025-06-17 00:43:49,083 - INFO - ✓ Monte Carlo model training completed
+2025-06-17 00:43:49,083 - INFO - Training ContrastiveLearningModel...
+2025-06-17 00:43:49,224 - INFO - Starting contrastive pretraining...
+2025-06-17 00:44:09,625 - INFO - Starting fine-tuning...
+2025-06-17 00:44:13,163 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-17 00:44:15,960 - INFO - ✓ Contrastive learning training completed
+2025-06-17 00:44:15,975 - INFO - Training SimpleBayesianFlareAnalyzer...
+2025-06-17 00:44:16,119 - INFO - Training Bayesian model...
+2025-06-17 00:44:24,828 - INFO - Testing Bayesian uncertainty predictions...
+2025-06-17 00:44:25,441 - INFO - ✓ Simple Bayesian model training completed
+2025-06-17 00:44:25,441 - INFO - Training GraphNeuralFlareModel...
+2025-06-17 00:44:25,441 - INFO -     Adapting GNN to sequence length: 128
+2025-06-17 00:44:25,820 - INFO - Training Graph Neural Network...
+2025-06-17 00:45:22,877 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-17 00:46:15,571 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-17 00:47:04,621 - INFO - ✓ Graph Neural Network training completed
+2025-06-17 00:47:04,621 - INFO - Training HybridGraphTransformerModel...
+2025-06-17 00:47:04,621 - INFO -     Adapting Hybrid Graph-Transformer to sequence length: 128
+2025-06-17 00:47:05,002 - INFO - Training Hybrid Graph-Transformer...
+2025-06-17 00:50:50,910 - INFO - ✓ Hybrid Graph-Transformer training completed
+2025-06-17 00:50:50,910 - INFO - Creating enhanced seaborn-based visualizations...
+2025-06-17 00:51:25,699 - INFO - Creating detailed model comparison plot...
+2025-06-17 00:51:27,590 - INFO - ✓ Model comparison dashboard saved to enhanced_output
+2025-06-17 00:51:27,590 - INFO - ✓ Enhanced seaborn visualizations saved to enhanced_output
+2025-06-17 00:51:27,605 - INFO - ✓ Training metadata saved to enhanced_output\enhanced_training_metadata.json
