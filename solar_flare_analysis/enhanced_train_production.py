@@ -810,6 +810,7 @@ class EnhancedMLTrainer:
             results['basic_decomposition'] = {'status': 'failed', 'error': str(e)}
         
         return results
+    
     def _create_enhanced_visualizations(self, X_train, y_train, X_val, y_val, results):
         """
         Create comprehensive visualizations for enhanced training using seaborn
@@ -1048,7 +1049,7 @@ class EnhancedMLTrainer:
         for model_name in model_names:
             if model_name in results:
                 status = results[model_name]['status']
-                performance_data.append({
+        performance_data.append({
                     'Model': model_name.replace('_', ' ').title(),
                     'Success': 1 if status == 'success' else 0,
                     'Training': 1 if model_name in results else 0
