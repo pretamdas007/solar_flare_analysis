@@ -146,11 +146,11 @@ def test_enhanced_comprehensive_analysis():
                 'nanoflare_heating_potential': 'High',
                 'power_law_significance': 'Significant'
             },
-            'temporal_analysis': {}
-        }
+            'temporal_analysis': {}        }
         
         # Initialize model and test
         model = EnhancedFlareDecompositionModel()
+        
         output_dir = Path("enhanced_output/final_seaborn_tests")
         fig = model.plot_comprehensive_analysis(analysis_results, energies)
         fig.savefig(output_dir / 'test_comprehensive_analysis_seaborn.png', 
