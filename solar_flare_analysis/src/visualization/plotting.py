@@ -9,11 +9,15 @@ import pandas as pd
 from matplotlib.patches import Rectangle
 import seaborn as sns
 
+# Set default seaborn theme for all visualizations
+sns.set_theme(style="whitegrid", palette="deep", font_scale=1.1)
+sns.set_context("paper", rc={"figure.dpi": 300})
+
 
 def plot_xrs_time_series(time_series, flux_column, title=None, figsize=(12, 6), 
                         log_scale=True, highlight_regions=None):
     """
-    Plot a time series of GOES XRS flux data.
+    Plot a time series of GOES XRS flux data with professional seaborn aesthetics.
     
     Parameters
     ----------
@@ -35,18 +39,22 @@ def plot_xrs_time_series(time_series, flux_column, title=None, figsize=(12, 6),
     matplotlib.figure.Figure
         Figure containing the plot
     """
+    # Set professional seaborn styling
+    plt.style.use('seaborn-v0_8')
+    sns.set_theme(style="whitegrid", palette="deep", font_scale=1.1)
+    
     fig, ax = plt.subplots(figsize=figsize)
     
-    # Plot the time series
-    ax.plot(time_series.index, time_series[flux_column], 'b-', label=flux_column)
-    
-    # Set labels and title
-    ax.set_xlabel('Time')
-    ax.set_ylabel('Flux (W/m²)')
+    # Plot the time series with seaborn styling
+    sns.lineplot(x=time_series.index, y=time_series[flux_column], 
+                ax=ax, color='steelblue', linewidth=2, label=flux_column)
+      # Set labels and title with enhanced styling
+    ax.set_xlabel('Time', fontsize=12, fontweight='bold')
+    ax.set_ylabel('Flux (W/m²)', fontsize=12, fontweight='bold')
     if title:
-        ax.set_title(title)
+        ax.set_title(title, fontsize=14, fontweight='bold')
     else:
-        ax.set_title(f'GOES XRS {flux_column} Time Series')
+        ax.set_title(f'GOES XRS {flux_column} Time Series', fontsize=14, fontweight='bold')
     
     # Set log scale if requested
     if log_scale:
@@ -82,22 +90,21 @@ def plot_xrs_time_series(time_series, flux_column, title=None, figsize=(12, 6),
             ax.text(mid_time, y_pos, label, 
                    ha='center', va='center', 
                    bbox=dict(facecolor='white', alpha=0.7))
-    
-    # Add GOES flare classification reference lines
-    if log_scale:
+          # Add enhanced flare classification reference lines
         flare_classes = {
-            'A': 1e-8,
-            'B': 1e-7,
-            'C': 1e-6,
-            'M': 1e-5,
-            'X': 1e-4,
+            'A': (1e-8, 'darkgray'),
+            'B': (1e-7, 'green'),
+            'C': (1e-6, 'gold'),
+            'M': (1e-5, 'orange'),
+            'X': (1e-4, 'red'),
         }
         
-        for cls, level in flare_classes.items():
-            ax.axhline(y=level, color='gray', linestyle='--', alpha=0.7)
+        for cls, (level, color) in flare_classes.items():
+            ax.axhline(y=level, color=color, linestyle='--', alpha=0.8, linewidth=1.5)
             ax.text(time_series.index[0], level, f'{cls}', 
-                   va='center', ha='right', 
-                   bbox=dict(facecolor='white', alpha=0.7))
+                   va='center', ha='right', fontsize=10, fontweight='bold',
+                   bbox=dict(boxstyle='round,pad=0.3', facecolor='white', 
+                            alpha=0.8, edgecolor=color))
     
     ax.grid(True, which='both', linestyle='--', alpha=0.5)
     plt.tight_layout()
@@ -200,9 +207,8 @@ def plot_detected_flares(time_series, flux_column, flares_df,
         ax.text(time_series.index[0], level, f'{cls}', 
                va='center', ha='right', fontsize=8,
                bbox=dict(facecolor='white', alpha=0.7))
-    
-    ax.grid(True, which='both', linestyle='--', alpha=0.5)
-    ax.legend()
+      # Enhanced grid and layout
+    ax.legend(frameon=True, fancybox=True, shadow=True)
     plt.tight_layout()
     
     return fig
@@ -347,7 +353,7 @@ def plot_power_law_comparison(results_dict, labels=None, figsize=(10, 8)):
 
 def plot_flare_statistics(flares_df, figsize=(15, 10)):
     """
-    Plot various statistics about detected flares.
+    Plot various statistics about detected flares with professional seaborn aesthetics.
     
     Parameters
     ----------
@@ -361,46 +367,65 @@ def plot_flare_statistics(flares_df, figsize=(15, 10)):
     matplotlib.figure.Figure
         Figure containing the plot
     """
+    # Set professional seaborn styling
+    plt.style.use('seaborn-v0_8')
+    sns.set_theme(style="whitegrid", palette="deep", font_scale=1.1)
+    
     fig = plt.figure(figsize=figsize)
+    fig.suptitle('Comprehensive Solar Flare Statistics', fontsize=16, fontweight='bold', y=0.98)
     
     # Define subplot grid
-    gs = fig.add_gridspec(3, 2)
-    
-    # Flare duration histogram
+    gs = fig.add_gridspec(3, 2, hspace=0.3, wspace=0.3)
+      # Flare duration histogram with seaborn
     ax1 = fig.add_subplot(gs[0, 0])
     if 'duration' in flares_df.columns:
         if pd.api.types.is_timedelta64_dtype(flares_df['duration']):
             # Convert timedelta to minutes
             duration_min = flares_df['duration'].dt.total_seconds() / 60
-            ax1.hist(duration_min, bins=20, alpha=0.7)
-            ax1.set_xlabel('Duration (minutes)')
+            sns.histplot(duration_min, bins=20, alpha=0.8, ax=ax1, 
+                        color='skyblue', kde=True, stat='density')
+            ax1.set_xlabel('Duration (minutes)', fontsize=12, fontweight='bold')
         else:
-            ax1.hist(flares_df['duration'], bins=20, alpha=0.7)
-            ax1.set_xlabel('Duration')
+            sns.histplot(flares_df['duration'], bins=20, alpha=0.8, ax=ax1, 
+                        color='skyblue', kde=True, stat='density')
+            ax1.set_xlabel('Duration', fontsize=12, fontweight='bold')
         
-        ax1.set_ylabel('Count')
-        ax1.set_title('Flare Duration Distribution')
-        ax1.grid(True, linestyle='--', alpha=0.7)
-    
-    # Peak flux histogram
+        ax1.set_ylabel('Density', fontsize=12, fontweight='bold')
+        ax1.set_title('Flare Duration Distribution', fontsize=14, fontweight='bold')
+      # Peak flux histogram with enhanced seaborn styling
     ax2 = fig.add_subplot(gs[0, 1])
     if 'peak_flux' in flares_df.columns:
-        sns.histplot(flares_df['peak_flux'], bins=20, kde=True, ax=ax2)
-        ax2.set_xlabel('Peak Flux (W/m²)')
-        ax2.set_ylabel('Count')
-        ax2.set_title('Peak Flux Distribution')
-        ax2.set_xscale('log')
-        ax2.grid(True, linestyle='--', alpha=0.7)
-    
-    # Flare energy histogram
+        # Use log scale for peak flux
+        log_flux = np.log10(flares_df['peak_flux'])
+        sns.histplot(log_flux, bins=20, kde=True, ax=ax2, 
+                    color='coral', alpha=0.8, stat='density')
+        ax2.set_xlabel('Log₁₀(Peak Flux) [W/m²]', fontsize=12, fontweight='bold')
+        ax2.set_ylabel('Density', fontsize=12, fontweight='bold')
+        ax2.set_title('Peak Flux Distribution', fontsize=14, fontweight='bold')
+        
+        # Add median line
+        median_log_flux = np.median(log_flux)
+        ax2.axvline(median_log_flux, color='red', linestyle='--', linewidth=2,
+                   label=f'Median: {10**median_log_flux:.2e} W/m²')
+        ax2.legend()
+      # Flare energy histogram with enhanced visualization
     ax3 = fig.add_subplot(gs[1, 0])
     if 'integrated_flux' in flares_df.columns:
-        sns.histplot(flares_df['integrated_flux'], bins=20, kde=True, ax=ax3)
-        ax3.set_xlabel('Integrated Flux')
-        ax3.set_ylabel('Count')
-        ax3.set_title('Flare Energy Distribution')
-        ax3.set_xscale('log')
-        ax3.grid(True, linestyle='--', alpha=0.7)
+        log_energy = np.log10(flares_df['integrated_flux'])
+        sns.histplot(log_energy, bins=20, kde=True, ax=ax3, 
+                    color='gold', alpha=0.8, stat='density')
+        ax3.set_xlabel('Log₁₀(Integrated Flux) [Energy]', fontsize=12, fontweight='bold')
+        ax3.set_ylabel('Density', fontsize=12, fontweight='bold')
+        ax3.set_title('Flare Energy Distribution', fontsize=14, fontweight='bold')
+        
+        # Add mean and median lines
+        mean_log = np.mean(log_energy)
+        median_log = np.median(log_energy)
+        ax3.axvline(mean_log, color='blue', linestyle='-', linewidth=2, 
+                   label=f'Mean: {10**mean_log:.2e}')
+        ax3.axvline(median_log, color='red', linestyle='--', linewidth=2,
+                   label=f'Median: {10**median_log:.2e}')
+        ax3.legend()
     
     # Rise vs decay time scatter plot
     ax4 = fig.add_subplot(gs[1, 1])
@@ -415,32 +440,46 @@ def plot_flare_statistics(flares_df, figsize=(15, 10)):
         else:
             rise_time = flares_df['peak_time'] - flares_df['start_time']
             decay_time = flares_df['end_time'] - flares_df['peak_time']
+          # Create enhanced scatter plot
+        scatter = ax4.scatter(rise_time, decay_time, alpha=0.7, s=60, 
+                             c=range(len(rise_time)), cmap='viridis',
+                             edgecolors='black', linewidth=0.5)
+        ax4.set_xlabel('Rise Time (minutes)', fontsize=12, fontweight='bold')
+        ax4.set_ylabel('Decay Time (minutes)', fontsize=12, fontweight='bold')
+        ax4.set_title('Rise vs. Decay Time Analysis', fontsize=14, fontweight='bold')
         
-        ax4.scatter(rise_time, decay_time, alpha=0.7)
-        ax4.set_xlabel('Rise Time')
-        ax4.set_ylabel('Decay Time')
-        ax4.set_title('Rise vs. Decay Time')
-        
-        # Add y=x line for reference
+        # Add y=x reference line
         max_val = max(ax4.get_xlim()[1], ax4.get_ylim()[1])
-        ax4.plot([0, max_val], [0, max_val], 'k--', alpha=0.5)
+        ax4.plot([0, max_val], [0, max_val], 'k--', alpha=0.7, linewidth=2,
+                label='Equal Rise/Decay')
+        ax4.legend()
         
-        ax4.grid(True, linestyle='--', alpha=0.7)
-    
-    # Flares over time
+        # Add colorbar
+        cbar = plt.colorbar(scatter, ax=ax4, shrink=0.8)
+        cbar.set_label('Flare Index', fontsize=10)
+      # Flares over time with enhanced visualization
     ax5 = fig.add_subplot(gs[2, :])
     if 'peak_time' in flares_df.columns and 'peak_flux' in flares_df.columns:
         # Sort by peak time
         sorted_flares = flares_df.sort_values('peak_time')
-        ax5.scatter(sorted_flares['peak_time'], sorted_flares['peak_flux'], alpha=0.7)
         
-        # Connect points with line to show trend
-        ax5.plot(sorted_flares['peak_time'], sorted_flares['peak_flux'], 'k-', alpha=0.3)
+        # Create enhanced scatter plot with color coding
+        scatter = ax5.scatter(sorted_flares['peak_time'], sorted_flares['peak_flux'], 
+                             alpha=0.7, s=50, c=np.log10(sorted_flares['peak_flux']),
+                             cmap='plasma', edgecolors='black', linewidth=0.5)
         
-        ax5.set_xlabel('Time')
-        ax5.set_ylabel('Peak Flux (W/m²)')
-        ax5.set_title('Flare Activity Over Time')
+        # Connect points with trend line
+        sns.lineplot(x=sorted_flares['peak_time'], y=sorted_flares['peak_flux'], 
+                    ax=ax5, color='gray', alpha=0.5, linewidth=1, estimator=None)
+        
+        ax5.set_xlabel('Time', fontsize=12, fontweight='bold')
+        ax5.set_ylabel('Peak Flux (W/m²)', fontsize=12, fontweight='bold')
+        ax5.set_title('Flare Activity Timeline', fontsize=14, fontweight='bold')
         ax5.set_yscale('log')
+        
+        # Add colorbar
+        cbar = plt.colorbar(scatter, ax=ax5, shrink=0.8)
+        cbar.set_label('Log₁₀(Peak Flux)', fontsize=10)
         
         # Format x-axis for datetime
         if pd.api.types.is_datetime64_any_dtype(sorted_flares['peak_time']):

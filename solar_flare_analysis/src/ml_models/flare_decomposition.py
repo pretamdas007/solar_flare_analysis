@@ -10,6 +10,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.metrics import mean_squared_error, r2_score
 
 
@@ -315,25 +316,175 @@ class FlareDecompositionModel:
     
     def plot_training_history(self):
         """
-        Plot the training history of the model.
-        
+        Plot the training history of the model.        
+        Enhanced training history visualization with seaborn        
         Returns
         -------
         matplotlib.figure.Figure
-            Figure containing the training history plot
+            Figure containing the professional training history dashboard
         """
         if self.history is None:
             print("No training history available.")
             return None
         
-        fig, ax = plt.subplots(1, 1, figsize=(10, 6))
-        ax.plot(self.history.history['loss'], label='Training Loss')
-        ax.plot(self.history.history['val_loss'], label='Validation Loss')
-        ax.set_title('Model Training History')
-        ax.set_xlabel('Epoch')
-        ax.set_ylabel('Loss')
-        ax.legend()
-        ax.grid(True)
+        # Set professional seaborn styling
+        plt.style.use('seaborn-v0_8')
+        sns.set_theme(style="whitegrid", palette="deep", font_scale=1.1)
+        sns.set_context("paper", rc={"figure.dpi": 300})
+        
+        # Create comprehensive training dashboard
+        fig = plt.figure(figsize=(18, 12), facecolor='white')
+        gs = fig.add_gridspec(2, 3, hspace=0.3, wspace=0.25)
+        
+        epochs = range(1, len(self.history.history['loss']) + 1)
+        
+        # 1. Loss Evolution with Enhanced Styling
+        ax1 = fig.add_subplot(gs[0, :2])
+        
+        # Prepare data for seaborn
+        loss_data = []
+        for epoch, (train_loss, val_loss) in enumerate(zip(
+            self.history.history['loss'], 
+            self.history.history.get('val_loss', [])), 1):
+            loss_data.append({'Epoch': epoch, 'Loss': train_loss, 'Type': 'Training'})
+            if val_loss is not None:
+                loss_data.append({'Epoch': epoch, 'Loss': val_loss, 'Type': 'Validation'})
+        
+        loss_df = pd.DataFrame(loss_data)
+        sns.lineplot(data=loss_df, x='Epoch', y='Loss', hue='Type', 
+                    ax=ax1, marker='o', linewidth=3, markersize=6, alpha=0.8)
+        
+        # Add trend analysis
+        if len(epochs) > 5:
+            train_trend = np.polyfit(epochs, self.history.history['loss'], 1)
+            ax1.plot(epochs, np.poly1d(train_trend)(epochs), '--', 
+                    color='blue', alpha=0.5, linewidth=2, label='Training Trend')
+        
+        ax1.set_title('🎯 Training & Validation Loss Evolution', 
+                     fontsize=16, fontweight='bold', pad=20)
+        ax1.set_xlabel('Epoch', fontsize=12, fontweight='semibold')
+        ax1.set_ylabel('Loss Value', fontsize=12, fontweight='semibold')
+        ax1.legend(frameon=True, fancybox=True, shadow=True)
+        ax1.grid(True, alpha=0.3)
+        ax1.set_yscale('log')
+        
+        # 2. Loss Distribution Analysis
+        ax2 = fig.add_subplot(gs[0, 2])
+        
+        # Create loss distribution comparison
+        all_losses = self.history.history['loss'] + self.history.history.get('val_loss', [])
+        loss_stats = pd.DataFrame({
+            'Training': self.history.history['loss'],
+            'Validation': self.history.history.get('val_loss', [0] * len(self.history.history['loss']))
+        })
+        
+        loss_melted = loss_stats.melt(var_name='Type', value_name='Loss')
+        sns.boxplot(data=loss_melted, x='Type', y='Loss', ax=ax2, palette='Set2')
+        sns.stripplot(data=loss_melted, x='Type', y='Loss', ax=ax2, 
+                     color='black', alpha=0.6, size=4)
+        
+        ax2.set_title('Loss Distribution Comparison', fontsize=14, fontweight='bold')
+        ax2.set_ylabel('Loss Value', fontsize=11)
+        ax2.grid(True, alpha=0.3, axis='y')
+        
+        # 3. Learning Progress Analysis
+        ax3 = fig.add_subplot(gs[1, 0])
+        
+        # Calculate improvement rate
+        train_losses = self.history.history['loss']
+        improvement_rate = []
+        window_size = max(3, len(train_losses) // 10)
+        
+        for i in range(window_size, len(train_losses)):
+            recent_avg = np.mean(train_losses[i-window_size:i])
+            current = train_losses[i]
+            improvement = (recent_avg - current) / recent_avg * 100
+            improvement_rate.append(improvement)
+        
+        if improvement_rate:
+            sns.lineplot(x=range(window_size+1, len(train_losses)+1), y=improvement_rate, 
+                        ax=ax3, marker='s', linewidth=2.5, markersize=4, color='green')
+            ax3.fill_between(range(window_size+1, len(train_losses)+1), improvement_rate, 
+                           alpha=0.3, color='green')
+            ax3.axhline(0, color='red', linestyle='--', alpha=0.7)
+        
+        ax3.set_title('Learning Progress Rate (%)', fontsize=14, fontweight='bold')
+        ax3.set_xlabel('Epoch', fontsize=11)
+        ax3.set_ylabel('Improvement Rate (%)', fontsize=11)
+        ax3.grid(True, alpha=0.3)
+        
+        # 4. Convergence Analysis
+        ax4 = fig.add_subplot(gs[1, 1])
+        
+        # Calculate convergence metrics
+        if len(train_losses) > 10:
+            # Moving average for smoothing
+            window = max(5, len(train_losses) // 20)
+            smooth_loss = pd.Series(train_losses).rolling(window=window).mean()
+            
+            sns.lineplot(x=epochs, y=train_losses, ax=ax4, alpha=0.5, 
+                        linewidth=1, color='lightblue', label='Raw Loss')
+            sns.lineplot(x=epochs, y=smooth_loss, ax=ax4, 
+                        linewidth=3, color='darkblue', label='Smoothed Loss')
+            
+            # Mark convergence point (when improvement becomes minimal)
+            derivatives = np.diff(smooth_loss.dropna())
+            convergence_point = np.where(np.abs(derivatives) < np.std(derivatives) * 0.1)[0]
+            if len(convergence_point) > 0:
+                conv_epoch = convergence_point[0] + window
+                ax4.axvline(conv_epoch, color='red', linestyle=':', linewidth=2, 
+                           label=f'Convergence ~Epoch {conv_epoch}')
+        
+        ax4.set_title('Convergence Analysis', fontsize=14, fontweight='bold')
+        ax4.set_xlabel('Epoch', fontsize=11)
+        ax4.set_ylabel('Loss', fontsize=11)
+        ax4.legend()
+        ax4.grid(True, alpha=0.3)
+        
+        # 5. Training Summary Dashboard
+        ax5 = fig.add_subplot(gs[1, 2])
+        ax5.axis('off')
+        
+        # Calculate comprehensive statistics
+        final_loss = self.history.history['loss'][-1]
+        best_loss = min(self.history.history['loss'])
+        best_epoch = self.history.history['loss'].index(best_loss) + 1
+        total_epochs = len(self.history.history['loss'])
+        
+        val_final = self.history.history.get('val_loss', [0])[-1] if self.history.history.get('val_loss') else 0
+        val_best = min(self.history.history.get('val_loss', [999])) if self.history.history.get('val_loss') else 0
+        
+        summary_text = f"""📊 TRAINING SUMMARY
+        
+🏆 Performance Metrics:
+• Final Training Loss: {final_loss:.6f}
+• Best Training Loss: {best_loss:.6f}
+• Best Epoch: {best_epoch}
+• Total Epochs: {total_epochs}
+
+📈 Validation Metrics:
+• Final Val Loss: {val_final:.6f}
+• Best Val Loss: {val_best:.6f}
+
+🎯 Model Configuration:
+• Architecture: Flare Decomposition
+• Sequence Length: {self.sequence_length}
+• Max Flares: {self.max_flares}
+• Features: {self.n_features}
+
+⚡ Training Stats:
+• Avg Improvement: {(self.history.history['loss'][0] - final_loss) / self.history.history['loss'][0] * 100:.1f}%
+• Loss Reduction: {self.history.history['loss'][0] / final_loss:.2f}x
+        """
+        
+        ax5.text(0.05, 0.95, summary_text, transform=ax5.transAxes,
+                fontsize=10, verticalalignment='top', fontfamily='monospace',
+                bbox=dict(boxstyle='round,pad=0.8', facecolor='lightblue', alpha=0.9,
+                         edgecolor='navy', linewidth=2))
+        
+        fig.suptitle('🚀 Professional Flare Decomposition Training Dashboard', 
+                    fontsize=18, fontweight='bold', y=0.95,
+                    bbox=dict(boxstyle='round,pad=0.5', facecolor='lightsteelblue', alpha=0.8))
         
         return fig
     
@@ -484,24 +635,168 @@ def reconstruct_flares(model, time_series, window_size=128, step=32, plot=False)
             individual_flares[start_idx:end_idx, j] += window_flares[:, j] * weight[:, 0]
         
         combined_flares[start_idx:end_idx] += np.sum(window_flares, axis=1, keepdims=True) * weight
-    
-    # Plot if requested
+      # Plot if requested
     if plot:
-        plt.figure(figsize=(12, 8))
+        # Set professional seaborn styling
+        plt.style.use('seaborn-v0_8')
+        sns.set_theme(style="whitegrid", palette="deep", font_scale=1.1)
+        sns.set_context("paper", rc={"figure.dpi": 300})
         
-        plt.subplot(2, 1, 1)
-        plt.plot(time_series, 'k-', label='Original')
-        plt.plot(combined_flares, 'r--', label='Reconstructed')
-        plt.title('Original vs Reconstructed Signal')
-        plt.legend()
-        plt.grid(True)
+        # Create comprehensive decomposition analysis
+        fig = plt.figure(figsize=(20, 14), facecolor='white')
+        gs = fig.add_gridspec(3, 3, hspace=0.4, wspace=0.3)
         
-        plt.subplot(2, 1, 2)
+        # 1. Original vs Reconstructed (Main comparison)
+        ax1 = fig.add_subplot(gs[0, :2])
+        time_steps = np.arange(len(time_series))
+        
+        # Enhanced line plots with seaborn styling
+        sns.lineplot(x=time_steps, y=time_series.flatten(), ax=ax1, 
+                    label='Original Signal', linewidth=2.5, color='black', alpha=0.8)
+        sns.lineplot(x=time_steps, y=combined_flares.flatten(), ax=ax1, 
+                    label='Reconstructed Signal', linewidth=2, color='red', linestyle='--', alpha=0.9)
+        
+        ax1.fill_between(time_steps, time_series.flatten(), alpha=0.3, color='lightblue', label='Original')
+        ax1.fill_between(time_steps, combined_flares.flatten(), alpha=0.3, color='lightcoral', label='Reconstructed')
+        
+        ax1.set_title('🔍 Original vs Reconstructed Signal Analysis', 
+                     fontsize=16, fontweight='bold', pad=20)
+        ax1.set_xlabel('Time Steps', fontsize=12, fontweight='semibold')
+        ax1.set_ylabel('Signal Intensity', fontsize=12, fontweight='semibold')
+        ax1.legend(frameon=True, fancybox=True, shadow=True)
+        ax1.grid(True, alpha=0.3)
+        
+        # 2. Reconstruction Quality Metrics
+        ax2 = fig.add_subplot(gs[0, 2])
+        
+        # Calculate quality metrics
+        mse = mean_squared_error(time_series, combined_flares)
+        r2 = r2_score(time_series, combined_flares)
+        correlation = np.corrcoef(time_series.flatten(), combined_flares.flatten())[0, 1]
+        
+        metrics_data = pd.DataFrame({
+            'Metric': ['MSE', 'R² Score', 'Correlation'],
+            'Value': [mse, r2, correlation],
+            'Color': ['red', 'green', 'blue']
+        })
+        
+        sns.barplot(data=metrics_data, x='Metric', y='Value', ax=ax2, palette=metrics_data['Color'])
+        ax2.set_title('Reconstruction Quality', fontsize=14, fontweight='bold')
+        ax2.set_ylabel('Score', fontsize=11)
+        ax2.grid(True, alpha=0.3, axis='y')
+        
+        # Add value labels on bars
+        for i, v in enumerate(metrics_data['Value']):
+            ax2.text(i, v + max(metrics_data['Value']) * 0.01, f'{v:.4f}', 
+                    ha='center', va='bottom', fontweight='bold', fontsize=10)
+        
+        # 3. Individual Flare Decomposition
+        ax3 = fig.add_subplot(gs[1, :])
+        
+        # Prepare data for seaborn
+        flare_data = []
+        colors = sns.color_palette("husl", model.max_flares)
+        
         for j in range(model.max_flares):
-            plt.plot(individual_flares[:, j], label=f'Flare {j+1}')
-        plt.title('Decomposed Individual Flares')
-        plt.legend()
-        plt.grid(True)
+            flare_intensity = np.max(individual_flares[:, j])
+            if flare_intensity > 0.01:  # Only show significant flares
+                for t, intensity in enumerate(individual_flares[:, j]):
+                    flare_data.append({
+                        'Time': t,
+                        'Intensity': intensity,
+                        'Flare': f'Flare {j+1}',
+                        'Peak': flare_intensity
+                    })
+        
+        if flare_data:
+            flare_df = pd.DataFrame(flare_data)
+            sns.lineplot(data=flare_df, x='Time', y='Intensity', hue='Flare', 
+                        ax=ax3, linewidth=2.5, marker='o', markersize=3, alpha=0.8)
+            
+            # Add fill areas for better visualization
+            for j, flare_id in enumerate(flare_df['Flare'].unique()):
+                flare_subset = flare_df[flare_df['Flare'] == flare_id]
+                ax3.fill_between(flare_subset['Time'], flare_subset['Intensity'], 
+                               alpha=0.3, color=colors[j])
+        else:
+            ax3.text(0.5, 0.5, 'No Significant Flares Detected', ha='center', va='center',
+                    transform=ax3.transAxes, fontsize=14, fontweight='bold',
+                    bbox=dict(boxstyle='round,pad=0.5', facecolor='yellow', alpha=0.8))
+        
+        ax3.set_title('📊 Individual Flare Decomposition Analysis', 
+                     fontsize=16, fontweight='bold', pad=20)
+        ax3.set_xlabel('Time Steps', fontsize=12, fontweight='semibold')
+        ax3.set_ylabel('Flare Intensity', fontsize=12, fontweight='semibold')
+        ax3.legend(frameon=True, fancybox=True, shadow=True, bbox_to_anchor=(1.05, 1))
+        ax3.grid(True, alpha=0.3)
+        
+        # 4. Residual Analysis
+        ax4 = fig.add_subplot(gs[2, 0])
+        residuals = time_series.flatten() - combined_flares.flatten()
+        
+        sns.histplot(residuals, kde=True, ax=ax4, color='purple', alpha=0.7)
+        ax4.axvline(0, color='red', linestyle='--', linewidth=2, label='Zero Line')
+        ax4.set_title('Residual Distribution', fontsize=14, fontweight='bold')
+        ax4.set_xlabel('Residuals', fontsize=11)
+        ax4.set_ylabel('Frequency', fontsize=11)
+        ax4.legend()
+        ax4.grid(True, alpha=0.3)
+        
+        # 5. Temporal Error Analysis
+        ax5 = fig.add_subplot(gs[2, 1])
+        
+        # Calculate rolling error
+        window_size = max(10, len(residuals) // 20)
+        rolling_error = pd.Series(np.abs(residuals)).rolling(window=window_size).mean()
+        
+        sns.lineplot(x=range(len(rolling_error)), y=rolling_error, ax=ax5, 
+                    linewidth=2.5, color='orange', marker='o', markersize=3)
+        ax5.fill_between(range(len(rolling_error)), rolling_error, alpha=0.3, color='orange')
+        ax5.set_title('Rolling Mean Absolute Error', fontsize=14, fontweight='bold')
+        ax5.set_xlabel('Time Steps', fontsize=11)
+        ax5.set_ylabel('MAE', fontsize=11)
+        ax5.grid(True, alpha=0.3)
+        
+        # 6. Decomposition Summary
+        ax6 = fig.add_subplot(gs[2, 2])
+        ax6.axis('off')
+        
+        # Calculate summary statistics
+        total_flares = np.sum([1 for j in range(model.max_flares) 
+                              if np.max(individual_flares[:, j]) > 0.01])
+        peak_original = np.max(time_series)
+        peak_reconstructed = np.max(combined_flares)
+        
+        summary_text = f"""📊 DECOMPOSITION SUMMARY
+        
+🎯 Model Performance:
+• MSE: {mse:.6f}
+• R² Score: {r2:.4f}
+• Correlation: {correlation:.4f}
+
+🔥 Flare Analysis:
+• Detected Flares: {total_flares}/{model.max_flares}
+• Original Peak: {peak_original:.4f}
+• Reconstructed Peak: {peak_reconstructed:.4f}
+
+📈 Signal Statistics:
+• Mean Residual: {np.mean(residuals):.6f}
+• Std Residual: {np.std(residuals):.6f}
+• Max Error: {np.max(np.abs(residuals)):.6f}
+
+⚡ Model Config:
+• Sequence Length: {len(time_series)}
+• Max Flares: {model.max_flares}
+        """
+        
+        ax6.text(0.05, 0.95, summary_text, transform=ax6.transAxes,
+                fontsize=10, verticalalignment='top', fontfamily='monospace',
+                bbox=dict(boxstyle='round,pad=0.8', facecolor='lightcyan', alpha=0.9,
+                         edgecolor='navy', linewidth=2))
+        
+        fig.suptitle('🚀 Professional Flare Decomposition Analysis Dashboard', 
+                    fontsize=18, fontweight='bold', y=0.95,
+                    bbox=dict(boxstyle='round,pad=0.5', facecolor='lightsteelblue', alpha=0.8))
         
         plt.tight_layout()
         plt.show()

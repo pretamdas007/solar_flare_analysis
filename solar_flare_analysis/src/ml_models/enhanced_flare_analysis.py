@@ -642,68 +642,229 @@ class EnhancedFlareDecompositionModel:
         alpha = 1 + n / np.sum(np.log(positive_energies / x_min))
         
         return alpha, x_min
-    
     def plot_enhanced_training_history(self):
-        """Plot comprehensive training history"""
+        """
+        Enhanced training history visualization with professional seaborn aesthetics
+        """
         if self.history is None:
             print("No training history available.")
             return None
         
-        fig, axes = plt.subplots(2, 3, figsize=(18, 10))
+        # Set professional seaborn styling
+        plt.style.use('seaborn-v0_8')
+        sns.set_theme(style="whitegrid", palette="deep", font_scale=1.1)
+        sns.set_context("paper", rc={"figure.dpi": 300})
         
-        # Loss plots
-        axes[0, 0].plot(self.history.history['loss'], label='Training Loss')
-        axes[0, 0].plot(self.history.history['val_loss'], label='Validation Loss')
-        axes[0, 0].set_title('Total Loss')
-        axes[0, 0].set_xlabel('Epoch')
-        axes[0, 0].set_ylabel('Loss')
-        axes[0, 0].legend()
-        axes[0, 0].grid(True)
+        # Create comprehensive training dashboard
+        fig = plt.figure(figsize=(22, 16), facecolor='white')
+        gs = fig.add_gridspec(3, 4, hspace=0.4, wspace=0.3)
         
-        # Flare parameters loss
-        axes[0, 1].plot(self.history.history['flare_params_loss'], label='Training')
-        axes[0, 1].plot(self.history.history['val_flare_params_loss'], label='Validation')
-        axes[0, 1].set_title('Flare Parameters Loss')
-        axes[0, 1].set_xlabel('Epoch')
-        axes[0, 1].set_ylabel('Loss')
-        axes[0, 1].legend()
-        axes[0, 1].grid(True)
+        epochs = range(1, len(self.history.history['loss']) + 1)
         
-        # Energy estimation loss
-        axes[0, 2].plot(self.history.history['energy_estimates_loss'], label='Training')
-        axes[0, 2].plot(self.history.history['val_energy_estimates_loss'], label='Validation')
-        axes[0, 2].set_title('Energy Estimation Loss')
-        axes[0, 2].set_xlabel('Epoch')
-        axes[0, 2].set_ylabel('Loss')
-        axes[0, 2].legend()
-        axes[0, 2].grid(True)
+        # 1. Total Loss Evolution
+        ax1 = fig.add_subplot(gs[0, :2])
+        loss_data = []
+        for epoch, (train_loss, val_loss) in enumerate(zip(
+            self.history.history['loss'],
+            self.history.history.get('val_loss', [])), 1):
+            loss_data.append({'Epoch': epoch, 'Loss': train_loss, 'Type': 'Training'})
+            if val_loss is not None:
+                loss_data.append({'Epoch': epoch, 'Loss': val_loss, 'Type': 'Validation'})
         
-        # Classification metrics
-        axes[1, 0].plot(self.history.history['classification_loss'], label='Training')
-        axes[1, 0].plot(self.history.history['val_classification_loss'], label='Validation')
-        axes[1, 0].set_title('Classification Loss')
-        axes[1, 0].set_xlabel('Epoch')
-        axes[1, 0].set_ylabel('Loss')
-        axes[1, 0].legend()
-        axes[1, 0].grid(True)
+        loss_df = pd.DataFrame(loss_data)
+        sns.lineplot(data=loss_df, x='Epoch', y='Loss', hue='Type', 
+                    ax=ax1, marker='o', linewidth=3, markersize=6, alpha=0.8)
+        ax1.set_title('🎯 Total Training Loss Evolution', fontsize=16, fontweight='bold', pad=20)
+        ax1.set_xlabel('Epoch', fontsize=12, fontweight='semibold')
+        ax1.set_ylabel('Loss Value', fontsize=12, fontweight='semibold')
+        ax1.legend(frameon=True, fancybox=True, shadow=True)
+        ax1.grid(True, alpha=0.3)
+        ax1.set_yscale('log')
         
-        # Accuracy
-        axes[1, 1].plot(self.history.history['classification_accuracy'], label='Training')
-        axes[1, 1].plot(self.history.history['val_classification_accuracy'], label='Validation')
-        axes[1, 1].set_title('Classification Accuracy')
-        axes[1, 1].set_xlabel('Epoch')
-        axes[1, 1].set_ylabel('Accuracy')
-        axes[1, 1].legend()
-        axes[1, 1].grid(True)
+        # 2. Multi-task Loss Comparison
+        ax2 = fig.add_subplot(gs[0, 2:])
         
-        # Learning rate
+        # Prepare multi-task loss data
+        multitask_data = []
+        task_losses = {
+            'Flare Params': 'flare_params_loss',
+            'Energy Est.': 'energy_estimates_loss', 
+            'Classification': 'classification_loss'
+        }
+        
+        for task_name, loss_key in task_losses.items():
+            if loss_key in self.history.history:
+                for epoch, loss in enumerate(self.history.history[loss_key], 1):
+                    multitask_data.append({'Epoch': epoch, 'Loss': loss, 'Task': task_name})
+        
+        if multitask_data:
+            multitask_df = pd.DataFrame(multitask_data)
+            sns.lineplot(data=multitask_df, x='Epoch', y='Loss', hue='Task', 
+                        ax=ax2, marker='s', linewidth=2.5, markersize=5)
+            ax2.set_title('📊 Multi-task Loss Breakdown', fontsize=16, fontweight='bold')
+            ax2.set_yscale('log')
+        else:
+            ax2.text(0.5, 0.5, 'Multi-task\nLoss Data\nNot Available', 
+                    ha='center', va='center', transform=ax2.transAxes,
+                    fontsize=12, fontweight='bold')
+            ax2.set_title('Multi-task Loss Analysis', fontsize=16, fontweight='bold')
+        ax2.grid(True, alpha=0.3)
+        ax2.legend(frameon=True, fancybox=True, shadow=True)
+        
+        # 3. Validation Metrics Comparison
+        ax3 = fig.add_subplot(gs[1, :2])
+        
+        val_metrics_data = []
+        val_metrics = {
+            'Total Loss': 'val_loss',
+            'Flare Params': 'val_flare_params_loss',
+            'Energy Est.': 'val_energy_estimates_loss',
+            'Classification': 'val_classification_loss'
+        }
+        
+        for metric_name, metric_key in val_metrics.items():
+            if metric_key in self.history.history:
+                for epoch, value in enumerate(self.history.history[metric_key], 1):
+                    val_metrics_data.append({'Epoch': epoch, 'Value': value, 'Metric': metric_name})
+        
+        if val_metrics_data:
+            val_df = pd.DataFrame(val_metrics_data)
+            sns.lineplot(data=val_df, x='Epoch', y='Value', hue='Metric', 
+                        ax=ax3, marker='d', linewidth=2.5, markersize=5, alpha=0.8)
+            ax3.set_title('📈 Validation Metrics Evolution', fontsize=16, fontweight='bold')
+            ax3.set_yscale('log')
+        else:
+            ax3.text(0.5, 0.5, 'Validation\nMetrics\nNot Available', 
+                    ha='center', va='center', transform=ax3.transAxes,
+                    fontsize=12, fontweight='bold')
+            ax3.set_title('Validation Metrics', fontsize=16, fontweight='bold')
+        ax3.grid(True, alpha=0.3)
+        ax3.legend(frameon=True, fancybox=True, shadow=True)
+        
+        # 4. Classification Performance
+        ax4 = fig.add_subplot(gs[1, 2:])
+        
+        if 'classification_accuracy' in self.history.history:
+            acc_data = []
+            for epoch, (train_acc, val_acc) in enumerate(zip(
+                self.history.history['classification_accuracy'],
+                self.history.history.get('val_classification_accuracy', [])), 1):
+                acc_data.append({'Epoch': epoch, 'Accuracy': train_acc, 'Type': 'Training'})
+                if val_acc is not None:
+                    acc_data.append({'Epoch': epoch, 'Accuracy': val_acc, 'Type': 'Validation'})
+            
+            acc_df = pd.DataFrame(acc_data)
+            sns.lineplot(data=acc_df, x='Epoch', y='Accuracy', hue='Type', 
+                        ax=ax4, marker='o', linewidth=3, markersize=6, alpha=0.8)
+            ax4.set_title('🎯 Classification Accuracy Progress', fontsize=16, fontweight='bold')
+            ax4.set_ylim(0, 1.05)
+        else:
+            ax4.text(0.5, 0.5, 'Classification\nAccuracy\nNot Available', 
+                    ha='center', va='center', transform=ax4.transAxes,
+                    fontsize=12, fontweight='bold')
+            ax4.set_title('Classification Performance', fontsize=16, fontweight='bold')
+        ax4.grid(True, alpha=0.3)
+        ax4.legend(frameon=True, fancybox=True, shadow=True)
+        
+        # 5. Learning Rate and Optimization
+        ax5 = fig.add_subplot(gs[2, 0])
+        
         if 'lr' in self.history.history:
-            axes[1, 2].plot(self.history.history['lr'])
-            axes[1, 2].set_title('Learning Rate')
-            axes[1, 2].set_xlabel('Epoch')
-            axes[1, 2].set_ylabel('Learning Rate')
-            axes[1, 2].set_yscale('log')
-            axes[1, 2].grid(True)
+            sns.lineplot(x=epochs, y=self.history.history['lr'], ax=ax5,
+                        marker='v', linewidth=3, markersize=6, color='purple')
+            ax5.fill_between(epochs, self.history.history['lr'], alpha=0.3, color='purple')
+            ax5.set_title('Learning Rate Schedule', fontsize=14, fontweight='bold')
+            ax5.set_ylabel('Learning Rate')
+            ax5.set_yscale('log')
+        else:
+            ax5.text(0.5, 0.5, 'Learning Rate\nNot Tracked', ha='center', va='center',
+                    transform=ax5.transAxes, fontsize=12, fontweight='bold')
+            ax5.set_title('Learning Rate', fontsize=14, fontweight='bold')
+        ax5.grid(True, alpha=0.3)
+        
+        # 6. Loss Distribution Analysis
+        ax6 = fig.add_subplot(gs[2, 1])
+        
+        final_losses = []
+        loss_types = []
+        for task_name, loss_key in task_losses.items():
+            if loss_key in self.history.history:
+                final_losses.append(self.history.history[loss_key][-1])
+                loss_types.append(task_name)
+        
+        if final_losses:
+            loss_dist_df = pd.DataFrame({'Task': loss_types, 'Final_Loss': final_losses})
+            sns.barplot(data=loss_dist_df, x='Task', y='Final_Loss', ax=ax6, palette='viridis')
+            ax6.set_title('Final Loss by Task', fontsize=14, fontweight='bold')
+            ax6.set_ylabel('Final Loss Value')
+            ax6.set_yscale('log')
+            
+            # Add value labels on bars
+            for i, v in enumerate(final_losses):
+                ax6.text(i, v * 1.1, f'{v:.4f}', ha='center', va='bottom', 
+                        fontweight='bold', fontsize=10)
+        else:
+            ax6.text(0.5, 0.5, 'Loss Distribution\nNot Available', ha='center', va='center',
+                    transform=ax6.transAxes, fontsize=12, fontweight='bold')
+            ax6.set_title('Loss Distribution', fontsize=14, fontweight='bold')
+        ax6.grid(True, alpha=0.3, axis='y')
+        
+        # 7. Training Progress Summary
+        ax7 = fig.add_subplot(gs[2, 2:])
+        ax7.axis('off')
+        
+        # Calculate comprehensive statistics
+        final_loss = self.history.history['loss'][-1]
+        best_loss = min(self.history.history['loss'])
+        best_epoch = self.history.history['loss'].index(best_loss) + 1
+        total_epochs = len(self.history.history['loss'])
+        
+        final_val_loss = self.history.history.get('val_loss', [0])[-1] if self.history.history.get('val_loss') else 0
+        final_accuracy = self.history.history.get('classification_accuracy', [0])[-1] if self.history.history.get('classification_accuracy') else 0
+        
+        summary_text = f"""📊 ENHANCED FLARE ANALYSIS TRAINING SUMMARY
+        
+🏆 Overall Performance:
+• Final Training Loss: {final_loss:.6f}
+• Best Training Loss: {best_loss:.6f} (Epoch {best_epoch})
+• Final Val Loss: {final_val_loss:.6f}
+• Total Epochs: {total_epochs}
+
+🎯 Multi-task Results:
+• Classification Accuracy: {final_accuracy:.4f}
+• Flare Detection: Advanced CNN
+• Energy Estimation: Regression Head
+• Parameter Extraction: Multi-output
+
+⚡ Model Configuration:
+• Architecture: Enhanced Multi-task CNN
+• Tasks: Classification + Regression
+• Nanoflare Detection: ✓
+• Energy Analysis: ✓
+
+📈 Training Quality:
+• Loss Improvement: {(self.history.history['loss'][0] / final_loss):.2f}x
+• Convergence: {'Good' if best_epoch < total_epochs * 0.8 else 'Late'}
+• Overfitting: {'Low' if abs(final_loss - final_val_loss) < final_loss * 0.1 else 'Moderate'}
+        """
+        
+        ax7.text(0.05, 0.95, summary_text, transform=ax7.transAxes,
+                fontsize=10, verticalalignment='top', fontfamily='monospace',
+                bbox=dict(boxstyle='round,pad=0.8', facecolor='lightcyan', alpha=0.9,
+                         edgecolor='teal', linewidth=2))
+        
+        fig.suptitle('🚀 Professional Enhanced Flare Analysis Training Dashboard', 
+                    fontsize=20, fontweight='bold', y=0.95,
+                    bbox=dict(boxstyle='round,pad=0.5', facecolor='lightsteelblue', alpha=0.8))
+        
+        plt.tight_layout()
+        return fig
+        axes[1, 2].plot(self.history.history['lr'])
+        axes[1, 2].set_title('Learning Rate')
+        axes[1, 2].set_xlabel('Epoch')
+        axes[1, 2].set_ylabel('Learning Rate')
+        axes[1, 2].set_yscale('log')
+        axes[1, 2].grid(True)
         
         plt.tight_layout()
         return fig
@@ -904,89 +1065,159 @@ class FlareEnergyAnalyzer:
             'max_interval': np.max(waiting_times) if len(waiting_times) > 0 else 0,
             'flare_rate': len(energies) / (time_data[-1] - time_data[0]) if len(time_data) > 1 else 0
         }
-    
     def plot_comprehensive_analysis(self, analysis_results, energies):
-        """Create comprehensive visualization of the analysis"""
+        """Create comprehensive visualization of the analysis with professional seaborn aesthetics"""
+        # Set professional seaborn styling
+        plt.style.use('seaborn-v0_8')
+        sns.set_theme(style="whitegrid", palette="deep", font_scale=1.1)
+        sns.set_context("paper", rc={"figure.dpi": 300})
+        
         fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+        fig.suptitle('Comprehensive Solar Flare Energy Analysis', fontsize=16, fontweight='bold', y=0.98)
+          # Energy histogram with seaborn styling
+        valid_energies = energies[energies > 0]
+        log_energies = np.log10(valid_energies)
         
-        # Energy histogram
-        axes[0, 0].hist(np.log10(energies[energies > 0]), bins=30, alpha=0.7)
-        axes[0, 0].set_xlabel('Log10(Energy)')
-        axes[0, 0].set_ylabel('Frequency')
-        axes[0, 0].set_title('Energy Distribution')
-        axes[0, 0].grid(True)
+        sns.histplot(log_energies, bins=30, alpha=0.7, ax=axes[0, 0], 
+                    color='skyblue', kde=True, stat='density')
+        axes[0, 0].set_xlabel('Log₁₀(Energy)', fontsize=12)
+        axes[0, 0].set_ylabel('Density', fontsize=12)
+        axes[0, 0].set_title('Energy Distribution', fontsize=14, fontweight='bold')
         
-        # Power law fit
+        # Add statistics annotation
+        mean_log = np.mean(log_energies)
+        std_log = np.std(log_energies)
+        axes[0, 0].axvline(mean_log, color='red', linestyle='--', alpha=0.8, 
+                          label=f'Mean: {mean_log:.2f}')
+        axes[0, 0].legend()
+          # Power law fit with enhanced visualization
         if analysis_results['power_law_analysis']['alpha'] is not None:
-            log_energies = np.log10(energies[energies > 0])
             hist, bin_edges = np.histogram(log_energies, bins=30)
             bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
             
             nonzero_mask = hist > 0
-            axes[0, 1].loglog(10**bin_centers[nonzero_mask], hist[nonzero_mask], 'bo', alpha=0.7)
+            x_data = 10**bin_centers[nonzero_mask]
+            y_data = hist[nonzero_mask]
+            
+            # Plot data points with seaborn styling
+            axes[0, 1].loglog(x_data, y_data, 'o', alpha=0.7, color='steelblue',
+                             markersize=6, label='Data')
             
             # Plot fit line
             alpha = analysis_results['power_law_analysis']['alpha']
             intercept = analysis_results['power_law_analysis']['intercept']
-            x_fit = 10**bin_centers[nonzero_mask]
-            y_fit = 10**(intercept) * x_fit**(-alpha)
-            axes[0, 1].loglog(x_fit, y_fit, 'r-', linewidth=2, 
-                             label=f'α = {alpha:.2f}')
+            y_fit = 10**(intercept) * x_data**(-alpha)
+            axes[0, 1].loglog(x_data, y_fit, '-', linewidth=3, color='crimson',
+                             label=f'Power Law (α = {alpha:.2f})')
             
-            axes[0, 1].set_xlabel('Energy')
-            axes[0, 1].set_ylabel('Frequency')
-            axes[0, 1].set_title('Power Law Fit')
-            axes[0, 1].legend()
-            axes[0, 1].grid(True)
-        
-        # Cumulative distribution
-        sorted_energies = np.sort(energies[energies > 0])
+            axes[0, 1].set_xlabel('Energy', fontsize=12)
+            axes[0, 1].set_ylabel('Frequency', fontsize=12)
+            axes[0, 1].set_title('Power Law Analysis', fontsize=14, fontweight='bold')
+            axes[0, 1].legend(frameon=True, fancybox=True, shadow=True)
+            
+            # Add goodness of fit annotation
+            r_squared = analysis_results['power_law_analysis'].get('r_squared', 'N/A')
+            axes[0, 1].text(0.05, 0.95, f'R² = {r_squared}', transform=axes[0, 1].transAxes,
+                           bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8),
+                           fontsize=10, verticalalignment='top')
+          # Cumulative distribution with enhanced styling
+        sorted_energies = np.sort(valid_energies)
         cumulative = 1 - np.arange(len(sorted_energies)) / len(sorted_energies)
-        axes[0, 2].loglog(sorted_energies, cumulative, 'b-', alpha=0.7)
-        axes[0, 2].set_xlabel('Energy')
-        axes[0, 2].set_ylabel('Cumulative Frequency')
-        axes[0, 2].set_title('Cumulative Distribution')
-        axes[0, 2].grid(True)
         
-        # Energy vs time (if temporal data available)
+        axes[0, 2].loglog(sorted_energies, cumulative, '-', linewidth=2.5, 
+                         color='darkgreen', alpha=0.8, label='Cumulative Distribution')
+        axes[0, 2].set_xlabel('Energy', fontsize=12)
+        axes[0, 2].set_ylabel('Cumulative Probability', fontsize=12)
+        axes[0, 2].set_title('Cumulative Energy Distribution', fontsize=14, fontweight='bold')
+        axes[0, 2].legend()
+        
+        # Add median and quartile lines
+        median_energy = np.median(sorted_energies)
+        q75_energy = np.percentile(sorted_energies, 75)
+        axes[0, 2].axvline(median_energy, color='red', linestyle='--', alpha=0.7, 
+                          label=f'Median: {median_energy:.2e}')
+        axes[0, 2].axvline(q75_energy, color='orange', linestyle=':', alpha=0.7,
+                          label=f'Q75: {q75_energy:.2e}')
+        axes[0, 2].legend()
+          # Energy vs time with enhanced scatter plot
         if 'temporal_analysis' in analysis_results and len(energies) > 1:
             time_index = np.arange(len(energies))
-            axes[1, 0].scatter(time_index, energies, alpha=0.6, s=20)
-            axes[1, 0].set_xlabel('Time Index')
-            axes[1, 0].set_ylabel('Energy')
-            axes[1, 0].set_title('Energy vs Time')
+            
+            # Create scatter plot with color coding based on energy levels
+            scatter = axes[1, 0].scatter(time_index, energies, alpha=0.7, s=30,
+                                       c=np.log10(energies), cmap='plasma',
+                                       edgecolors='black', linewidth=0.5)
+            
+            axes[1, 0].set_xlabel('Time Index', fontsize=12)
+            axes[1, 0].set_ylabel('Energy', fontsize=12)
+            axes[1, 0].set_title('Energy Time Series', fontsize=14, fontweight='bold')
             axes[1, 0].set_yscale('log')
-            axes[1, 0].grid(True)
-        
-        # Statistics summary
+            
+            # Add colorbar
+            cbar = plt.colorbar(scatter, ax=axes[1, 0], shrink=0.8)
+            cbar.set_label('Log₁₀(Energy)', fontsize=10)
+            
+            # Add trend line if enough points
+            if len(energies) > 10:
+                z = np.polyfit(time_index, np.log10(energies), 1)
+                p = np.poly1d(z)
+                axes[1, 0].plot(time_index, 10**p(time_index), '--', 
+                               color='red', alpha=0.8, linewidth=2, label='Trend')
+                axes[1, 0].legend()
+          # Statistics summary with enhanced design
         stats = analysis_results['basic_statistics']
-        stats_text = f"""Total Events: {stats['total_events']}
-Total Energy: {stats['total_energy']:.2e}
-Mean Energy: {stats['mean_energy']:.2e}
-Median Energy: {stats['median_energy']:.2e}
-Energy Range: {stats['energy_range']:.2e}"""
+        stats_text = f"""📊 Statistical Summary
         
-        axes[1, 1].text(0.1, 0.5, stats_text, transform=axes[1, 1].transAxes,
-                        fontsize=10, verticalalignment='center',
-                        bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
+Total Events: {stats['total_events']:,}
+Total Energy: {stats['total_energy']:.2e} J
+Mean Energy: {stats['mean_energy']:.2e} J
+Median Energy: {stats['median_energy']:.2e} J
+Energy Range: {stats['energy_range']:.2e} J
+
+Distribution Metrics:
+• Skewness: {stats.get('skewness', 'N/A')}
+• Kurtosis: {stats.get('kurtosis', 'N/A')}"""
+        
+        axes[1, 1].text(0.05, 0.95, stats_text, transform=axes[1, 1].transAxes,
+                        fontsize=11, verticalalignment='top', fontfamily='monospace',
+                        bbox=dict(boxstyle='round,pad=0.5', facecolor='lightblue', 
+                                alpha=0.9, edgecolor='navy', linewidth=1.5))
         axes[1, 1].set_xlim(0, 1)
         axes[1, 1].set_ylim(0, 1)
         axes[1, 1].axis('off')
-        axes[1, 1].set_title('Basic Statistics')
-        
-        # Corona heating assessment
+        axes[1, 1].set_title('Statistical Analysis', fontsize=14, fontweight='bold')
+          # Corona heating assessment with enhanced styling
         heating = analysis_results['corona_heating_assessment']
-        heating_text = f"""Heating Mechanism: {heating['heating_mechanism']}
-Confidence: {heating['confidence']}
+        heating_text = f"""🔥 Corona Heating Analysis
+        
+Heating Mechanism: {heating['heating_mechanism']}
+Confidence Level: {heating['confidence']}
 Nanoflare Potential: {heating['nanoflare_heating_potential']}
-Power Law Significant: {heating['power_law_significance']}"""
+Power Law Significance: {heating['power_law_significance']}
+
+Physical Parameters:"""
         
         if analysis_results['power_law_analysis']['alpha'] is not None:
-            heating_text += f"\nAlpha: {analysis_results['power_law_analysis']['alpha']:.2f}"
+            alpha_val = analysis_results['power_law_analysis']['alpha']
+            heating_text += f"\n• Power Law Index (α): {alpha_val:.3f}"
+            
+            # Interpret alpha value
+            if alpha_val < 1.5:
+                interpretation = "Steep - Dominated by large events"
+            elif alpha_val < 2.0:
+                interpretation = "Moderate - Mixed population"
+            else:
+                interpretation = "Shallow - Dominated by small events"
+            heating_text += f"\n• Interpretation: {interpretation}"
         
-        axes[1, 2].text(0.1, 0.5, heating_text, transform=axes[1, 2].transAxes,
-                        fontsize=10, verticalalignment='center',
-                        bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.8))
+        # Determine box color based on heating potential
+        box_color = 'lightgreen' if heating['nanoflare_heating_potential'] == 'High' else 'lightyellow'
+        edge_color = 'darkgreen' if heating['nanoflare_heating_potential'] == 'High' else 'orange'
+        
+        axes[1, 2].text(0.05, 0.95, heating_text, transform=axes[1, 2].transAxes,
+                        fontsize=11, verticalalignment='top', fontfamily='monospace',
+                        bbox=dict(boxstyle='round,pad=0.5', facecolor=box_color, 
+                                alpha=0.9, edgecolor=edge_color, linewidth=1.5))
         axes[1, 2].set_xlim(0, 1)
         axes[1, 2].set_ylim(0, 1)
         axes[1, 2].axis('off')

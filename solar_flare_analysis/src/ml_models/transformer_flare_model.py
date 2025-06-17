@@ -258,7 +258,7 @@ class TransformerFlareModel:
     
     def visualize_attention(self, X_sample, sample_idx=0, save_path=None):
         """
-        Visualize attention patterns
+        Enhanced attention visualization with professional seaborn aesthetics
         """
         attention_weights = self.extract_attention_weights(X_sample)
         
@@ -266,17 +266,249 @@ class TransformerFlareModel:
             print("No attention weights found")
             return
         
-        # Plot attention weights for the first transformer block
-        attention = attention_weights[0][sample_idx]  # Shape: [seq_len, seq_len]
+        # Set professional seaborn styling
+        plt.style.use('seaborn-v0_8')
+        sns.set_theme(style="whitegrid", palette="viridis", font_scale=1.1)
+        sns.set_context("paper", rc={"figure.dpi": 300})
         
-        plt.figure(figsize=(12, 8))
-        sns.heatmap(attention, cmap='Blues', cbar=True)
-        plt.title('Transformer Attention Weights')
-        plt.xlabel('Key Position')
-        plt.ylabel('Query Position')
+        # Create comprehensive attention analysis
+        fig = plt.figure(figsize=(20, 12), facecolor='white')
+        gs = fig.add_gridspec(2, 3, hspace=0.3, wspace=0.25)
+        
+        # 1. Main Attention Heatmap
+        ax1 = fig.add_subplot(gs[0, :2])
+        attention = attention_weights[0][sample_idx]
+        
+        # Enhanced heatmap with professional styling
+        sns.heatmap(attention, ax=ax1, cmap='viridis', cbar=True,
+                   square=True, linewidths=0.1, linecolor='white',
+                   cbar_kws={'label': 'Attention Weight', 'shrink': 0.8})
+        ax1.set_title('🔍 Transformer Attention Pattern Analysis', 
+                     fontsize=16, fontweight='bold', pad=20)
+        ax1.set_xlabel('Key Position (Time Steps)', fontsize=12, fontweight='semibold')
+        ax1.set_ylabel('Query Position (Time Steps)', fontsize=12, fontweight='semibold')
+        
+        # 2. Attention Distribution
+        ax2 = fig.add_subplot(gs[0, 2])
+        attention_flat = attention.flatten()
+        sns.histplot(attention_flat, kde=True, ax=ax2, color='skyblue', alpha=0.7)
+        ax2.set_title('Attention Weight Distribution', fontsize=14, fontweight='bold')
+        ax2.set_xlabel('Attention Weight', fontsize=11)
+        ax2.set_ylabel('Frequency', fontsize=11)
+        ax2.grid(True, alpha=0.3)
+        
+        # 3. Average Attention by Position
+        ax3 = fig.add_subplot(gs[1, 0])
+        avg_attention = np.mean(attention, axis=0)
+        positions = np.arange(len(avg_attention))
+        
+        sns.lineplot(x=positions, y=avg_attention, ax=ax3, 
+                    marker='o', linewidth=2.5, markersize=4, color='coral')
+        ax3.fill_between(positions, avg_attention, alpha=0.3, color='coral')
+        ax3.set_title('Average Attention by Position', fontsize=14, fontweight='bold')
+        ax3.set_xlabel('Position', fontsize=11)
+        ax3.set_ylabel('Average Attention', fontsize=11)
+        ax3.grid(True, alpha=0.3)
+        
+        # 4. Attention Head Comparison (if multiple heads)
+        ax4 = fig.add_subplot(gs[1, 1])
+        if len(attention_weights) > 1:
+            head_data = []
+            for i, head_attention in enumerate(attention_weights[:4]):  # Show first 4 heads
+                head_avg = np.mean(head_attention[sample_idx])
+                head_std = np.std(head_attention[sample_idx])
+                head_data.append({'Head': f'Head {i+1}', 'Mean': head_avg, 'Std': head_std})
+            
+            head_df = pd.DataFrame(head_data)
+            sns.barplot(data=head_df, x='Head', y='Mean', ax=ax4, palette='Set2')
+            ax4.set_title('Attention Head Comparison', fontsize=14, fontweight='bold')
+            ax4.set_ylabel('Mean Attention Weight', fontsize=11)
+        else:
+            ax4.text(0.5, 0.5, 'Single Head\nTransformer', ha='center', va='center',
+                    transform=ax4.transAxes, fontsize=14, fontweight='bold',
+                    bbox=dict(boxstyle='round,pad=0.5', facecolor='lightblue', alpha=0.8))
+            ax4.set_title('Attention Configuration', fontsize=14, fontweight='bold')
+        ax4.grid(True, alpha=0.3)
+        
+        # 5. Temporal Focus Analysis
+        ax5 = fig.add_subplot(gs[1, 2])
+        # Calculate attention focus (how much attention is concentrated)
+        attention_entropy = -np.sum(attention * np.log(attention + 1e-8), axis=1)
+        
+        sns.lineplot(x=np.arange(len(attention_entropy)), y=attention_entropy, 
+                    ax=ax5, marker='s', linewidth=2.5, markersize=4, color='darkgreen')
+        ax5.fill_between(np.arange(len(attention_entropy)), attention_entropy, 
+                        alpha=0.3, color='darkgreen')
+        ax5.set_title('Attention Entropy (Focus)', fontsize=14, fontweight='bold')
+        ax5.set_xlabel('Query Position', fontsize=11)
+        ax5.set_ylabel('Entropy (bits)', fontsize=11)
+        ax5.grid(True, alpha=0.3)
+        
+        # Add comprehensive title
+        fig.suptitle('🚀 Professional Transformer Attention Analysis Dashboard', 
+                    fontsize=18, fontweight='bold', y=0.95,
+                    bbox=dict(boxstyle='round,pad=0.5', facecolor='lightsteelblue', alpha=0.8))
         
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            plt.savefig(save_path, dpi=300, bbox_inches='tight', facecolor='white')
+        plt.show()
+    
+    def plot_training_history(self, history, save_path=None):
+        """
+        Enhanced training history visualization with seaborn
+        """
+        # Set professional seaborn styling
+        plt.style.use('seaborn-v0_8')
+        sns.set_theme(style="whitegrid", palette="deep", font_scale=1.1)
+        
+        fig, axes = plt.subplots(2, 2, figsize=(16, 12), facecolor='white')
+        fig.suptitle('🎯 Transformer Training History Dashboard', 
+                    fontsize=16, fontweight='bold', y=0.95)
+        
+        # Prepare data for seaborn
+        epochs = range(1, len(history.history['loss']) + 1)
+        
+        # 1. Loss Evolution
+        loss_data = []
+        for epoch, (train_loss, val_loss) in enumerate(zip(history.history['loss'], 
+                                                          history.history.get('val_loss', [])), 1):
+            loss_data.append({'Epoch': epoch, 'Loss': train_loss, 'Type': 'Training'})
+            if val_loss is not None:
+                loss_data.append({'Epoch': epoch, 'Loss': val_loss, 'Type': 'Validation'})
+        
+        loss_df = pd.DataFrame(loss_data)
+        sns.lineplot(data=loss_df, x='Epoch', y='Loss', hue='Type', 
+                    ax=axes[0,0], marker='o', linewidth=2.5, markersize=6)
+        axes[0,0].set_title('Training & Validation Loss', fontsize=14, fontweight='bold')
+        axes[0,0].grid(True, alpha=0.3)
+        
+        # 2. Accuracy Evolution (if available)
+        if 'accuracy' in history.history:
+            acc_data = []
+            for epoch, acc in enumerate(history.history['accuracy'], 1):
+                acc_data.append({'Epoch': epoch, 'Accuracy': acc, 'Type': 'Training'})
+            if 'val_accuracy' in history.history:
+                for epoch, acc in enumerate(history.history['val_accuracy'], 1):
+                    acc_data.append({'Epoch': epoch, 'Accuracy': acc, 'Type': 'Validation'})
+            
+            acc_df = pd.DataFrame(acc_data)
+            sns.lineplot(data=acc_df, x='Epoch', y='Accuracy', hue='Type', 
+                        ax=axes[0,1], marker='s', linewidth=2.5, markersize=6)
+            axes[0,1].set_title('Training & Validation Accuracy', fontsize=14, fontweight='bold')
+        else:
+            axes[0,1].text(0.5, 0.5, 'Accuracy\nNot Available', ha='center', va='center',
+                          transform=axes[0,1].transAxes, fontsize=12, fontweight='bold')
+            axes[0,1].set_title('Accuracy Metrics', fontsize=14, fontweight='bold')
+        axes[0,1].grid(True, alpha=0.3)
+        
+        # 3. Learning Rate (if available)
+        if 'lr' in history.history:
+            sns.lineplot(x=epochs, y=history.history['lr'], ax=axes[1,0], 
+                        marker='d', linewidth=2.5, markersize=6, color='orange')
+            axes[1,0].set_title('Learning Rate Schedule', fontsize=14, fontweight='bold')
+            axes[1,0].set_xlabel('Epoch')
+            axes[1,0].set_ylabel('Learning Rate')
+            axes[1,0].set_yscale('log')
+        else:
+            axes[1,0].text(0.5, 0.5, 'Learning Rate\nNot Tracked', ha='center', va='center',
+                          transform=axes[1,0].transAxes, fontsize=12, fontweight='bold')
+            axes[1,0].set_title('Learning Rate', fontsize=14, fontweight='bold')
+        axes[1,0].grid(True, alpha=0.3)
+        
+        # 4. Training Summary
+        axes[1,1].axis('off')
+        summary_text = f"""📊 TRAINING SUMMARY
+        
+🏆 Final Metrics:
+• Training Loss: {history.history['loss'][-1]:.4f}
+• Validation Loss: {history.history.get('val_loss', [0])[-1]:.4f}
+• Total Epochs: {len(history.history['loss'])}
+
+🎯 Best Performance:
+• Min Train Loss: {min(history.history['loss']):.4f}
+• Min Val Loss: {min(history.history.get('val_loss', [999])):.4f}
+
+⚡ Model Configuration:
+• Architecture: Multi-head Transformer
+• Sequence Length: {self.sequence_length}
+• Features: {self.n_features}
+• Heads: {self.num_heads}
+        """
+        
+        axes[1,1].text(0.05, 0.95, summary_text, transform=axes[1,1].transAxes,
+                      fontsize=10, verticalalignment='top', fontfamily='monospace',
+                      bbox=dict(boxstyle='round,pad=0.8', facecolor='lightblue', alpha=0.9))
+        
+        plt.tight_layout()
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight', facecolor='white')
+        plt.show()
+    
+    def plot_model_predictions(self, X_test, y_test, predictions, save_path=None):
+        """
+        Enhanced prediction analysis with seaborn
+        """
+        # Set professional seaborn styling
+        plt.style.use('seaborn-v0_8')
+        sns.set_theme(style="whitegrid", palette="deep", font_scale=1.1)
+        
+        fig = plt.figure(figsize=(20, 12), facecolor='white')
+        gs = fig.add_gridspec(2, 3, hspace=0.3, wspace=0.25)
+        
+        # 1. Prediction vs True Values
+        ax1 = fig.add_subplot(gs[0, :2])
+        pred_data = pd.DataFrame({
+            'True': y_test.flatten(),
+            'Predicted': predictions.flatten(),
+            'Sample': range(len(y_test.flatten()))
+        })
+        
+        sns.scatterplot(data=pred_data, x='True', y='Predicted', ax=ax1, 
+                       alpha=0.6, s=50, color='skyblue', edgecolor='navy', linewidth=0.5)
+        
+        # Add perfect prediction line
+        min_val, max_val = min(pred_data['True'].min(), pred_data['Predicted'].min()), \
+                          max(pred_data['True'].max(), pred_data['Predicted'].max())
+        ax1.plot([min_val, max_val], [min_val, max_val], 'r--', linewidth=2, label='Perfect Prediction')
+        
+        ax1.set_title('🎯 Prediction vs True Values', fontsize=16, fontweight='bold')
+        ax1.set_xlabel('True Values', fontsize=12, fontweight='semibold')
+        ax1.set_ylabel('Predicted Values', fontsize=12, fontweight='semibold')
+        ax1.legend()
+        ax1.grid(True, alpha=0.3)
+        
+        # 2. Residuals Distribution
+        ax2 = fig.add_subplot(gs[0, 2])
+        residuals = predictions.flatten() - y_test.flatten()
+        sns.histplot(residuals, kde=True, ax=ax2, color='coral', alpha=0.7)
+        ax2.axvline(0, color='red', linestyle='--', linewidth=2)
+        ax2.set_title('Residuals Distribution', fontsize=14, fontweight='bold')
+        ax2.set_xlabel('Residuals', fontsize=11)
+        ax2.grid(True, alpha=0.3)
+        
+        # 3. Sample Predictions Time Series
+        ax3 = fig.add_subplot(gs[1, :])
+        sample_indices = np.random.choice(len(X_test), min(5, len(X_test)), replace=False)
+        
+        for i, idx in enumerate(sample_indices):
+            time_steps = np.arange(X_test.shape[1])
+            
+            # Plot input sequence
+            ax3.plot(time_steps, X_test[idx, :, 0], 
+                    alpha=0.7, linewidth=2, label=f'Sample {i+1} Input')
+            
+        ax3.set_title('🔍 Sample Input Sequences Analysis', fontsize=14, fontweight='bold')
+        ax3.set_xlabel('Time Steps', fontsize=12, fontweight='semibold')
+        ax3.set_ylabel('Input Values', fontsize=12, fontweight='semibold')
+        ax3.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        ax3.grid(True, alpha=0.3)
+        
+        fig.suptitle('🚀 Professional Transformer Prediction Analysis', 
+                    fontsize=18, fontweight='bold', y=0.95,
+                    bbox=dict(boxstyle='round,pad=0.5', facecolor='lightsteelblue', alpha=0.8))
+        
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight', facecolor='white')
         plt.show()
 
 

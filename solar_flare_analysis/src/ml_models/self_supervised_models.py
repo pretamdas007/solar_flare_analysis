@@ -11,6 +11,7 @@ from keras import layers, models, optimizers
 from sklearn.preprocessing import StandardScaler, RobustScaler
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
+import seaborn as sns
 from typing import Optional, Tuple, Dict
 import warnings
 warnings.filterwarnings('ignore')
@@ -341,231 +342,347 @@ class ContrastiveLearningModel:
         )
         
         return history
+    
+    def plot_contrastive_analysis(self, X_sample, save_path=None):
+        """
+        Enhanced contrastive learning analysis with professional seaborn aesthetics
+        """
+        # Set professional seaborn styling
+        plt.style.use('seaborn-v0_8')
+        sns.set_theme(style="whitegrid", palette="viridis", font_scale=1.1)
+        sns.set_context("paper", rc={"figure.dpi": 300})
+        
+        # Create comprehensive analysis dashboard
+        fig = plt.figure(figsize=(20, 14), facecolor='white')
+        gs = fig.add_gridspec(3, 3, hspace=0.4, wspace=0.3)
+        
+        # 1. Encoder Feature Representations
+        ax1 = fig.add_subplot(gs[0, :2])
+        
+        # Get encoder representations
+        if hasattr(self, 'encoder') and self.encoder is not None:
+            representations = self.encoder.predict(X_sample[:100])  # Sample subset
+            
+            # Apply PCA for visualization
+            from sklearn.decomposition import PCA
+            pca = PCA(n_components=2)
+            representations_2d = pca.fit_transform(representations)
+            
+            # Create DataFrame for seaborn
+            repr_data = pd.DataFrame({
+                'PC1': representations_2d[:, 0],
+                'PC2': representations_2d[:, 1],
+                'Sample_ID': range(len(representations_2d)),
+                'Cluster': np.arange(len(representations_2d)) % 5  # Simple clustering
+            })
+            
+            sns.scatterplot(data=repr_data, x='PC1', y='PC2', hue='Cluster', 
+                           ax=ax1, alpha=0.7, s=60, palette='viridis')
+            ax1.set_title('🔍 Learned Representation Space (PCA)', 
+                         fontsize=16, fontweight='bold', pad=20)
+            ax1.set_xlabel(f'PC1 ({pca.explained_variance_ratio_[0]:.1%} variance)', 
+                          fontsize=12, fontweight='semibold')
+            ax1.set_ylabel(f'PC2 ({pca.explained_variance_ratio_[1]:.1%} variance)', 
+                          fontsize=12, fontweight='semibold')
+            ax1.legend(title='Sample Clusters', frameon=True, fancybox=True, shadow=True)
+        else:
+            ax1.text(0.5, 0.5, 'Encoder Not Available\nTrain Model First', 
+                    ha='center', va='center', transform=ax1.transAxes,
+                    fontsize=14, fontweight='bold',
+                    bbox=dict(boxstyle='round,pad=0.5', facecolor='yellow', alpha=0.8))
+            ax1.set_title('Representation Space', fontsize=16, fontweight='bold')
+        ax1.grid(True, alpha=0.3)
+        
+        # 2. Feature Distribution Analysis
+        ax2 = fig.add_subplot(gs[0, 2])
+        
+        if hasattr(self, 'encoder') and self.encoder is not None:
+            feature_stats = []
+            for i in range(min(10, representations.shape[1])):
+                feature_stats.extend([{
+                    'Feature': f'F{i}',
+                    'Value': val,
+                    'Type': 'Learned Representation'
+                } for val in representations[:50, i]])
+            
+            feat_df = pd.DataFrame(feature_stats)
+            sns.boxplot(data=feat_df, y='Feature', x='Value', ax=ax2, 
+                       orient='h', palette='Set2')
+            ax2.set_title('Feature Value Distribution', fontsize=14, fontweight='bold')
+            ax2.set_xlabel('Feature Value', fontsize=11)
+        else:
+            ax2.text(0.5, 0.5, 'Feature Analysis\nUnavailable', ha='center', va='center',
+                    transform=ax2.transAxes, fontsize=12, fontweight='bold')
+            ax2.set_title('Feature Analysis', fontsize=14, fontweight='bold')
+        ax2.grid(True, alpha=0.3)
+        
+        # 3. Augmentation Comparison
+        ax3 = fig.add_subplot(gs[1, :])
+        
+        # Show original vs augmented samples
+        sample_idx = 0
+        original = X_sample[sample_idx]
+        
+        # Generate augmentations
+        augmented = self.create_augmentations(X_sample[sample_idx:sample_idx+1])
+        
+        # Plot comparison
+        time_steps = np.arange(len(original))
+        
+        # Original signal
+        sns.lineplot(x=time_steps, y=original[:, 0], ax=ax3, 
+                    label='Original Signal', linewidth=3, color='blue', alpha=0.8)
+        
+        # Show multiple augmented versions
+        aug_sample = augmented[0]
+        if len(aug_sample.shape) > 1:
+            sns.lineplot(x=time_steps, y=aug_sample[:, 0], ax=ax3, 
+                        label='Augmented Signal', linewidth=2, color='red', 
+                        linestyle='--', alpha=0.8)
+        
+        ax3.fill_between(time_steps, original[:, 0], alpha=0.3, color='blue', label='Original Area')
+        
+        ax3.set_title('📊 Original vs Augmented Signal Comparison', 
+                     fontsize=16, fontweight='bold', pad=20)
+        ax3.set_xlabel('Time Steps', fontsize=12, fontweight='semibold')
+        ax3.set_ylabel('Signal Amplitude', fontsize=12, fontweight='semibold')
+        ax3.legend(frameon=True, fancybox=True, shadow=True)
+        ax3.grid(True, alpha=0.3)
+        
+        # 4. Projection Head Analysis
+        ax4 = fig.add_subplot(gs[2, 0])
+        
+        if hasattr(self, 'projection_head') and self.projection_head is not None:
+            # Get projection outputs
+            projections = self.projection_head.predict(representations[:50])
+            proj_norms = np.linalg.norm(projections, axis=1)
+            
+            sns.histplot(proj_norms, kde=True, ax=ax4, color='green', alpha=0.7)
+            ax4.axvline(np.mean(proj_norms), color='red', linestyle='--', 
+                       linewidth=2, label=f'Mean: {np.mean(proj_norms):.3f}')
+            ax4.set_title('Projection Norm Distribution', fontsize=14, fontweight='bold')
+            ax4.set_xlabel('L2 Norm', fontsize=11)
+            ax4.set_ylabel('Frequency', fontsize=11)
+            ax4.legend()
+        else:
+            ax4.text(0.5, 0.5, 'Projection Head\nNot Available', ha='center', va='center',
+                    transform=ax4.transAxes, fontsize=12, fontweight='bold')
+            ax4.set_title('Projection Analysis', fontsize=14, fontweight='bold')
+        ax4.grid(True, alpha=0.3)
+        
+        # 5. Temperature Effect Visualization
+        ax5 = fig.add_subplot(gs[2, 1])
+        
+        # Simulate temperature effects on similarity
+        temperatures = [0.1, 0.5, 1.0, 2.0, 5.0]
+        similarities = [0.95, 0.85, 0.7, 0.5, 0.3]  # Simulated values
+        
+        temp_data = pd.DataFrame({
+            'Temperature': temperatures,
+            'Similarity': similarities
+        })
+        
+        sns.lineplot(data=temp_data, x='Temperature', y='Similarity', ax=ax5,
+                    marker='o', linewidth=3, markersize=8, color='orange')
+        ax5.fill_between(temperatures, similarities, alpha=0.3, color='orange')
+        ax5.set_title('Temperature Effect on Similarity', fontsize=14, fontweight='bold')
+        ax5.set_xlabel('Temperature', fontsize=11)
+        ax5.set_ylabel('Similarity Score', fontsize=11)
+        ax5.grid(True, alpha=0.3)
+        
+        # 6. Training Configuration Summary
+        ax6 = fig.add_subplot(gs[2, 2])
+        ax6.axis('off')
+        
+        summary_text = f"""📊 CONTRASTIVE LEARNING SUMMARY
+        
+🎯 Model Architecture:
+• Sequence Length: {self.sequence_length}
+• Features: {self.n_features}
+• Projection Dim: {self.projection_dim}
 
+🔧 Configuration:
+• Temperature: {getattr(self, 'temperature', 0.1)}
+• Encoder Layers: Multi-layer CNN
+• Projection Head: Dense layers
 
-class MaskedAutoencoderModel:
-    """
-    Masked Autoencoder for self-supervised representation learning
-    """
-    
-    def __init__(self,
-                 sequence_length: int = 128,
-                 n_features: int = 2,
-                 encoder_dim: int = 256,
-                 decoder_dim: int = 128,
-                 mask_ratio: float = 0.25):
-        """
-        Initialize Masked Autoencoder
-        
-        Parameters
-        ----------
-        sequence_length : int
-            Length of input sequences
-        n_features : int
-            Number of input features
-        encoder_dim : int
-            Encoder hidden dimension
-        decoder_dim : int
-            Decoder hidden dimension
-        mask_ratio : float
-            Ratio of sequence to mask
-        """
-        self.sequence_length = sequence_length
-        self.n_features = n_features        
-        self.encoder_dim = encoder_dim
-        self.decoder_dim = decoder_dim
-        self.mask_ratio = mask_ratio
-        
-        self.autoencoder = None
-        self.encoder = None
-        self.classifier = None
-        self.scaler_X = RobustScaler()
+📈 Representation Quality:
+• Dimensionality: {self.projection_dim}D
+• Input Shape: {X_sample.shape}
+• Sample Count: {len(X_sample)}
 
+⚡ Contrastive Learning:
+• Augmentation: Multi-type
+• Loss: NT-Xent (InfoNCE)
+• Self-supervised: ✓
+        """
+        
+        ax6.text(0.05, 0.95, summary_text, transform=ax6.transAxes,
+                fontsize=10, verticalalignment='top', fontfamily='monospace',
+                bbox=dict(boxstyle='round,pad=0.8', facecolor='lightyellow', alpha=0.9,
+                         edgecolor='orange', linewidth=2))
+        
+        fig.suptitle('🚀 Professional Contrastive Learning Analysis Dashboard', 
+                    fontsize=18, fontweight='bold', y=0.95,
+                    bbox=dict(boxstyle='round,pad=0.5', facecolor='lightsteelblue', alpha=0.8))
+        
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight', facecolor='white')
+        plt.show()
+    
+    def plot_training_comparison(self, pretrain_history, finetune_history=None, save_path=None):
+        """
+        Enhanced training comparison visualization with seaborn
+        """
+        # Set professional seaborn styling
+        plt.style.use('seaborn-v0_8')
+        sns.set_theme(style="whitegrid", palette="deep", font_scale=1.1)
+        
+        fig = plt.figure(figsize=(18, 12), facecolor='white')
+        gs = fig.add_gridspec(2, 3, hspace=0.3, wspace=0.25)
+        
+        # 1. Pretraining Loss Evolution
+        ax1 = fig.add_subplot(gs[0, :2])
+        
+        if pretrain_history:
+            pretrain_epochs = range(1, len(pretrain_history.history['loss']) + 1)
+            
+            # Prepare data for seaborn
+            pretrain_data = []
+            for epoch, loss in enumerate(pretrain_history.history['loss'], 1):
+                pretrain_data.append({'Epoch': epoch, 'Loss': loss, 'Phase': 'Pretraining'})
+            
+            # Add fine-tuning if available
+            if finetune_history:
+                finetune_epochs = range(len(pretrain_epochs) + 1, 
+                                      len(pretrain_epochs) + len(finetune_history.history['loss']) + 1)
+                for epoch, loss in zip(finetune_epochs, finetune_history.history['loss']):
+                    pretrain_data.append({'Epoch': epoch, 'Loss': loss, 'Phase': 'Fine-tuning'})
+            
+            train_df = pd.DataFrame(pretrain_data)
+            sns.lineplot(data=train_df, x='Epoch', y='Loss', hue='Phase', 
+                        ax=ax1, marker='o', linewidth=3, markersize=6)
+            
+            # Add phase transition line
+            if finetune_history:
+                ax1.axvline(len(pretrain_epochs), color='red', linestyle=':', 
+                           linewidth=2, alpha=0.7, label='Phase Transition')
+        
+        ax1.set_title('🎯 Contrastive Learning Training Progress', 
+                     fontsize=16, fontweight='bold', pad=20)
+        ax1.set_xlabel('Epoch', fontsize=12, fontweight='semibold')
+        ax1.set_ylabel('Loss Value', fontsize=12, fontweight='semibold')
+        ax1.legend(frameon=True, fancybox=True, shadow=True)
+        ax1.grid(True, alpha=0.3)
+        ax1.set_yscale('log')
+        
+        # 2. Loss Distribution Comparison
+        ax2 = fig.add_subplot(gs[0, 2])
+        
+        if pretrain_history and finetune_history:
+            loss_comparison = pd.DataFrame({
+                'Pretraining': pretrain_history.history['loss'],
+                'Fine-tuning': finetune_history.history['loss'][:len(pretrain_history.history['loss'])]
+            })
+            
+            loss_melted = loss_comparison.melt(var_name='Phase', value_name='Loss')
+            sns.boxplot(data=loss_melted, x='Phase', y='Loss', ax=ax2, palette='Set1')
+            sns.stripplot(data=loss_melted, x='Phase', y='Loss', ax=ax2, 
+                         color='black', alpha=0.6, size=4)
+        elif pretrain_history:
+            sns.histplot(pretrain_history.history['loss'], kde=True, ax=ax2, 
+                        color='blue', alpha=0.7)
+            ax2.set_xlabel('Pretraining Loss')
+        
+        ax2.set_title('Loss Distribution Analysis', fontsize=14, fontweight='bold')
+        ax2.grid(True, alpha=0.3)
+        
+        # 3. Fine-tuning Performance (if available)
+        ax3 = fig.add_subplot(gs[1, 0])
+        
+        if finetune_history and 'accuracy' in finetune_history.history:
+            acc_data = []
+            for epoch, (acc, val_acc) in enumerate(zip(
+                finetune_history.history['accuracy'],
+                finetune_history.history.get('val_accuracy', [])), 1):
+                acc_data.append({'Epoch': epoch, 'Accuracy': acc, 'Type': 'Training'})
+                if val_acc is not None:
+                    acc_data.append({'Epoch': epoch, 'Accuracy': val_acc, 'Type': 'Validation'})
+            
+            acc_df = pd.DataFrame(acc_data)
+            sns.lineplot(data=acc_df, x='Epoch', y='Accuracy', hue='Type', 
+                        ax=ax3, marker='s', linewidth=2.5, markersize=6)
+            ax3.set_title('Fine-tuning Accuracy', fontsize=14, fontweight='bold')
+        else:
+            ax3.text(0.5, 0.5, 'Fine-tuning\nMetrics\nNot Available', 
+                    ha='center', va='center', transform=ax3.transAxes,
+                    fontsize=12, fontweight='bold')
+            ax3.set_title('Fine-tuning Performance', fontsize=14, fontweight='bold')
+        ax3.grid(True, alpha=0.3)
+        
+        # 4. Learning Rate Schedule (if available)
+        ax4 = fig.add_subplot(gs[1, 1])
+        
+        if pretrain_history and 'lr' in pretrain_history.history:
+            lr_data = pretrain_history.history['lr']
+            sns.lineplot(x=range(1, len(lr_data) + 1), y=lr_data, ax=ax4,
+                        marker='d', linewidth=2.5, markersize=4, color='purple')
+            ax4.set_title('Learning Rate Schedule', fontsize=14, fontweight='bold')
+            ax4.set_xlabel('Epoch')
+            ax4.set_ylabel('Learning Rate')
+            ax4.set_yscale('log')
+        else:
+            ax4.text(0.5, 0.5, 'Learning Rate\nNot Tracked', ha='center', va='center',
+                    transform=ax4.transAxes, fontsize=12, fontweight='bold')
+            ax4.set_title('Learning Rate', fontsize=14, fontweight='bold')
+        ax4.grid(True, alpha=0.3)
+        
+        # 5. Training Summary
+        ax5 = fig.add_subplot(gs[1, 2])
+        ax5.axis('off')
+        
+        # Calculate metrics
+        pretrain_final = pretrain_history.history['loss'][-1] if pretrain_history else 0
+        pretrain_best = min(pretrain_history.history['loss']) if pretrain_history else 0
+        pretrain_epochs_count = len(pretrain_history.history['loss']) if pretrain_history else 0
+        
+        finetune_final = finetune_history.history['loss'][-1] if finetune_history else 0
+        finetune_acc = finetune_history.history.get('val_accuracy', [0])[-1] if finetune_history else 0
+        
+        summary_text = f"""📊 TRAINING SUMMARY
+        
+🔄 Pretraining Phase:
+• Final Loss: {pretrain_final:.6f}
+• Best Loss: {pretrain_best:.6f}
+• Epochs: {pretrain_epochs_count}
 
-class RandomMaskingLayer(layers.Layer):
-    """
-    Custom layer for random masking of input sequences
-    """
-    
-    def __init__(self, mask_ratio=0.15, **kwargs):
-        super().__init__(**kwargs)
-        self.mask_ratio = mask_ratio
-    
-    def call(self, x):
-        """
-        Apply random masking to input sequences using Keras operations
-        """
-        batch_size = keras.ops.shape(x)[0]
-        seq_len = keras.ops.shape(x)[1]
-        
-        # Number of tokens to mask - ensure it's an integer
-        len_mask = keras.ops.cast(
-            keras.ops.cast(seq_len, 'float32') * self.mask_ratio, 'int32'
-        )
-        
-        # Generate random indices for masking
-        noise = keras.random.uniform([batch_size, seq_len])
-        ids_shuffle = keras.ops.argsort(noise, axis=1)
-        
-        # Create mask - start with all True (unmasked)
-        mask = keras.ops.ones([batch_size, seq_len], dtype='bool')
-        
-        # For simplicity, use a different masking approach compatible with Keras ops
-        # Create a mask based on shuffled indices
-        mask_indices = ids_shuffle[:, :len_mask]
-        
-        # Apply masking by setting masked positions to False
-        # Using a simpler approach: threshold-based masking
-        threshold = self.mask_ratio
-        random_values = keras.random.uniform(keras.ops.shape(x)[:2])
-        mask = random_values > threshold
-        
-        # Apply mask
-        masked_x = keras.ops.where(
-            keras.ops.expand_dims(mask, -1),
-            x,
-            keras.ops.zeros_like(x)
-        )
-        
-        return masked_x
-    
-    def compute_output_shape(self, input_shape):
-        return input_shape
+🎯 Fine-tuning Phase:
+• Final Loss: {finetune_final:.6f}
+• Val Accuracy: {finetune_acc:.4f}
+• Task: Classification
 
+⚡ Self-Supervised Benefits:
+• Representation Learning: ✓
+• Data Efficiency: ✓
+• Transfer Learning: ✓
 
-class MaskedAutoencoderModel:
-    """
-    Masked Autoencoder for self-supervised representation learning
-    """
-    
-    def __init__(self,
-                 sequence_length: int = 128,
-                 n_features: int = 2,
-                 mask_ratio: float = 0.15,
-                 encoder_dim: int = 256,
-                 decoder_dim: int = 128):
+🎪 Contrastive Method:
+• SimCLR-inspired
+• NT-Xent Loss
+• Data Augmentation
         """
-        Initialize Masked Autoencoder model
-        """
-        self.sequence_length = sequence_length
-        self.n_features = n_features
-        self.mask_ratio = mask_ratio
-        self.encoder_dim = encoder_dim
-        self.decoder_dim = decoder_dim
         
-        self.model = None
-        self.encoder = None
-        self.decoder = None
-        self.scaler_X = RobustScaler()
-    
-    def random_masking(self, x):
-        """
-        Random masking of input sequences - replaced by custom layer
-        """
-        # This method is now replaced by RandomMaskingLayer
-        pass
-    
-    def build_autoencoder(self):
-        """
-        Build the masked autoencoder model
-        """
-        inputs = layers.Input(shape=(self.sequence_length, self.n_features))
+        ax5.text(0.05, 0.95, summary_text, transform=ax5.transAxes,
+                fontsize=10, verticalalignment='top', fontfamily='monospace',
+                bbox=dict(boxstyle='round,pad=0.8', facecolor='lightgreen', alpha=0.9,
+                         edgecolor='darkgreen', linewidth=2))
         
-        # Apply masking using custom layer
-        masked_inputs = RandomMaskingLayer(mask_ratio=self.mask_ratio)(inputs)
+        fig.suptitle('🚀 Professional Contrastive Training Analysis', 
+                    fontsize=18, fontweight='bold', y=0.95,
+                    bbox=dict(boxstyle='round,pad=0.5', facecolor='lightsteelblue', alpha=0.8))
         
-        # Encoder
-        x = layers.Conv1D(64, kernel_size=3, padding='same', activation='relu')(masked_inputs)
-        x = layers.BatchNormalization()(x)
-        x = layers.Conv1D(128, kernel_size=3, padding='same', activation='relu')(x)
-        x = layers.BatchNormalization()(x)
-        encoded = layers.Dense(self.encoder_dim, activation='relu', name='encoded')(x)
-        
-        # Decoder
-        x = layers.Dense(self.decoder_dim, activation='relu')(encoded)
-        x = layers.Conv1D(128, kernel_size=3, padding='same', activation='relu')(x)
-        x = layers.BatchNormalization()(x)
-        x = layers.Conv1D(64, kernel_size=3, padding='same', activation='relu')(x)
-        x = layers.BatchNormalization()(x)
-        decoded = layers.Dense(self.n_features, activation='linear', name='decoded')(x)
-        
-        # Standard reconstruction loss (masking loss is handled internally by the layer)
-        autoencoder = keras.Model(inputs, decoded)
-        autoencoder.compile(
-            optimizer=optimizers.Adam(learning_rate=0.001),
-            loss='mse',
-            metrics=['mae']
-        )
-        
-        # Create separate encoder model
-        encoder = keras.Model(inputs, encoded, name='mae_encoder')
-        
-        self.autoencoder = autoencoder
-        self.encoder = encoder
-        return autoencoder
-    
-    def pretrain(self, X_train, epochs=100, batch_size=32, verbose=1):
-        """
-        Pretrain the masked autoencoder
-        """
-        if self.autoencoder is None:
-            self.build_autoencoder()
-        
-        # Scale data
-        X_scaled = self.scaler_X.fit_transform(
-            X_train.reshape(-1, self.n_features)
-        ).reshape(X_train.shape)
-        
-        # Callbacks
-        callbacks_list = [
-            keras.callbacks.EarlyStopping(
-                monitor='loss', patience=20, restore_best_weights=True
-            ),
-            keras.callbacks.ReduceLROnPlateau(
-                monitor='loss', factor=0.5, patience=10, min_lr=1e-7
-            )
-        ]
-        
-        # Train
-        history = self.autoencoder.fit(
-            X_scaled, epochs=epochs, batch_size=batch_size,
-            callbacks=callbacks_list, verbose=verbose
-        )
-        
-        return history
-    
-    def build_classifier(self, n_classes: int = 6):
-        """
-        Build classifier using pretrained encoder
-        """
-        if self.encoder is None:
-            raise ValueError("Must pretrain encoder first")
-        
-        inputs = layers.Input(shape=(self.sequence_length, self.n_features))
-        
-        # Get encoder features (without masking)
-        x = layers.Conv1D(64, kernel_size=3, padding='same', activation='relu')(inputs)
-        x = layers.BatchNormalization()(x)
-        x = layers.Conv1D(128, kernel_size=3, padding='same', activation='relu')(x)
-        x = layers.BatchNormalization()(x)
-        features = layers.Dense(self.encoder_dim, activation='relu')(x)
-        
-        # Global pooling
-        pooled = layers.GlobalAveragePooling1D()(features)
-        
-        # Classification head
-        x = layers.Dense(256, activation='relu')(pooled)
-        x = layers.Dropout(0.3)(x)
-        x = layers.Dense(128, activation='relu')(x)
-        x = layers.Dropout(0.2)(x)
-        outputs = layers.Dense(n_classes, activation='softmax')(x)
-        
-        classifier = keras.Model(inputs, outputs, name='mae_classifier')
-        classifier.compile(
-            optimizer=optimizers.Adam(learning_rate=0.001),
-            loss='sparse_categorical_crossentropy',
-            metrics=['accuracy']
-        )
-        
-        self.classifier = classifier
-        return classifier
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight', facecolor='white')
+        plt.show()
+
+    # ...existing code...

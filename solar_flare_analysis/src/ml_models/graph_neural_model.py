@@ -14,6 +14,7 @@ from sklearn.preprocessing import StandardScaler, RobustScaler
 from sklearn.neighbors import kneighbors_graph
 from typing import Optional, Tuple, List
 import warnings
+import seaborn as sns
 warnings.filterwarnings('ignore')
 
 
@@ -297,30 +298,343 @@ class GraphNeuralFlareModel:
         """
         X_processed = self.preprocess_data(X)
         return self.model.predict(X_processed)
-    
     def visualize_graph(self, X_sample, sample_idx=0, save_path=None):
         """
-        Visualize the constructed graph for a sample
+        Enhanced graph visualization with professional seaborn aesthetics
         """
         adjacency = self.construct_graph(X_sample[sample_idx:sample_idx+1])[0]
         
-        # Create networkx graph
+        # Set professional seaborn styling
+        plt.style.use('seaborn-v0_8')
+        sns.set_theme(style="whitegrid", palette="viridis", font_scale=1.1)
+        sns.set_context("paper", rc={"figure.dpi": 300})
+        
+        # Create comprehensive graph analysis dashboard
+        fig = plt.figure(figsize=(20, 12), facecolor='white')
+        gs = fig.add_gridspec(2, 3, hspace=0.3, wspace=0.25)
+        
+        # 1. Main Graph Visualization
+        ax1 = fig.add_subplot(gs[0, :2])
         G = nx.from_numpy_array(adjacency)
         
-        # Plot
-        plt.figure(figsize=(12, 8))
-        pos = nx.spring_layout(G, k=1, iterations=50)
+        # Enhanced graph layout
+        pos = nx.spring_layout(G, k=2, iterations=100, seed=42)
         
-        # Draw nodes and edges
-        nx.draw_networkx_nodes(G, pos, node_color='lightblue',
-                              node_size=100, alpha=0.8)
-        nx.draw_networkx_edges(G, pos, alpha=0.5, width=0.5)
+        # Calculate node properties for enhanced visualization
+        node_degrees = dict(G.degree())
+        node_sizes = [300 + degree * 50 for degree in node_degrees.values()]
+        edge_weights = [adjacency[u, v] * 5 for u, v in G.edges()]
         
-        plt.title(f'Graph Structure for Sample {sample_idx}')
-        plt.axis('off')
+        # Draw with professional styling
+        nx.draw_networkx_nodes(G, pos, ax=ax1, node_color=list(node_degrees.values()),
+                              node_size=node_sizes, cmap='viridis', alpha=0.8,
+                              edgecolors='black', linewidths=0.5)
+        nx.draw_networkx_edges(G, pos, ax=ax1, alpha=0.6, width=edge_weights,
+                              edge_color='gray', style='-')
+        
+        # Add node labels
+        nx.draw_networkx_labels(G, pos, ax=ax1, font_size=8, font_weight='bold')
+        
+        ax1.set_title('🌐 Graph Neural Network Structure', 
+                     fontsize=16, fontweight='bold', pad=20)
+        ax1.axis('off')
+        
+        # 2. Adjacency Matrix Heatmap
+        ax2 = fig.add_subplot(gs[0, 2])
+        sns.heatmap(adjacency, ax=ax2, cmap='viridis', cbar=True,
+                   square=True, linewidths=0.1, linecolor='white',
+                   cbar_kws={'label': 'Connection Strength', 'shrink': 0.8})
+        ax2.set_title('Adjacency Matrix', fontsize=14, fontweight='bold')
+        ax2.set_xlabel('Node Index', fontsize=11)
+        ax2.set_ylabel('Node Index', fontsize=11)
+        
+        # 3. Node Degree Distribution
+        ax3 = fig.add_subplot(gs[1, 0])
+        degrees = list(node_degrees.values())
+        sns.histplot(degrees, kde=True, ax=ax3, color='skyblue', alpha=0.7)
+        ax3.set_title('Node Degree Distribution', fontsize=14, fontweight='bold')
+        ax3.set_xlabel('Node Degree', fontsize=11)
+        ax3.set_ylabel('Frequency', fontsize=11)
+        ax3.grid(True, alpha=0.3)
+        
+        # 4. Edge Weight Distribution
+        ax4 = fig.add_subplot(gs[1, 1])
+        edge_weights_dist = adjacency[adjacency > 0].flatten()
+        sns.histplot(edge_weights_dist, kde=True, ax=ax4, color='coral', alpha=0.7)
+        ax4.set_title('Edge Weight Distribution', fontsize=14, fontweight='bold')
+        ax4.set_xlabel('Edge Weight', fontsize=11)
+        ax4.set_ylabel('Frequency', fontsize=11)
+        ax4.grid(True, alpha=0.3)
+        
+        # 5. Graph Statistics
+        ax5 = fig.add_subplot(gs[1, 2])
+        ax5.axis('off')
+        
+        # Calculate graph metrics
+        n_nodes = G.number_of_nodes()
+        n_edges = G.number_of_edges()
+        density = nx.density(G)
+        avg_clustering = nx.average_clustering(G)
+        
+        stats_text = f"""📊 GRAPH STATISTICS
+        
+🔢 Basic Metrics:
+• Nodes: {n_nodes}
+• Edges: {n_edges}
+• Density: {density:.3f}
+• Avg Clustering: {avg_clustering:.3f}
+
+🎯 Connectivity:
+• Max Degree: {max(degrees)}
+• Min Degree: {min(degrees)}
+• Avg Degree: {np.mean(degrees):.2f}
+
+⚡ Structure:
+• Connected: {'Yes' if nx.is_connected(G) else 'No'}
+• Sample: {sample_idx}
+        """
+        
+        ax5.text(0.05, 0.95, stats_text, transform=ax5.transAxes,
+                fontsize=10, verticalalignment='top', fontfamily='monospace',
+                bbox=dict(boxstyle='round,pad=0.8', facecolor='lightgreen', alpha=0.9))
+        
+        fig.suptitle('🚀 Professional Graph Neural Network Analysis', 
+                    fontsize=18, fontweight='bold', y=0.95,
+                    bbox=dict(boxstyle='round,pad=0.5', facecolor='lightsteelblue', alpha=0.8))
         
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            plt.savefig(save_path, dpi=300, bbox_inches='tight', facecolor='white')
+        plt.show()
+    
+    def plot_training_history(self, history, save_path=None):
+        """
+        Enhanced training history visualization for GNN with seaborn
+        """
+        # Set professional seaborn styling
+        plt.style.use('seaborn-v0_8')
+        sns.set_theme(style="whitegrid", palette="deep", font_scale=1.1)
+        
+        fig, axes = plt.subplots(2, 2, figsize=(16, 12), facecolor='white')
+        fig.suptitle('🎯 Graph Neural Network Training Dashboard', 
+                    fontsize=16, fontweight='bold', y=0.95)
+        
+        epochs = range(1, len(history.history['loss']) + 1)
+        
+        # 1. Multi-task Loss Evolution
+        loss_data = []
+        for epoch, loss in enumerate(history.history['loss'], 1):
+            loss_data.append({'Epoch': epoch, 'Loss': loss, 'Type': 'Total Loss'})
+        
+        # Add specific task losses if available
+        if 'classification_output_loss' in history.history:
+            for epoch, loss in enumerate(history.history['classification_output_loss'], 1):
+                loss_data.append({'Epoch': epoch, 'Loss': loss, 'Type': 'Classification'})
+        
+        if 'energy_output_loss' in history.history:
+            for epoch, loss in enumerate(history.history['energy_output_loss'], 1):
+                loss_data.append({'Epoch': epoch, 'Loss': loss, 'Type': 'Energy Regression'})
+        
+        loss_df = pd.DataFrame(loss_data)
+        sns.lineplot(data=loss_df, x='Epoch', y='Loss', hue='Type', 
+                    ax=axes[0,0], marker='o', linewidth=2.5, markersize=4)
+        axes[0,0].set_title('Multi-task Training Loss', fontsize=14, fontweight='bold')
+        axes[0,0].grid(True, alpha=0.3)
+        axes[0,0].set_yscale('log')
+        
+        # 2. Validation Metrics
+        val_data = []
+        for metric in ['val_loss', 'val_classification_output_loss', 'val_energy_output_loss']:
+            if metric in history.history:
+                for epoch, value in enumerate(history.history[metric], 1):
+                    val_data.append({'Epoch': epoch, 'Value': value, 'Metric': metric.replace('val_', '').replace('_', ' ').title()})
+        
+        if val_data:
+            val_df = pd.DataFrame(val_data)
+            sns.lineplot(data=val_df, x='Epoch', y='Value', hue='Metric', 
+                        ax=axes[0,1], marker='s', linewidth=2.5, markersize=4)
+            axes[0,1].set_title('Validation Metrics', fontsize=14, fontweight='bold')
+            axes[0,1].set_yscale('log')
+        else:
+            axes[0,1].text(0.5, 0.5, 'Validation Metrics\nNot Available', ha='center', va='center',
+                          transform=axes[0,1].transAxes, fontsize=12, fontweight='bold')
+            axes[0,1].set_title('Validation Metrics', fontsize=14, fontweight='bold')
+        axes[0,1].grid(True, alpha=0.3)
+        
+        # 3. Learning Rate and Accuracy
+        if 'lr' in history.history:
+            sns.lineplot(x=epochs, y=history.history['lr'], ax=axes[1,0], 
+                        marker='d', linewidth=2.5, markersize=4, color='orange')
+            axes[1,0].set_title('Learning Rate Schedule', fontsize=14, fontweight='bold')
+            axes[1,0].set_yscale('log')
+        else:
+            # Show accuracy if available
+            if 'classification_output_accuracy' in history.history:
+                sns.lineplot(x=epochs, y=history.history['classification_output_accuracy'], 
+                            ax=axes[1,0], marker='o', linewidth=2.5, markersize=4, color='green')
+                axes[1,0].set_title('Classification Accuracy', fontsize=14, fontweight='bold')
+            else:
+                axes[1,0].text(0.5, 0.5, 'Learning Rate\nNot Tracked', ha='center', va='center',
+                              transform=axes[1,0].transAxes, fontsize=12, fontweight='bold')
+                axes[1,0].set_title('Learning Rate', fontsize=14, fontweight='bold')
+        axes[1,0].grid(True, alpha=0.3)
+        
+        # 4. Training Summary
+        axes[1,1].axis('off')
+        summary_text = f"""📊 GNN TRAINING SUMMARY
+        
+🏆 Final Metrics:
+• Total Loss: {history.history['loss'][-1]:.4f}
+• Classification Loss: {history.history.get('classification_output_loss', [0])[-1]:.4f}
+• Energy Loss: {history.history.get('energy_output_loss', [0])[-1]:.4f}
+
+🎯 Best Performance:
+• Min Total Loss: {min(history.history['loss']):.4f}
+• Total Epochs: {len(history.history['loss'])}
+
+⚡ Model Configuration:
+• Architecture: Graph Attention Network
+• Hidden Units: {self.hidden_units}
+• GAT Layers: {self.num_gat_layers}
+• Attention Heads: {self.num_heads}
+        """
+        
+        axes[1,1].text(0.05, 0.95, summary_text, transform=axes[1,1].transAxes,
+                      fontsize=10, verticalalignment='top', fontfamily='monospace',
+                      bbox=dict(boxstyle='round,pad=0.8', facecolor='lightblue', alpha=0.9))
+        
+        plt.tight_layout()
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight', facecolor='white')
+        plt.show()
+    
+    def plot_graph_attention_analysis(self, X_sample, predictions, save_path=None):
+        """
+        Analyze graph attention patterns and node importance
+        """
+        # Set professional seaborn styling
+        plt.style.use('seaborn-v0_8')
+        sns.set_theme(style="whitegrid", palette="viridis", font_scale=1.1)
+        
+        fig = plt.figure(figsize=(20, 12), facecolor='white')
+        gs = fig.add_gridspec(2, 3, hspace=0.3, wspace=0.25)
+        
+        # Get graph structure for first sample
+        adjacency = self.construct_graph(X_sample[:1])[0]
+        G = nx.from_numpy_array(adjacency)
+        
+        # 1. Node Importance Heatmap
+        ax1 = fig.add_subplot(gs[0, :2])
+        
+        # Calculate node features importance
+        node_features = X_sample[0]  # First sample
+        feature_importance = np.std(node_features, axis=1)  # Variability as importance
+        
+        # Create heatmap
+        importance_matrix = node_features.T
+        sns.heatmap(importance_matrix, ax=ax1, cmap='viridis', cbar=True,
+                   xticklabels=[f'Node {i}' for i in range(len(node_features))],
+                   yticklabels=[f'Feature {i}' for i in range(node_features.shape[1])],
+                   cbar_kws={'label': 'Feature Value'})
+        ax1.set_title('🎯 Node Feature Importance Matrix', fontsize=16, fontweight='bold')
+        
+        # 2. Graph Centrality Analysis
+        ax2 = fig.add_subplot(gs[0, 2])
+        
+        # Calculate centrality measures
+        centrality_data = []
+        betweenness = nx.betweenness_centrality(G)
+        closeness = nx.closeness_centrality(G)
+        degree = nx.degree_centrality(G)
+        
+        for node in G.nodes():
+            centrality_data.append({
+                'Node': node,
+                'Betweenness': betweenness[node],
+                'Closeness': closeness[node],
+                'Degree': degree[node]
+            })
+        
+        centrality_df = pd.DataFrame(centrality_data)
+        centrality_melted = centrality_df.melt(id_vars=['Node'], var_name='Centrality', value_name='Score')
+        
+        sns.boxplot(data=centrality_melted, x='Centrality', y='Score', ax=ax2)
+        ax2.set_title('Node Centrality Distribution', fontsize=14, fontweight='bold')
+        ax2.grid(True, alpha=0.3)
+        
+        # 3. Prediction Confidence by Node
+        ax3 = fig.add_subplot(gs[1, 0])
+        
+        # Assume predictions contain confidence scores
+        node_predictions = predictions[0] if len(predictions.shape) > 1 else [predictions[0]] * len(G.nodes())
+        pred_data = pd.DataFrame({
+            'Node': list(G.nodes()),
+            'Prediction': node_predictions[:len(G.nodes())],
+            'Importance': feature_importance
+        })
+        
+        sns.scatterplot(data=pred_data, x='Importance', y='Prediction', ax=ax3,
+                       size='Prediction', sizes=(50, 200), alpha=0.7)
+        ax3.set_title('Prediction vs Node Importance', fontsize=14, fontweight='bold')
+        ax3.grid(True, alpha=0.3)
+        
+        # 4. Graph Connectivity Analysis
+        ax4 = fig.add_subplot(gs[1, 1])
+        
+        # Analyze connectivity patterns
+        connectivity_data = []
+        for node in G.nodes():
+            neighbors = list(G.neighbors(node))
+            connectivity_data.append({
+                'Node': node,
+                'Neighbors': len(neighbors),
+                'Weight_Sum': sum(adjacency[node, neighbor] for neighbor in neighbors)
+            })
+        
+        conn_df = pd.DataFrame(connectivity_data)
+        sns.scatterplot(data=conn_df, x='Neighbors', y='Weight_Sum', ax=ax4,
+                       alpha=0.7, s=80)
+        ax4.set_title('Node Connectivity Analysis', fontsize=14, fontweight='bold')
+        ax4.set_xlabel('Number of Neighbors')
+        ax4.set_ylabel('Total Edge Weight')
+        ax4.grid(True, alpha=0.3)
+        
+        # 5. Model Performance Summary
+        ax5 = fig.add_subplot(gs[1, 2])
+        ax5.axis('off')
+        
+        # Calculate graph statistics
+        avg_prediction = np.mean(predictions)
+        prediction_std = np.std(predictions)
+        
+        performance_text = f"""📊 GRAPH ANALYSIS SUMMARY
+        
+🎯 Prediction Statistics:
+• Mean Prediction: {avg_prediction:.4f}
+• Std Deviation: {prediction_std:.4f}
+• Sample Count: {len(predictions)}
+
+🌐 Graph Properties:
+• Total Nodes: {G.number_of_nodes()}
+• Total Edges: {G.number_of_edges()}
+• Graph Density: {nx.density(G):.3f}
+• Avg Clustering: {nx.average_clustering(G):.3f}
+
+⚡ Feature Analysis:
+• Feature Dimensions: {node_features.shape[1]}
+• Max Importance: {max(feature_importance):.3f}
+• Min Importance: {min(feature_importance):.3f}
+        """
+        
+        ax5.text(0.05, 0.95, performance_text, transform=ax5.transAxes,
+                fontsize=10, verticalalignment='top', fontfamily='monospace',
+                bbox=dict(boxstyle='round,pad=0.8', facecolor='lightcyan', alpha=0.9))
+        
+        fig.suptitle('🚀 Professional Graph Attention Analysis Dashboard', 
+                    fontsize=18, fontweight='bold', y=0.95,
+                    bbox=dict(boxstyle='round,pad=0.5', facecolor='lightsteelblue', alpha=0.8))
+        
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight', facecolor='white')
         plt.show()
 
 
