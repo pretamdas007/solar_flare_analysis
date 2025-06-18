@@ -33,8 +33,7 @@ from .graph_neural_model import (
 
 # Self-supervised learning models
 from .self_supervised_models import (
-    ContrastiveLearningModel,
-    MaskedAutoencoderModel
+    ContrastiveLearningModel
 )
 
 __all__ = [
@@ -56,8 +55,7 @@ __all__ = [
     'GraphAttentionLayer',
     
     # Self-supervised models
-    'ContrastiveLearningModel',
-    'MaskedAutoencoderModel'
+    'ContrastiveLearningModel'
 ]
 
 # Model categories for easy access
@@ -76,8 +74,7 @@ ADVANCED_MODELS = [
 ]
 
 SELF_SUPERVISED_MODELS = [
-    'ContrastiveLearningModel',
-    'MaskedAutoencoderModel'
+    'ContrastiveLearningModel'
 ]
 
 def get_model_by_name(model_name: str):

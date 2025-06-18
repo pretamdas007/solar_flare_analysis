@@ -1,0 +1,80 @@
+
+================================================================================
+                    COMPREHENSIVE SOLAR FLARE MODEL COMPARISON REPORT
+================================================================================
+Generated: 2025-06-19 01:23:38
+
+EXECUTIVE SUMMARY:
+------------------
+Total Models Compared: 2
+Best Performing Model: Graph Neural Network
+Best Accuracy: 0.6963
+Best F1-Score: 0.7039
+
+DATASET INFORMATION:
+--------------------
+• Test Samples: 800
+• Feature Dimensions: 20
+• Class Distribution: {np.int64(0): np.int64(686), np.int64(3): np.int64(114)}
+
+MODEL PERFORMANCE COMPARISON:
+-----------------------------
+
+Transformer:
+• Accuracy: 0.5012
+• Precision: 0.8575
+• Recall: 0.5012
+• F1-Score: 0.6327
+• Parameters: 3,556
+• Layers: 6
+• Prediction Method: standard
+• Description: Attention-based sequence model
+
+Graph Neural Network:
+• Accuracy: 0.6963
+• Precision: 0.7118
+• Recall: 0.6963
+• F1-Score: 0.7039
+• Parameters: 3,556
+• Layers: 5
+• Prediction Method: standard
+• Description: Graph-based relationship modeling
+
+DETAILED ANALYSIS:
+------------------
+• Performance Range:
+  - Accuracy: 0.5012 - 0.6963
+  - F1-Score: 0.6327 - 0.7039
+
+• Model Complexity:
+  - Simplest: Transformer (3,556 parameters)
+  - Most Complex: Contrastive Learning (438,466 parameters)
+
+• Model Efficiency (Performance/Complexity):
+  - Transformer: 1.779169
+  - Graph Neural Network: 1.979601
+
+RECOMMENDATIONS:
+----------------
+• Best Overall Performance: Graph Neural Network
+• Most Efficient Model: Graph Neural Network
+• Production Deployment: Consider Graph Neural Network for highest accuracy
+• Resource-Constrained Environments: Consider Graph Neural Network for best efficiency
+
+TECHNICAL INSIGHTS:
+-------------------
+• All models show variable performance across the test dataset
+• No clear correlation between model complexity and performance
+• Models demonstrate diverse approaches to solar flare prediction with complementary strengths
+
+FUTURE WORK:
+------------
+• Consider ensemble methods combining top-performing models
+• Implement cross-validation for more robust performance estimates
+• Explore model distillation to combine complex model knowledge into simpler architectures
+• Develop domain-specific evaluation metrics for solar physics applications
+
+================================================================================
+                            END OF COMPARISON REPORT
+================================================================================
+        

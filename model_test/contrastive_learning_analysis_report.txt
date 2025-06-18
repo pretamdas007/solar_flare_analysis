@@ -1,0 +1,77 @@
+
+================================================================================
+                  CONTRASTIVE LEARNING MODEL ANALYSIS REPORT
+================================================================================
+Generated: 2025-06-19 00:33:22
+
+MODEL INFORMATION:
+------------------
+• Model File: ..\best_contrastive_classifier.h5
+• Architecture: Contrastive Learning (Self-Supervised)
+• Total Parameters: 438,466
+• Prediction Type: multi-class
+• Encoder Available: No
+
+EMBEDDING SPACE ANALYSIS:
+-------------------------
+• Embedding Dimension: 128
+• Separation Margin: 0.011752
+• Positive Pairs Distance (μ ± σ): 15.961458 ± 1.001422
+• Negative Pairs Distance (μ ± σ): 15.973210 ± 0.985482
+
+DATASET INFORMATION:
+--------------------
+• Total Samples: 2000
+• Feature Dimensions: 20
+• Class Distribution:
+  • No Flare: 1811 samples (90.55%)
+  • Flare Event: 189 samples (9.45%)
+
+PERFORMANCE METRICS:
+--------------------
+• Overall Accuracy: 0.6900 (69.00%)
+• Weighted Precision: 0.9268
+• Weighted Recall: 0.6900
+• Weighted F1-Score: 0.7543
+
+DETAILED CLASSIFICATION REPORT:
+-------------------------------
+              precision    recall  f1-score   support
+
+    No Flare       1.00      0.66      0.79      1811
+ Flare Event       0.23      0.99      0.38       189
+
+    accuracy                           0.69      2000
+   macro avg       0.62      0.83      0.59      2000
+weighted avg       0.93      0.69      0.75      2000
+
+
+CONFUSION MATRIX:
+-----------------
+[[1192  619]
+ [   1  188]]
+
+CONTRASTIVE LEARNING ANALYSIS:
+------------------------------
+• Quality of Embeddings: Developing
+• Class Separability: Low
+• Embedding Efficiency: 128 dimensions capturing solar flare patterns
+
+ANALYSIS INSIGHTS:
+------------------
+• Contrastive learning effectively captures solar flare signatures in embedding space
+• Self-supervised pretraining enables robust feature extraction from unlabeled data
+• Embedding separation indicates model's ability to distinguish flare vs. quiet conditions
+• Moderate downstream classification performance
+
+RECOMMENDATIONS:
+----------------
+• Experiment with different contrastive loss functions (InfoNCE, SimCLR, etc.)
+• Implement data augmentation strategies specific to solar time series
+• Consider temperature scaling for improved calibration
+• Explore multi-scale temporal contrasts for better temporal pattern capture
+
+================================================================================
+                            END OF REPORT
+================================================================================
+        

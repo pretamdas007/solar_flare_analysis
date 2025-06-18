@@ -1,0 +1,22 @@
+Monte Carlo Bayesian Model Analysis Report
+==================================================
+
+Generated: 2025-06-19 00:48:57
+
+Model Information:
+- Monte Carlo Samples: 50
+- Model Path: ../best_graph_model.h5
+
+Performance Metrics:
+------------------------------
+classification_accuracy: 0.4460
+uncertainty_error_correlation: -0.0681
+uncertainty_prediction_mse: 0.0042
+uncertainty_prediction_correlation: 0.7522
+
+Uncertainty Analysis Summary:
+------------------------------
+Mean Epistemic Uncertainty: 0.0641
+Std Epistemic Uncertainty: 0.0455
+
+Analysis completed successfully!

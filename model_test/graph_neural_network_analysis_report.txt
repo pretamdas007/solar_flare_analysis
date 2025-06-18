@@ -1,0 +1,70 @@
+
+================================================================================
+                    GRAPH NEURAL NETWORK MODEL ANALYSIS REPORT
+================================================================================
+Generated: 2025-06-19 00:40:04
+
+MODEL INFORMATION:
+------------------
+• Model File: ..\best_graph_model.h5
+• Architecture: Graph Neural Network
+• Total Parameters: 13,057
+• Input Format: dense
+• Prediction Type: binary
+
+GRAPH STRUCTURE:
+----------------
+• Number of Nodes: 20
+• Number of Edges: 135.0
+• Graph Connectivity: 67.50% if self.graph_structure else 'N/A'
+
+DATASET INFORMATION:
+--------------------
+• Total Samples: 2000
+• Feature Dimensions: 20
+• Class Distribution:
+  • No Flare: 1811 samples (90.55%)
+  • C-Class: 189 samples (9.45%)
+
+PERFORMANCE METRICS:
+--------------------
+• Overall Accuracy: 0.1395 (13.95%)
+• Weighted Precision: 0.9149
+• Weighted Recall: 0.1395
+• Weighted F1-Score: 0.1028
+
+DETAILED CLASSIFICATION REPORT:
+-------------------------------
+              precision    recall  f1-score   support
+
+    No Flare       1.00      0.05      0.09      1811
+ Flare Event       0.10      1.00      0.18       189
+
+    accuracy                           0.14      2000
+   macro avg       0.55      0.52      0.14      2000
+weighted avg       0.91      0.14      0.10      2000
+
+
+CONFUSION MATRIX:
+-----------------
+[[  90 1721]
+ [   0  189]]
+
+ANALYSIS INSIGHTS:
+------------------
+• The Graph Neural Network model leverages feature relationships through graph connectivity
+• Node centrality analysis reveals most important features for flare prediction
+• Graph structure captures spatial and temporal correlations in solar data
+• Model shows developing performance on test data
+
+RECOMMENDATIONS:
+----------------
+• Consider increasing graph connectivity for better feature interaction modeling
+• Implement attention mechanisms to focus on critical nodes during prediction
+• Explore dynamic graph structures that adapt to temporal patterns
+• Add graph regularization to prevent overfitting in sparse regions
+
+================================================================================
+                            END OF REPORT
+================================================================================
+        

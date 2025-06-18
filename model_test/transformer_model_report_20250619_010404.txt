@@ -1,0 +1,56 @@
+Transformer Model Analysis Report
+==================================================
+
+Generated: 2025-06-19 01:04:04
+
+Model Information:
+- Model Path: ../best_transformer_model.h5
+- Architecture: Transformer with Multi-Head Attention
+- Input Shape: (None, 128, 2)
+
+Performance Metrics:
+------------------------------
+classification_accuracy: 0.0000
+
+Detailed Classification Report:
+------------------------------
+
+Background:
+  precision: 0.0000
+  recall: 0.0000
+  f1-score: 0.0000
+  support: 0.0000
+
+A-class:
+  precision: 0.0000
+  recall: 0.0000
+  f1-score: 0.0000
+  support: 38.0000
+
+C-class:
+  precision: 0.0000
+  recall: 0.0000
+  f1-score: 0.0000
+  support: 0.0000
+
+macro avg:
+  precision: 0.0000
+  recall: 0.0000
+  f1-score: 0.0000
+  support: 38.0000
+
+weighted avg:
+  precision: 0.0000
+  recall: 0.0000
+  f1-score: 0.0000
+  support: 38.0000
+
+Model Architecture Summary:
+------------------------------
+• Multi-head self-attention mechanism
+• Positional encoding for temporal sequences
+• Layer normalization and residual connections
+• Multi-task learning (classification + regression)
+• Global average pooling for sequence aggregation
+
+Analysis completed successfully!

@@ -760,10 +760,14 @@ class EnhancedMLTrainer:
             }
             logger.info("✓ Hybrid Graph-Transformer training completed")
             
-        except Exception as e:
+        except Exception as e:            
             logger.error(f"✗ Hybrid Graph-Transformer training failed: {e}")
             logger.error(f"Traceback: {traceback.format_exc()}")
             results['hybrid_graph_transformer'] = {'status': 'failed', 'error': str(e)}
+        
+        # Save all successfully trained models
+        logger.info("Saving all successfully trained models...")
+        self._save_all_trained_models(results)
         
         return results
     
@@ -803,12 +807,125 @@ class EnhancedMLTrainer:
             }
             
             logger.info("✓ Basic model training completed")
-            
         except Exception as e:
             logger.error(f"✗ Basic model training failed: {e}")
             results['basic_decomposition'] = {'status': 'failed', 'error': str(e)}
         
+        # Save all successfully trained basic models
+        logger.info("Saving basic models...")
+        self._save_all_trained_models(results)
+        
         return results
+    
+    def _save_all_trained_models(self, results):
+        """
+        Save all successfully trained models to disk as .h5 files
+        """
+        import os
+        
+        # Create models directory if it doesn't exist
+        models_dir = Path("models")
+        models_dir.mkdir(exist_ok=True)
+        
+        saved_count = 0
+        
+        for model_name, result in results.items():
+            if result.get('status') == 'success' and 'model' in result:
+                try:
+                    model_obj = result['model']
+                    
+                    # Determine the correct model to save based on model type
+                    model_to_save = None
+                    filename = f"{model_name}_model.h5"
+                    
+                    if model_name == 'transformer':
+                        # TransformerFlareModel - save the main model
+                        if hasattr(model_obj, 'model') and model_obj.model is not None:
+                            model_to_save = model_obj.model
+                    
+                    elif model_name == 'conv_transformer':
+                        # ConvolutionalTransformerModel - save the main model
+                        if hasattr(model_obj, 'model') and model_obj.model is not None:
+                            model_to_save = model_obj.model
+                    
+                    elif model_name == 'monte_carlo':
+                        # MonteCarloSolarFlareModel - save the Monte Carlo model
+                        if hasattr(model_obj, 'monte_carlo_model') and model_obj.monte_carlo_model is not None:
+                            model_to_save = model_obj.monte_carlo_model
+                        elif hasattr(model_obj, 'model') and model_obj.model is not None:
+                            model_to_save = model_obj.model
+                    
+                    elif model_name == 'contrastive':
+                        # ContrastiveLearningModel - save the classifier
+                        if hasattr(model_obj, 'classifier') and model_obj.classifier is not None:
+                            model_to_save = model_obj.classifier
+                            filename = f"{model_name}_classifier.h5"
+                        elif hasattr(model_obj, 'encoder') and model_obj.encoder is not None:
+                            model_to_save = model_obj.encoder
+                            filename = f"{model_name}_encoder.h5"
+                    
+                    elif model_name == 'simple_bayesian':
+                        # SimpleBayesianFlareAnalyzer - save the Bayesian model
+                        if hasattr(model_obj, 'bayesian_model') and model_obj.bayesian_model is not None:
+                            model_to_save = model_obj.bayesian_model
+                        elif hasattr(model_obj, 'model') and model_obj.model is not None:
+                            model_to_save = model_obj.model
+                    
+                    elif model_name == 'graph_neural':
+                        # GraphNeuralFlareModel - save the main model
+                        if hasattr(model_obj, 'model') and model_obj.model is not None:
+                            model_to_save = model_obj.model
+                    
+                    elif model_name == 'hybrid_graph_transformer':
+                        # HybridGraphTransformerModel - save the main model
+                        if hasattr(model_obj, 'model') and model_obj.model is not None:
+                            model_to_save = model_obj.model
+                    
+                    elif model_name == 'basic_decomposition':
+                        # FlareDecompositionModel - save the main model
+                        if hasattr(model_obj, 'model') and model_obj.model is not None:
+                            model_to_save = model_obj.model
+                    
+                    # Save the model if we found one
+                    if model_to_save is not None:
+                        filepath = models_dir / filename
+                        model_to_save.save(str(filepath))
+                        logger.info(f"✓ Saved {model_name} model to {filepath}")
+                        saved_count += 1
+                    else:
+                        logger.warning(f"⚠ Could not find saveable model for {model_name}")
+                        # Try to save any TensorFlow/Keras model found in the result
+                        for key, value in result.items():
+                            if hasattr(value, 'save') and hasattr(value, 'predict'):
+                                try:
+                                    filepath = models_dir / f"{model_name}_{key}.h5"
+                                    value.save(str(filepath))
+                                    logger.info(f"✓ Saved {model_name} {key} to {filepath}")
+                                    saved_count += 1
+                                    break
+                                except Exception as e:
+                                    logger.warning(f"Failed to save {model_name} {key}: {e}")
+                        
+                except Exception as e:
+                    logger.error(f"✗ Failed to save {model_name} model: {e}")
+        
+        logger.info(f"📁 Total models saved: {saved_count}/{len([r for r in results.values() if r.get('status') == 'success'])}")
+        
+        # Also save models to the root directory as requested
+        logger.info("Copying models to root directory...")
+        root_saved = 0
+        for model_file in models_dir.glob("*.h5"):
+            try:
+                import shutil
+                root_path = Path(model_file.name)
+                shutil.copy2(model_file, root_path)
+                logger.info(f"✓ Copied {model_file.name} to root directory")
+                root_saved += 1
+            except Exception as e:
+                logger.error(f"✗ Failed to copy {model_file.name} to root: {e}")
+        
+        logger.info(f"📁 Total models copied to root: {root_saved}")
+    
     def _create_enhanced_visualizations(self, X_train, y_train, X_val, y_val, results):
         """
         Create comprehensive professional visualizations with enhanced seaborn aesthetics
@@ -1251,7 +1368,7 @@ class EnhancedMLTrainer:
             ax.set_xlabel('Training Epoch', fontsize=12, fontweight='semibold')
             ax.set_ylabel('Training Loss', fontsize=12, fontweight='semibold')
             ax.set_yscale('log')
-            ax.grid(True, alpha=0.3)
+            ax.grid(True, alpha=0.3)            
             ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', frameon=True, fancybox=True, shadow=True)
         else:
             ax.text(0.5, 0.5, 'No Convergence Data Available', 
@@ -1266,6 +1383,13 @@ class EnhancedMLTrainer:
             'contrastive': 5, 'simple_bayesian': 3, 'graph_neural': 6,
             'hybrid_graph_transformer': 7
         }
+        
+        # Log available models for debugging
+        available_models = list(results.keys()) if results else []
+        expected_models = list(complexity_map.keys())
+        
+        logger.info(f"Available models in results: {available_models}")
+        logger.info(f"Expected models in complexity_map: {expected_models}")
         
         complexity_data = []
         for model_name, complexity in complexity_map.items():
@@ -1282,7 +1406,40 @@ class EnhancedMLTrainer:
                     'Size': complexity * 50  # For bubble size
                 })
         
+        # Check if we have any data to plot
+        if not complexity_data:
+            logger.warning("No model data available for complexity plot. Creating placeholder.")
+            # Create placeholder visualization
+            ax.text(0.5, 0.5, 'No Model Complexity Data Available\n\nAvailable models: ' + 
+                   ', '.join(available_models) if available_models else 'None',
+                   ha='center', va='center', transform=ax.transAxes,
+                   fontsize=12, fontweight='bold',
+                   bbox=dict(boxstyle='round,pad=0.5', facecolor='lightgray', alpha=0.8))
+            ax.set_title('Model Complexity vs Performance', fontsize=14, fontweight='bold', pad=15)            
+            ax.set_xlabel('Model Complexity (1=Simple, 7=Complex)', fontsize=12, fontweight='semibold')
+            ax.set_ylabel('Performance Score', fontsize=12, fontweight='semibold')
+            ax.grid(True, alpha=0.3)            
+            return
+        
         comp_df = pd.DataFrame(complexity_data)
+        
+        # Debug the DataFrame structure
+        logger.info(f"DataFrame shape: {comp_df.shape}")
+        logger.info(f"DataFrame columns: {list(comp_df.columns)}")
+        logger.info(f"DataFrame empty: {comp_df.empty}")
+        
+        # Additional safety check
+        if comp_df.empty or 'Complexity' not in comp_df.columns:
+            logger.warning("DataFrame is empty or missing required columns. Creating fallback plot.")
+            ax.text(0.5, 0.5, 'No Valid Model Data Available\nfor Complexity Analysis',
+                   ha='center', va='center', transform=ax.transAxes,
+                   fontsize=12, fontweight='bold',
+                   bbox=dict(boxstyle='round,pad=0.5', facecolor='lightgray', alpha=0.8))
+            ax.set_title('Model Complexity vs Performance', fontsize=14, fontweight='bold', pad=15)
+            ax.set_xlabel('Model Complexity (1=Simple, 7=Complex)', fontsize=12, fontweight='semibold')
+            ax.set_ylabel('Performance Score', fontsize=12, fontweight='semibold')
+            ax.grid(True, alpha=0.3)
+            return
         
         # Create enhanced scatter plot
         sns.scatterplot(data=comp_df, x='Complexity', y='Performance', 

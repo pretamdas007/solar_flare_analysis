@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-06-16T21:01:35.592729",
+  "timestamp": "2025-06-18T03:15:05.315320",
   "data_info": {
     "total_files": 5,
     "processed_files": 5,
@@ -75,7 +75,7 @@
       1724862,
       2
     ],
-    "processing_timestamp": "2025-06-16T20:12:55.278448",
+    "processing_timestamp": "2025-06-17T21:31:58.063441",
     "scaling": {
       "method": "RobustScaler",
       "feature_ranges": {
@@ -117,18 +117,30 @@
       "error": null
     },
     "monte_carlo": {
-      "status": "failed",
-      "error": "'MonteCarloSolarFlareModel' object has no attribute 'build_model'"
+      "status": "success",
+      "error": null
     },
     "contrastive": {
-      "status": "failed",
-      "error": "A KerasTensor cannot be used as input to a TensorFlow function. A KerasTensor is a symbolic placeholder for a shape and dtype, used when constructing Keras Functional models or Keras Functions. You can only use it as input to a Keras layer or a Keras operation (from the namespaces `keras.layers` and `keras.ops`). You are likely doing something like:\n\n```\nx = Input(...)\n...\ntf_fn(x)  # Invalid.\n```\n\nWhat you should do instead is wrap `tf_fn` in a layer:\n\n```\nclass MyLayer(Layer):\n    def call(self, x):\n        return tf_fn(x)\n\nx = MyLayer()(x)\n```\n"
+      "status": "success",
+      "error": null
+    },
+    "simple_bayesian": {
+      "status": "success",
+      "error": null
+    },
+    "graph_neural": {
+      "status": "success",
+      "error": null
+    },
+    "hybrid_graph_transformer": {
+      "status": "success",
+      "error": null
     }
   },
   "configuration": {
     "sequence_length": 128,
     "overlap_ratio": 0.75,
-    "models_trained": 4,
-    "successful_models": 2
+    "models_trained": 7,
+    "successful_models": 7
   }
 }

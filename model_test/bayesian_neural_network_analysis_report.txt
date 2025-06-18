@@ -1,0 +1,91 @@
+
+================================================================================
+                    BAYESIAN NEURAL NETWORK MODEL ANALYSIS REPORT
+================================================================================
+Generated: 2025-06-18 23:58:44
+
+MODEL INFORMATION:
+------------------
+• Model File: ..\models\bayesian_model.h5
+• Architecture: Bayesian Neural Network
+• Total Parameters: 109,903
+• Prediction Type: multi-class->binary
+• Monte Carlo Samples: 100
+
+UNCERTAINTY QUANTIFICATION:
+---------------------------
+• Mean Epistemic Uncertainty: 0.00117873
+• Mean Aleatoric Uncertainty: 0.18915954
+• Mean Total Uncertainty: 0.19033828
+• Uncertainty-Error Correlation: 0.0638
+
+DATASET INFORMATION:
+--------------------
+• Total Samples: 2000
+• Feature Dimensions: 20
+• Class Distribution:
+  • No Flare: 1707 samples (85.35%)
+  • Flare Event: 293 samples (14.65%)
+
+PERFORMANCE METRICS:
+--------------------
+• Overall Accuracy: 0.1465 (14.65%)
+• Weighted Precision: 0.0215
+• Weighted Recall: 0.1465
+• Weighted F1-Score: 0.0374
+
+DETAILED CLASSIFICATION REPORT:
+-------------------------------
+              precision    recall  f1-score   support
+
+    No Flare       0.00      0.00      0.00      1707
+ Flare Event       0.15      1.00      0.26       293
+
+    accuracy                           0.15      2000
+   macro avg       0.07      0.50      0.13      2000
+weighted avg       0.02      0.15      0.04      2000
+
+
+CONFUSION MATRIX:
+-----------------
+[[   0 1707]
+ [   0  293]]
+
+UNCERTAINTY ANALYSIS:
+---------------------
+• Epistemic Uncertainty Statistics:
+  - Mean: 0.00117873
+  - Std: 0.05245882
+  - Min: 0.00000395
+  - Max: 2.34662175
+
+• Aleatoric Uncertainty Statistics:
+  - Mean: 0.18915954
+  - Std: 0.02862254
+  - Min: 0.17979372
+  - Max: 1.43004441
+
+• Model Calibration:
+  - Uncertainty-Error Correlation: 0.0638
+  - Calibration Quality: Poor
+
+BAYESIAN INSIGHTS:
+------------------
+• The model provides uncertainty estimates for each prediction
+• Epistemic uncertainty reflects model confidence (reducible with more data)
+• Aleatoric uncertainty reflects inherent data noise (irreducible)
+• Weak correlation between uncertainty and prediction errors
+• Model shows developing predictive performance
+
+RECOMMENDATIONS:
+----------------
+• Use uncertainty estimates for decision-making and risk assessment
+• Focus data collection efforts on high epistemic uncertainty regions
+• Consider ensemble methods to further improve uncertainty estimates
+• Implement uncertainty-aware active learning for optimal data acquisition
+• Apply uncertainty thresholding for reliable prediction filtering
+
+================================================================================
+                            END OF REPORT
+================================================================================
+        

@@ -1,0 +1,647 @@
+2025-06-18 13:26:12,932 - INFO - Loading real XRS data for training...
+2025-06-18 13:26:12,932 - INFO - Loading XRS data from: solar_flare_analysis\data\XRS
+2025-06-18 13:26:12,932 - INFO - Processing 5 XRS CSV files...
+2025-06-18 13:26:12,932 - INFO - Processing file 1/5: 2017_xrsa_xrsb.csv
+2025-06-18 13:26:13,300 - INFO -   Sampled 236160 from 236160 original points
+2025-06-18 13:26:13,392 - INFO -   ✓ Processed 213530 samples
+2025-06-18 13:26:13,392 - INFO - Processing file 2/5: 2019_xrsa_xrsb.csv
+2025-06-18 13:26:13,918 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 13:26:14,025 - INFO -   ✓ Processed 258124 samples
+2025-06-18 13:26:14,025 - INFO - Processing file 3/5: 2020_xrsa_xrsb.csv
+2025-06-18 13:26:14,496 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 13:26:14,607 - INFO -   ✓ Processed 248657 samples
+2025-06-18 13:26:14,607 - INFO - Processing file 4/5: 2021_xrsa_xrsb.csv
+2025-06-18 13:26:15,023 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 13:26:15,142 - INFO -   ✓ Processed 254521 samples
+2025-06-18 13:26:15,142 - INFO - Processing file 5/5: 2022_xrsa_xrsb.csv
+2025-06-18 13:26:15,532 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 13:26:15,626 - INFO -   ✓ Processed 257359 samples
+2025-06-18 13:26:15,641 - INFO - ✓ Successfully loaded 1,232,191 XRS data points from 5 files
+2025-06-18 13:26:15,641 - INFO - Applying final preprocessing...
+2025-06-18 13:26:15,757 - INFO - ✓ Data preprocessing completed. Shape: (1232191, 2)
+2025-06-18 13:26:15,757 - INFO - Creating sequences: length=128, step=32, data_len=1232191
+2025-06-18 13:26:18,725 - INFO - ✓ Created 38502 training sequences with 8115 flare events (21.1% flare ratio)
+2025-06-18 13:26:18,725 - INFO - ✓ Loaded 38502 XRS training sequences
+2025-06-18 13:26:18,725 - INFO - ✓ Flare events: 8115 (21.1%)
+2025-06-18 13:26:18,824 - INFO - ============================================================
+2025-06-18 13:26:18,824 - INFO - TRAINING: SimpleBayesianFlareAnalyzer
+2025-06-18 13:26:18,824 - INFO - ============================================================
+2025-06-18 13:26:18,824 - INFO - Training Simple Bayesian Flare Analyzer...
+2025-06-18 13:26:41,720 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-18 13:26:46,512 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-18 13:26:49,206 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-18 13:28:48,916 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 13:28:49,030 - INFO - ✓ Bayesian model saved to models\bayesian_model.h5
+2025-06-18 13:28:49,032 - INFO - Creating visualization for bayesian...
+2025-06-18 13:28:54,091 - INFO - ✓ Visualization saved to individual_models_output\bayesian_training_results.png
+2025-06-18 13:37:08,367 - INFO - Generating 800 synthetic training samples...
+2025-06-18 13:37:08,710 - INFO - Generated data with 245.0 flare events (30.6% flare ratio)
+2025-06-18 13:37:08,725 - ERROR - Error testing simple_cnn: Model 'simple_cnn' not available. Choose from: ['transformer', 'conv_transformer', 'monte_carlo', 'contrastive', 'bayesian', 'graph_neural', 'hybrid_graph_transformer', 'enhanced_decomposition']
+2025-06-18 13:37:08,733 - ERROR - Error testing lstm_attention: Model 'lstm_attention' not available. Choose from: ['transformer', 'conv_transformer', 'monte_carlo', 'contrastive', 'bayesian', 'graph_neural', 'hybrid_graph_transformer', 'enhanced_decomposition']
+2025-06-18 13:37:08,734 - INFO - ============================================================
+2025-06-18 13:37:08,735 - INFO - TRAINING: SimpleBayesianFlareAnalyzer
+2025-06-18 13:37:08,783 - INFO - ============================================================
+2025-06-18 13:37:08,802 - INFO - Training Simple Bayesian Flare Analyzer...
+2025-06-18 13:38:34,042 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-18 13:38:40,981 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-18 13:38:43,606 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-18 13:38:59,796 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 13:38:59,891 - INFO - ✓ Bayesian model saved to models\bayesian_model.h5
+2025-06-18 13:38:59,891 - INFO - Creating enhanced seaborn visualization for bayesian...
+2025-06-18 13:39:13,433 - INFO - ✓ Enhanced visualization saved to individual_models_output\bayesian_enhanced_training_results.png
+2025-06-18 13:39:13,433 - INFO - Loading real XRS data for training...
+2025-06-18 13:39:13,433 - INFO - Loading XRS data from: solar_flare_analysis\data\XRS
+2025-06-18 13:39:13,433 - INFO - Processing 2 XRS CSV files...
+2025-06-18 13:39:13,433 - INFO - Processing file 1/2: 2017_xrsa_xrsb.csv
+2025-06-18 13:39:13,952 - INFO -   Sampled 236160 from 236160 original points
+2025-06-18 13:39:14,025 - INFO -   ✓ Processed 213530 samples
+2025-06-18 13:39:14,025 - INFO - Processing file 2/2: 2019_xrsa_xrsb.csv
+2025-06-18 13:39:14,373 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 13:39:14,450 - INFO -   ✓ Processed 258124 samples
+2025-06-18 13:39:14,450 - INFO - ✓ Successfully loaded 471,654 XRS data points from 2 files
+2025-06-18 13:39:14,450 - INFO - Applying final preprocessing...
+2025-06-18 13:39:14,487 - INFO - ✓ Data preprocessing completed. Shape: (471654, 2)
+2025-06-18 13:39:14,502 - INFO - Creating sequences: length=64, step=16, data_len=471654
+2025-06-18 13:39:16,943 - INFO - ✓ Created 29475 training sequences with 2598 flare events (8.8% flare ratio)
+2025-06-18 13:39:16,943 - INFO - ✓ Loaded 29475 XRS training sequences
+2025-06-18 13:39:16,943 - INFO - ✓ Flare events: 2598 (8.8%)
+2025-06-18 13:42:03,646 - INFO - Loading real XRS data for training...
+2025-06-18 13:42:03,646 - INFO - Loading XRS data from: solar_flare_analysis\data\XRS
+2025-06-18 13:42:03,646 - INFO - Processing 5 XRS CSV files...
+2025-06-18 13:42:03,646 - INFO - Processing file 1/5: 2017_xrsa_xrsb.csv
+2025-06-18 13:42:04,039 - INFO -   Sampled 236160 from 236160 original points
+2025-06-18 13:42:04,116 - INFO -   ✓ Processed 213530 samples
+2025-06-18 13:42:04,117 - INFO - Processing file 2/5: 2019_xrsa_xrsb.csv
+2025-06-18 13:42:04,437 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 13:42:04,546 - INFO -   ✓ Processed 258124 samples
+2025-06-18 13:42:04,547 - INFO - Processing file 3/5: 2020_xrsa_xrsb.csv
+2025-06-18 13:42:04,962 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 13:42:05,093 - INFO -   ✓ Processed 248657 samples
+2025-06-18 13:42:05,093 - INFO - Processing file 4/5: 2021_xrsa_xrsb.csv
+2025-06-18 13:42:05,630 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 13:42:05,754 - INFO -   ✓ Processed 254521 samples
+2025-06-18 13:42:05,755 - INFO - Processing file 5/5: 2022_xrsa_xrsb.csv
+2025-06-18 13:42:06,478 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 13:42:06,679 - INFO -   ✓ Processed 257359 samples
+2025-06-18 13:42:06,703 - INFO - ✓ Successfully loaded 1,232,191 XRS data points from 5 files
+2025-06-18 13:42:06,703 - INFO - Applying final preprocessing...
+2025-06-18 13:42:06,897 - INFO - ✓ Data preprocessing completed. Shape: (1232191, 2)
+2025-06-18 13:42:06,911 - INFO - Creating sequences: length=128, step=32, data_len=1232191
+2025-06-18 13:42:14,162 - INFO - ✓ Created 38502 training sequences with 8115 flare events (21.1% flare ratio)
+2025-06-18 13:42:14,162 - INFO - ✓ Loaded 38502 XRS training sequences
+2025-06-18 13:42:14,162 - INFO - ✓ Flare events: 8115 (21.1%)
+2025-06-18 13:42:14,269 - INFO - ============================================================
+2025-06-18 13:42:14,270 - INFO - TRAINING: SimpleBayesianFlareAnalyzer
+2025-06-18 13:42:14,271 - INFO - ============================================================
+2025-06-18 13:42:14,274 - INFO - Training Simple Bayesian Flare Analyzer...
+2025-06-18 13:42:28,835 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-18 13:42:33,143 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-18 13:42:35,466 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-18 13:44:23,280 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 13:44:23,348 - INFO - ✓ Bayesian model saved to models\bayesian_model.h5
+2025-06-18 13:44:23,349 - INFO - Creating enhanced seaborn visualization for bayesian...
+2025-06-18 13:44:46,627 - INFO - ✓ Enhanced visualization saved to individual_models_output\bayesian_enhanced_training_results.png
+2025-06-18 13:49:20,068 - INFO - Loading real XRS data for training...
+2025-06-18 13:49:20,068 - INFO - Loading XRS data from: solar_flare_analysis\data\XRS
+2025-06-18 13:49:20,083 - INFO - Processing 8 XRS CSV files...
+2025-06-18 13:49:20,083 - INFO - Processing file 1/8: 2017_xrsa_xrsb.csv
+2025-06-18 13:49:20,412 - INFO -   Sampled 236160 from 236160 original points
+2025-06-18 13:49:20,495 - INFO -   ✓ Processed 213530 samples
+2025-06-18 13:49:20,496 - INFO - Processing file 2/8: 2019_xrsa_xrsb.csv
+2025-06-18 13:49:20,826 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 13:49:20,916 - INFO -   ✓ Processed 258124 samples
+2025-06-18 13:49:20,916 - INFO - Processing file 3/8: 2020_xrsa_xrsb.csv
+2025-06-18 13:49:21,329 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 13:49:21,432 - INFO -   ✓ Processed 248657 samples
+2025-06-18 13:49:21,432 - INFO - Processing file 4/8: 2021_xrsa_xrsb.csv
+2025-06-18 13:49:21,815 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 13:49:21,901 - INFO -   ✓ Processed 254521 samples
+2025-06-18 13:49:21,901 - INFO - Processing file 5/8: 2022_xrsa_xrsb.csv
+2025-06-18 13:49:22,318 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 13:49:22,417 - INFO -   ✓ Processed 257359 samples
+2025-06-18 13:49:22,417 - INFO - Processing file 6/8: 2023_xrsa_xrsb.csv
+2025-06-18 13:49:22,794 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 13:49:22,881 - INFO -   ✓ Processed 254012 samples
+2025-06-18 13:49:22,881 - INFO - Processing file 7/8: 2024_xrsa_xrsb.csv
+2025-06-18 13:49:23,249 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 13:49:23,349 - INFO -   ✓ Processed 258070 samples
+2025-06-18 13:49:23,349 - INFO - Processing file 8/8: 2025_xrsa_xrsb.csv
+2025-06-18 13:49:23,458 - INFO -   Sampled 69120 from 69120 original points
+2025-06-18 13:49:23,484 - INFO -   ✓ Processed 64378 samples
+2025-06-18 13:49:23,507 - INFO - ✓ Successfully loaded 1,808,651 XRS data points from 8 files
+2025-06-18 13:49:23,507 - INFO - Applying final preprocessing...
+2025-06-18 13:49:23,659 - INFO - ✓ Data preprocessing completed. Shape: (1808651, 2)
+2025-06-18 13:49:23,659 - INFO - Creating sequences: length=128, step=32, data_len=1808651
+2025-06-18 13:49:27,598 - INFO - ✓ Created 56517 training sequences with 19961 flare events (35.3% flare ratio)
+2025-06-18 13:49:27,598 - INFO - ✓ Loaded 56517 XRS training sequences
+2025-06-18 13:49:27,598 - INFO - ✓ Flare events: 19961 (35.3%)
+2025-06-18 13:49:27,730 - INFO - ============================================================
+2025-06-18 13:49:27,730 - INFO - TRAINING: SimpleBayesianFlareAnalyzer
+2025-06-18 13:49:27,730 - INFO - ============================================================
+2025-06-18 13:49:27,730 - INFO - Training Simple Bayesian Flare Analyzer...
+2025-06-18 13:49:37,819 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-18 13:49:40,869 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-18 13:49:43,074 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-18 13:52:31,832 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 13:52:31,911 - INFO - ✓ Bayesian model saved to models\bayesian_model.h5
+2025-06-18 13:52:31,911 - INFO - Creating enhanced seaborn visualization for bayesian...
+2025-06-18 13:52:49,573 - INFO - ✓ Enhanced visualization saved to individual_models_output\bayesian_enhanced_training_results.png
+2025-06-18 13:56:22,578 - INFO - Loading real XRS data for training...
+2025-06-18 13:56:22,578 - INFO - Loading XRS data from: solar_flare_analysis\data\XRS
+2025-06-18 13:56:22,578 - INFO - Processing 8 XRS CSV files...
+2025-06-18 13:56:22,578 - INFO - Processing file 1/8: 2017_xrsa_xrsb.csv
+2025-06-18 13:56:22,990 - INFO -   Sampled 236160 from 236160 original points
+2025-06-18 13:56:23,078 - INFO -   ✓ Processed 213530 samples
+2025-06-18 13:56:23,079 - INFO - Processing file 2/8: 2019_xrsa_xrsb.csv
+2025-06-18 13:56:23,396 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 13:56:23,501 - INFO -   ✓ Processed 258124 samples
+2025-06-18 13:56:23,501 - INFO - Processing file 3/8: 2020_xrsa_xrsb.csv
+2025-06-18 13:56:23,911 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 13:56:24,004 - INFO -   ✓ Processed 248657 samples
+2025-06-18 13:56:24,004 - INFO - Processing file 4/8: 2021_xrsa_xrsb.csv
+2025-06-18 13:56:24,389 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 13:56:24,469 - INFO -   ✓ Processed 254521 samples
+2025-06-18 13:56:24,469 - INFO - Processing file 5/8: 2022_xrsa_xrsb.csv
+2025-06-18 13:56:24,847 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 13:56:24,934 - INFO -   ✓ Processed 257359 samples
+2025-06-18 13:56:24,934 - INFO - Processing file 6/8: 2023_xrsa_xrsb.csv
+2025-06-18 13:56:25,301 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 13:56:25,401 - INFO -   ✓ Processed 254012 samples
+2025-06-18 13:56:25,401 - INFO - Processing file 7/8: 2024_xrsa_xrsb.csv
+2025-06-18 13:56:25,774 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 13:56:25,868 - INFO -   ✓ Processed 258070 samples
+2025-06-18 13:56:25,868 - INFO - Processing file 8/8: 2025_xrsa_xrsb.csv
+2025-06-18 13:56:25,979 - INFO -   Sampled 69120 from 69120 original points
+2025-06-18 13:56:26,002 - INFO -   ✓ Processed 64378 samples
+2025-06-18 13:56:26,024 - INFO - ✓ Successfully loaded 1,808,651 XRS data points from 8 files
+2025-06-18 13:56:26,024 - INFO - Applying final preprocessing...
+2025-06-18 13:56:26,186 - INFO - ✓ Data preprocessing completed. Shape: (1808651, 2)
+2025-06-18 13:56:26,201 - INFO - Creating sequences: length=128, step=32, data_len=1808651
+2025-06-18 13:56:30,654 - INFO - ✓ Created 56517 training sequences with 19961 flare events (35.3% flare ratio)
+2025-06-18 13:56:30,654 - INFO - ✓ Loaded 56517 XRS training sequences
+2025-06-18 13:56:30,654 - INFO - ✓ Flare events: 19961 (35.3%)
+2025-06-18 13:56:30,763 - INFO - ============================================================
+2025-06-18 13:56:30,763 - INFO - TRAINING: GraphNeuralFlareModel
+2025-06-18 13:56:30,763 - INFO - ============================================================
+2025-06-18 13:56:30,779 - INFO - Training Graph Neural Flare Model...
+2025-06-18 13:56:40,552 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-18 13:56:43,545 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-18 13:56:45,735 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-18 14:12:28,550 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 14:54:42,482 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 15:08:53,925 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 16:05:16,720 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 16:19:30,455 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 16:19:30,524 - INFO - ✓ Graph Neural model saved to models\graph_neural_model.h5
+2025-06-18 16:19:30,525 - INFO - Creating enhanced seaborn visualization for graph_neural...
+2025-06-18 16:19:51,994 - INFO - ✓ Enhanced visualization saved to individual_models_output\graph_neural_enhanced_training_results.png
+2025-06-18 16:29:59,241 - INFO - Loading real XRS data for training...
+2025-06-18 16:29:59,241 - INFO - Loading XRS data from: solar_flare_analysis\data\XRS
+2025-06-18 16:29:59,241 - INFO - Processing 8 XRS CSV files...
+2025-06-18 16:29:59,241 - INFO - Processing file 1/8: 2017_xrsa_xrsb.csv
+2025-06-18 16:29:59,637 - INFO -   Sampled 236160 from 236160 original points
+2025-06-18 16:29:59,727 - INFO -   ✓ Processed 213530 samples
+2025-06-18 16:29:59,728 - INFO - Processing file 2/8: 2019_xrsa_xrsb.csv
+2025-06-18 16:30:00,083 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 16:30:00,177 - INFO -   ✓ Processed 258124 samples
+2025-06-18 16:30:00,177 - INFO - Processing file 3/8: 2020_xrsa_xrsb.csv
+2025-06-18 16:30:00,564 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 16:30:00,675 - INFO -   ✓ Processed 248657 samples
+2025-06-18 16:30:00,675 - INFO - Processing file 4/8: 2021_xrsa_xrsb.csv
+2025-06-18 16:30:01,048 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 16:30:01,141 - INFO -   ✓ Processed 254521 samples
+2025-06-18 16:30:01,141 - INFO - Processing file 5/8: 2022_xrsa_xrsb.csv
+2025-06-18 16:30:01,582 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 16:30:01,676 - INFO -   ✓ Processed 257359 samples
+2025-06-18 16:30:01,676 - INFO - Processing file 6/8: 2023_xrsa_xrsb.csv
+2025-06-18 16:30:02,064 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 16:30:02,157 - INFO -   ✓ Processed 254012 samples
+2025-06-18 16:30:02,157 - INFO - Processing file 7/8: 2024_xrsa_xrsb.csv
+2025-06-18 16:30:02,531 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 16:30:02,624 - INFO -   ✓ Processed 258070 samples
+2025-06-18 16:30:02,624 - INFO - Processing file 8/8: 2025_xrsa_xrsb.csv
+2025-06-18 16:30:02,742 - INFO -   Sampled 69120 from 69120 original points
+2025-06-18 16:30:02,764 - INFO -   ✓ Processed 64378 samples
+2025-06-18 16:30:02,795 - INFO - ✓ Successfully loaded 1,808,651 XRS data points from 8 files
+2025-06-18 16:30:02,795 - INFO - Applying final preprocessing...
+2025-06-18 16:30:02,938 - INFO - ✓ Data preprocessing completed. Shape: (1808651, 2)
+2025-06-18 16:30:02,938 - INFO - Creating sequences: length=128, step=32, data_len=1808651
+2025-06-18 16:30:07,184 - INFO - ✓ Created 56517 training sequences with 19961 flare events (35.3% flare ratio)
+2025-06-18 16:30:07,184 - INFO - ✓ Loaded 56517 XRS training sequences
+2025-06-18 16:30:07,184 - INFO - ✓ Flare events: 19961 (35.3%)
+2025-06-18 16:30:07,321 - INFO - ============================================================
+2025-06-18 16:30:07,321 - INFO - TRAINING: HybridGraphTransformerModel
+2025-06-18 16:30:07,336 - INFO - ============================================================
+2025-06-18 16:30:07,336 - INFO - Training Hybrid Graph-Transformer Model...
+2025-06-18 16:30:22,173 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-18 16:30:25,571 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-18 16:30:27,791 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-18 16:31:48,250 - INFO - Loading real XRS data for training...
+2025-06-18 16:31:48,251 - INFO - Loading XRS data from: solar_flare_analysis\data\XRS
+2025-06-18 16:31:48,252 - INFO - Processing 8 XRS CSV files...
+2025-06-18 16:31:48,253 - INFO - Processing file 1/8: 2017_xrsa_xrsb.csv
+2025-06-18 16:31:48,997 - INFO -   Sampled 236160 from 236160 original points
+2025-06-18 16:31:49,090 - INFO -   ✓ Processed 213530 samples
+2025-06-18 16:31:49,090 - INFO - Processing file 2/8: 2019_xrsa_xrsb.csv
+2025-06-18 16:31:49,561 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 16:31:49,673 - INFO -   ✓ Processed 258124 samples
+2025-06-18 16:31:49,673 - INFO - Processing file 3/8: 2020_xrsa_xrsb.csv
+2025-06-18 16:31:50,180 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 16:31:50,328 - INFO -   ✓ Processed 248657 samples
+2025-06-18 16:31:50,338 - INFO - Processing file 4/8: 2021_xrsa_xrsb.csv
+2025-06-18 16:31:51,296 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 16:31:51,397 - INFO -   ✓ Processed 254521 samples
+2025-06-18 16:31:51,397 - INFO - Processing file 5/8: 2022_xrsa_xrsb.csv
+2025-06-18 16:31:51,878 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 16:31:51,963 - INFO -   ✓ Processed 257359 samples
+2025-06-18 16:31:51,963 - INFO - Processing file 6/8: 2023_xrsa_xrsb.csv
+2025-06-18 16:31:52,516 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 16:31:52,671 - INFO -   ✓ Processed 254012 samples
+2025-06-18 16:31:52,671 - INFO - Processing file 7/8: 2024_xrsa_xrsb.csv
+2025-06-18 16:31:53,258 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 16:31:53,375 - INFO -   ✓ Processed 258070 samples
+2025-06-18 16:31:53,375 - INFO - Processing file 8/8: 2025_xrsa_xrsb.csv
+2025-06-18 16:31:53,507 - INFO -   Sampled 69120 from 69120 original points
+2025-06-18 16:31:53,549 - INFO -   ✓ Processed 64378 samples
+2025-06-18 16:31:53,578 - INFO - ✓ Successfully loaded 1,808,651 XRS data points from 8 files
+2025-06-18 16:31:53,578 - INFO - Applying final preprocessing...
+2025-06-18 16:31:53,738 - INFO - ✓ Data preprocessing completed. Shape: (1808651, 2)
+2025-06-18 16:31:53,738 - INFO - Creating sequences: length=128, step=32, data_len=1808651
+2025-06-18 16:32:00,116 - INFO - ✓ Created 56517 training sequences with 19961 flare events (35.3% flare ratio)
+2025-06-18 16:32:00,117 - INFO - ✓ Loaded 56517 XRS training sequences
+2025-06-18 16:32:00,118 - INFO - ✓ Flare events: 19961 (35.3%)
+2025-06-18 16:32:00,289 - INFO - ============================================================
+2025-06-18 16:32:00,289 - INFO - TRAINING: EnhancedFlareDecompositionModel
+2025-06-18 16:32:00,289 - INFO - ============================================================
+2025-06-18 16:32:00,289 - INFO - Training Enhanced Flare Decomposition Model...
+2025-06-18 16:32:22,110 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-18 16:32:28,347 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-18 16:32:32,406 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-18 16:36:42,829 - INFO - Loading real XRS data for training...
+2025-06-18 16:36:42,829 - INFO - Loading XRS data from: solar_flare_analysis\data\XRS
+2025-06-18 16:36:42,829 - INFO - Processing 8 XRS CSV files...
+2025-06-18 16:36:42,829 - INFO - Processing file 1/8: 2017_xrsa_xrsb.csv
+2025-06-18 16:36:43,214 - INFO -   Sampled 236160 from 236160 original points
+2025-06-18 16:36:43,313 - INFO -   ✓ Processed 213530 samples
+2025-06-18 16:36:43,313 - INFO - Processing file 2/8: 2019_xrsa_xrsb.csv
+2025-06-18 16:36:43,670 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 16:36:43,763 - INFO -   ✓ Processed 258124 samples
+2025-06-18 16:36:43,763 - INFO - Processing file 3/8: 2020_xrsa_xrsb.csv
+2025-06-18 16:36:44,194 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 16:36:44,296 - INFO -   ✓ Processed 248657 samples
+2025-06-18 16:36:44,296 - INFO - Processing file 4/8: 2021_xrsa_xrsb.csv
+2025-06-18 16:36:44,674 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 16:36:44,773 - INFO -   ✓ Processed 254521 samples
+2025-06-18 16:36:44,773 - INFO - Processing file 5/8: 2022_xrsa_xrsb.csv
+2025-06-18 16:36:45,149 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 16:36:45,243 - INFO -   ✓ Processed 257359 samples
+2025-06-18 16:36:45,243 - INFO - Processing file 6/8: 2023_xrsa_xrsb.csv
+2025-06-18 16:36:45,635 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 16:36:45,727 - INFO -   ✓ Processed 254012 samples
+2025-06-18 16:36:45,727 - INFO - Processing file 7/8: 2024_xrsa_xrsb.csv
+2025-06-18 16:36:46,108 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 16:36:46,223 - INFO -   ✓ Processed 258070 samples
+2025-06-18 16:36:46,223 - INFO - Processing file 8/8: 2025_xrsa_xrsb.csv
+2025-06-18 16:36:46,347 - INFO -   Sampled 69120 from 69120 original points
+2025-06-18 16:36:46,368 - INFO -   ✓ Processed 64378 samples
+2025-06-18 16:36:46,393 - INFO - ✓ Successfully loaded 1,808,651 XRS data points from 8 files
+2025-06-18 16:36:46,394 - INFO - Applying final preprocessing...
+2025-06-18 16:36:46,523 - INFO - ✓ Data preprocessing completed. Shape: (1808651, 2)
+2025-06-18 16:36:46,538 - INFO - Creating sequences: length=128, step=32, data_len=1808651
+2025-06-18 16:36:50,757 - INFO - ✓ Created 56517 training sequences with 19961 flare events (35.3% flare ratio)
+2025-06-18 16:36:50,757 - INFO - ✓ Loaded 56517 XRS training sequences
+2025-06-18 16:36:50,757 - INFO - ✓ Flare events: 19961 (35.3%)
+2025-06-18 16:36:50,889 - INFO - ============================================================
+2025-06-18 16:36:50,889 - INFO - TRAINING: HybridGraphTransformerModel
+2025-06-18 16:36:50,889 - INFO - ============================================================
+2025-06-18 16:36:50,889 - INFO - Training Hybrid Graph-Transformer Model...
+2025-06-18 16:37:05,874 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-18 16:37:09,116 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-18 16:37:11,396 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-18 17:52:18,033 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 17:52:18,672 - INFO - ✓ Hybrid Graph-Transformer model saved to models\hybrid_graph_transformer_model.h5
+2025-06-18 17:52:18,672 - INFO - Creating enhanced seaborn visualization for hybrid_graph_transformer...
+2025-06-18 17:52:42,367 - INFO - ✓ Enhanced visualization saved to individual_models_output\hybrid_graph_transformer_enhanced_training_results.png
+2025-06-18 17:57:42,640 - INFO - Loading real XRS data for training...
+2025-06-18 17:57:42,640 - INFO - Loading XRS data from: solar_flare_analysis\data\XRS
+2025-06-18 17:57:42,640 - INFO - Processing 8 XRS CSV files...
+2025-06-18 17:57:42,640 - INFO - Processing file 1/8: 2017_xrsa_xrsb.csv
+2025-06-18 17:57:43,021 - INFO -   Sampled 236160 from 236160 original points
+2025-06-18 17:57:43,103 - INFO -   ✓ Processed 213530 samples
+2025-06-18 17:57:43,103 - INFO - Processing file 2/8: 2019_xrsa_xrsb.csv
+2025-06-18 17:57:43,464 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 17:57:43,551 - INFO -   ✓ Processed 258124 samples
+2025-06-18 17:57:43,566 - INFO - Processing file 3/8: 2020_xrsa_xrsb.csv
+2025-06-18 17:57:43,954 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 17:57:44,051 - INFO -   ✓ Processed 248657 samples
+2025-06-18 17:57:44,051 - INFO - Processing file 4/8: 2021_xrsa_xrsb.csv
+2025-06-18 17:57:44,426 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 17:57:44,517 - INFO -   ✓ Processed 254521 samples
+2025-06-18 17:57:44,517 - INFO - Processing file 5/8: 2022_xrsa_xrsb.csv
+2025-06-18 17:57:44,935 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 17:57:45,032 - INFO -   ✓ Processed 257359 samples
+2025-06-18 17:57:45,033 - INFO - Processing file 6/8: 2023_xrsa_xrsb.csv
+2025-06-18 17:57:45,551 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 17:57:45,645 - INFO -   ✓ Processed 254012 samples
+2025-06-18 17:57:45,645 - INFO - Processing file 7/8: 2024_xrsa_xrsb.csv
+2025-06-18 17:57:46,288 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 17:57:46,412 - INFO -   ✓ Processed 258070 samples
+2025-06-18 17:57:46,412 - INFO - Processing file 8/8: 2025_xrsa_xrsb.csv
+2025-06-18 17:57:46,544 - INFO -   Sampled 69120 from 69120 original points
+2025-06-18 17:57:46,592 - INFO -   ✓ Processed 64378 samples
+2025-06-18 17:57:46,622 - INFO - ✓ Successfully loaded 1,808,651 XRS data points from 8 files
+2025-06-18 17:57:46,622 - INFO - Applying final preprocessing...
+2025-06-18 17:57:46,818 - INFO - ✓ Data preprocessing completed. Shape: (1808651, 2)
+2025-06-18 17:57:46,818 - INFO - Creating sequences: length=128, step=32, data_len=1808651
+2025-06-18 17:57:52,600 - INFO - ✓ Created 56517 training sequences with 19961 flare events (35.3% flare ratio)
+2025-06-18 17:57:52,600 - INFO - ✓ Loaded 56517 XRS training sequences
+2025-06-18 17:57:52,600 - INFO - ✓ Flare events: 19961 (35.3%)
+2025-06-18 17:57:52,727 - INFO - ============================================================
+2025-06-18 17:57:52,727 - INFO - TRAINING: EnhancedFlareDecompositionModel
+2025-06-18 17:57:52,727 - INFO - ============================================================
+2025-06-18 17:57:52,727 - INFO - Training Enhanced Flare Decomposition Model...
+2025-06-18 17:58:08,069 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-18 17:58:11,528 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-18 17:58:13,778 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-18 18:11:48,048 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 18:23:02,907 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 18:34:17,699 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 18:34:17,919 - INFO - ✓ Enhanced Decomposition model saved to models\enhanced_decomposition_model.h5
+2025-06-18 18:34:17,919 - INFO - Creating enhanced seaborn visualization for enhanced_decomposition...
+2025-06-18 18:34:36,935 - INFO - ✓ Enhanced visualization saved to individual_models_output\enhanced_decomposition_enhanced_training_results.png
+2025-06-18 18:53:23,903 - INFO - Loading real XRS data for training...
+2025-06-18 18:53:23,903 - INFO - Loading XRS data from: solar_flare_analysis\data\XRS
+2025-06-18 18:53:23,903 - INFO - Processing 8 XRS CSV files...
+2025-06-18 18:53:23,903 - INFO - Processing file 1/8: 2017_xrsa_xrsb.csv
+2025-06-18 18:53:24,241 - INFO -   Sampled 236160 from 236160 original points
+2025-06-18 18:53:24,339 - INFO -   ✓ Processed 213530 samples
+2025-06-18 18:53:24,339 - INFO - Processing file 2/8: 2019_xrsa_xrsb.csv
+2025-06-18 18:53:24,715 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 18:53:24,808 - INFO -   ✓ Processed 258124 samples
+2025-06-18 18:53:24,808 - INFO - Processing file 3/8: 2020_xrsa_xrsb.csv
+2025-06-18 18:53:25,192 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 18:53:25,289 - INFO -   ✓ Processed 248657 samples
+2025-06-18 18:53:25,289 - INFO - Processing file 4/8: 2021_xrsa_xrsb.csv
+2025-06-18 18:53:25,664 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 18:53:25,741 - INFO -   ✓ Processed 254521 samples
+2025-06-18 18:53:25,741 - INFO - Processing file 5/8: 2022_xrsa_xrsb.csv
+2025-06-18 18:53:26,114 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 18:53:26,216 - INFO -   ✓ Processed 257359 samples
+2025-06-18 18:53:26,216 - INFO - Processing file 6/8: 2023_xrsa_xrsb.csv
+2025-06-18 18:53:26,581 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 18:53:26,688 - INFO -   ✓ Processed 254012 samples
+2025-06-18 18:53:26,688 - INFO - Processing file 7/8: 2024_xrsa_xrsb.csv
+2025-06-18 18:53:27,093 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 18:53:27,256 - INFO -   ✓ Processed 258070 samples
+2025-06-18 18:53:27,281 - INFO - Processing file 8/8: 2025_xrsa_xrsb.csv
+2025-06-18 18:53:27,498 - INFO -   Sampled 69120 from 69120 original points
+2025-06-18 18:53:27,524 - INFO -   ✓ Processed 64378 samples
+2025-06-18 18:53:27,545 - INFO - ✓ Successfully loaded 1,808,651 XRS data points from 8 files
+2025-06-18 18:53:27,545 - INFO - Applying final preprocessing...
+2025-06-18 18:53:27,686 - INFO - ✓ Data preprocessing completed. Shape: (1808651, 2)
+2025-06-18 18:53:27,686 - INFO - Creating sequences: length=128, step=32, data_len=1808651
+2025-06-18 18:53:31,955 - INFO - ✓ Created 56517 training sequences with 19961 flare events (35.3% flare ratio)
+2025-06-18 18:53:31,955 - INFO - ✓ Loaded 56517 XRS training sequences
+2025-06-18 18:53:31,955 - INFO - ✓ Flare events: 19961 (35.3%)
+2025-06-18 18:53:32,084 - INFO - ============================================================
+2025-06-18 18:53:32,084 - INFO - TRAINING: TransformerFlareModel
+2025-06-18 18:53:32,084 - INFO - ============================================================
+2025-06-18 18:53:32,084 - INFO - Training Transformer Flare Model...
+2025-06-18 18:53:42,173 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-18 18:53:47,049 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-18 18:53:49,696 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-18 18:58:47,143 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 19:35:01,980 - INFO - Loading real XRS data for training...
+2025-06-18 19:35:01,980 - INFO - Loading XRS data from: solar_flare_analysis\data\XRS
+2025-06-18 19:35:02,066 - INFO - Processing 8 XRS CSV files...
+2025-06-18 19:35:02,128 - INFO - Processing file 1/8: 2017_xrsa_xrsb.csv
+2025-06-18 19:35:03,258 - INFO -   Sampled 236160 from 236160 original points
+2025-06-18 19:35:03,505 - INFO -   ✓ Processed 213530 samples
+2025-06-18 19:35:03,520 - INFO - Processing file 2/8: 2019_xrsa_xrsb.csv
+2025-06-18 19:35:04,887 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 19:35:05,131 - INFO -   ✓ Processed 258124 samples
+2025-06-18 19:35:05,190 - INFO - Processing file 3/8: 2020_xrsa_xrsb.csv
+2025-06-18 19:35:06,368 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 19:35:06,579 - INFO -   ✓ Processed 248657 samples
+2025-06-18 19:35:06,594 - INFO - Processing file 4/8: 2021_xrsa_xrsb.csv
+2025-06-18 19:35:07,957 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 19:35:08,224 - INFO -   ✓ Processed 254521 samples
+2025-06-18 19:35:08,239 - INFO - Processing file 5/8: 2022_xrsa_xrsb.csv
+2025-06-18 19:35:09,566 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 19:35:09,809 - INFO -   ✓ Processed 257359 samples
+2025-06-18 19:35:09,839 - INFO - Processing file 6/8: 2023_xrsa_xrsb.csv
+2025-06-18 19:35:10,931 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 19:35:11,219 - INFO -   ✓ Processed 254012 samples
+2025-06-18 19:35:11,234 - INFO - Processing file 7/8: 2024_xrsa_xrsb.csv
+2025-06-18 19:35:12,624 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 19:35:12,861 - INFO -   ✓ Processed 258070 samples
+2025-06-18 19:35:12,876 - INFO - Processing file 8/8: 2025_xrsa_xrsb.csv
+2025-06-18 19:35:13,333 - INFO -   Sampled 69120 from 69120 original points
+2025-06-18 19:35:13,429 - INFO -   ✓ Processed 64378 samples
+2025-06-18 19:35:13,491 - INFO - ✓ Successfully loaded 1,808,651 XRS data points from 8 files
+2025-06-18 19:35:13,495 - INFO - Applying final preprocessing...
+2025-06-18 19:35:13,833 - INFO - ✓ Data preprocessing completed. Shape: (1808651, 2)
+2025-06-18 19:35:13,848 - INFO - Creating sequences: length=128, step=32, data_len=1808651
+2025-06-18 19:35:20,647 - INFO - ✓ Created 56517 training sequences with 19961 flare events (35.3% flare ratio)
+2025-06-18 19:35:20,647 - INFO - ✓ Loaded 56517 XRS training sequences
+2025-06-18 19:35:20,662 - INFO - ✓ Flare events: 19961 (35.3%)
+2025-06-18 19:35:20,807 - INFO - ============================================================
+2025-06-18 19:35:20,807 - INFO - TRAINING: TransformerFlareModel
+2025-06-18 19:35:20,807 - INFO - ============================================================
+2025-06-18 19:35:20,807 - INFO - Training Transformer Flare Model...
+2025-06-18 19:36:54,607 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-18 19:37:09,163 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-18 19:37:12,782 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-18 19:42:37,181 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 19:48:16,732 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 19:53:18,865 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 19:53:39,202 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 19:53:39,317 - INFO - ✓ Transformer model saved to models\transformer_model.h5
+2025-06-18 19:53:39,317 - INFO - Creating enhanced seaborn visualization for transformer...
+2025-06-18 19:54:01,054 - INFO - ✓ Enhanced visualization saved to individual_models_output\transformer_enhanced_training_results.png
+2025-06-18 20:06:41,829 - INFO - Loading real XRS data for training...
+2025-06-18 20:06:41,829 - INFO - Loading XRS data from: solar_flare_analysis\data\XRS
+2025-06-18 20:06:41,829 - INFO - Processing 8 XRS CSV files...
+2025-06-18 20:06:41,829 - INFO - Processing file 1/8: 2017_xrsa_xrsb.csv
+2025-06-18 20:06:42,212 - INFO -   Sampled 236160 from 236160 original points
+2025-06-18 20:06:42,308 - INFO -   ✓ Processed 213530 samples
+2025-06-18 20:06:42,308 - INFO - Processing file 2/8: 2019_xrsa_xrsb.csv
+2025-06-18 20:06:42,678 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 20:06:42,804 - INFO -   ✓ Processed 258124 samples
+2025-06-18 20:06:42,804 - INFO - Processing file 3/8: 2020_xrsa_xrsb.csv
+2025-06-18 20:06:43,388 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 20:06:43,545 - INFO -   ✓ Processed 248657 samples
+2025-06-18 20:06:43,545 - INFO - Processing file 4/8: 2021_xrsa_xrsb.csv
+2025-06-18 20:06:44,587 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 20:06:44,719 - INFO -   ✓ Processed 254521 samples
+2025-06-18 20:06:44,719 - INFO - Processing file 5/8: 2022_xrsa_xrsb.csv
+2025-06-18 20:06:45,898 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 20:06:46,068 - INFO -   ✓ Processed 257359 samples
+2025-06-18 20:06:46,078 - INFO - Processing file 6/8: 2023_xrsa_xrsb.csv
+2025-06-18 20:06:46,904 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 20:06:47,024 - INFO -   ✓ Processed 254012 samples
+2025-06-18 20:06:47,024 - INFO - Processing file 7/8: 2024_xrsa_xrsb.csv
+2025-06-18 20:06:47,607 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 20:06:47,748 - INFO -   ✓ Processed 258070 samples
+2025-06-18 20:06:47,748 - INFO - Processing file 8/8: 2025_xrsa_xrsb.csv
+2025-06-18 20:06:47,915 - INFO -   Sampled 69120 from 69120 original points
+2025-06-18 20:06:47,959 - INFO -   ✓ Processed 64378 samples
+2025-06-18 20:06:47,993 - INFO - ✓ Successfully loaded 1,808,651 XRS data points from 8 files
+2025-06-18 20:06:47,993 - INFO - Applying final preprocessing...
+2025-06-18 20:06:48,192 - INFO - ✓ Data preprocessing completed. Shape: (1808651, 2)
+2025-06-18 20:06:48,192 - INFO - Creating sequences: length=128, step=32, data_len=1808651
+2025-06-18 20:06:55,950 - INFO - ✓ Created 56517 training sequences with 19961 flare events (35.3% flare ratio)
+2025-06-18 20:06:55,952 - INFO - ✓ Loaded 56517 XRS training sequences
+2025-06-18 20:06:55,953 - INFO - ✓ Flare events: 19961 (35.3%)
+2025-06-18 20:06:56,094 - INFO - ============================================================
+2025-06-18 20:06:56,094 - INFO - TRAINING: ConvolutionalTransformerModel
+2025-06-18 20:06:56,094 - INFO - ============================================================
+2025-06-18 20:06:56,094 - INFO - Training Convolutional Transformer Model...
+2025-06-18 20:08:42,041 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-18 20:08:52,688 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-18 20:08:55,433 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-18 20:25:40,680 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 20:25:41,007 - INFO - ✓ Conv Transformer model saved to models\conv_transformer_model.h5
+2025-06-18 20:25:41,007 - INFO - Creating enhanced seaborn visualization for conv_transformer...
+2025-06-18 20:26:08,167 - INFO - ✓ Enhanced visualization saved to individual_models_output\conv_transformer_enhanced_training_results.png
+2025-06-18 20:27:17,464 - INFO - Loading real XRS data for training...
+2025-06-18 20:27:17,464 - INFO - Loading XRS data from: solar_flare_analysis\data\XRS
+2025-06-18 20:27:17,464 - INFO - Processing 8 XRS CSV files...
+2025-06-18 20:27:17,464 - INFO - Processing file 1/8: 2017_xrsa_xrsb.csv
+2025-06-18 20:27:17,834 - INFO -   Sampled 236160 from 236160 original points
+2025-06-18 20:27:17,922 - INFO -   ✓ Processed 213530 samples
+2025-06-18 20:27:17,923 - INFO - Processing file 2/8: 2019_xrsa_xrsb.csv
+2025-06-18 20:27:18,300 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 20:27:18,411 - INFO -   ✓ Processed 258124 samples
+2025-06-18 20:27:18,411 - INFO - Processing file 3/8: 2020_xrsa_xrsb.csv
+2025-06-18 20:27:18,793 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 20:27:18,880 - INFO -   ✓ Processed 248657 samples
+2025-06-18 20:27:18,880 - INFO - Processing file 4/8: 2021_xrsa_xrsb.csv
+2025-06-18 20:27:19,284 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 20:27:19,377 - INFO -   ✓ Processed 254521 samples
+2025-06-18 20:27:19,377 - INFO - Processing file 5/8: 2022_xrsa_xrsb.csv
+2025-06-18 20:27:19,750 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 20:27:19,844 - INFO -   ✓ Processed 257359 samples
+2025-06-18 20:27:19,844 - INFO - Processing file 6/8: 2023_xrsa_xrsb.csv
+2025-06-18 20:27:20,232 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 20:27:20,326 - INFO -   ✓ Processed 254012 samples
+2025-06-18 20:27:20,326 - INFO - Processing file 7/8: 2024_xrsa_xrsb.csv
+2025-06-18 20:27:20,748 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 20:27:20,844 - INFO -   ✓ Processed 258070 samples
+2025-06-18 20:27:20,844 - INFO - Processing file 8/8: 2025_xrsa_xrsb.csv
+2025-06-18 20:27:20,958 - INFO -   Sampled 69120 from 69120 original points
+2025-06-18 20:27:20,979 - INFO -   ✓ Processed 64378 samples
+2025-06-18 20:27:21,000 - INFO - ✓ Successfully loaded 1,808,651 XRS data points from 8 files
+2025-06-18 20:27:21,000 - INFO - Applying final preprocessing...
+2025-06-18 20:27:21,139 - INFO - ✓ Data preprocessing completed. Shape: (1808651, 2)
+2025-06-18 20:27:21,139 - INFO - Creating sequences: length=128, step=32, data_len=1808651
+2025-06-18 20:27:25,133 - INFO - ✓ Created 56517 training sequences with 19961 flare events (35.3% flare ratio)
+2025-06-18 20:27:25,134 - INFO - ✓ Loaded 56517 XRS training sequences
+2025-06-18 20:27:25,135 - INFO - ✓ Flare events: 19961 (35.3%)
+2025-06-18 20:27:25,256 - INFO - ============================================================
+2025-06-18 20:27:25,256 - INFO - TRAINING: MonteCarloSolarFlareModel
+2025-06-18 20:27:25,256 - INFO - ============================================================
+2025-06-18 20:27:25,256 - INFO - Training Monte Carlo Solar Flare Model...
+2025-06-18 20:27:37,171 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-18 20:27:40,796 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-18 20:27:43,094 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-18 20:27:44,684 - INFO - Building Monte Carlo Solar Flare ML Model
+2025-06-18 20:27:44,984 - INFO - Model built successfully: 137380 parameters
+2025-06-18 21:22:04,580 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 21:22:04,843 - INFO - ✓ Monte Carlo model saved to models\monte_carlo_model.h5
+2025-06-18 21:22:04,858 - INFO - Creating enhanced seaborn visualization for monte_carlo...
+2025-06-18 21:22:25,565 - INFO - ✓ Enhanced visualization saved to individual_models_output\monte_carlo_enhanced_training_results.png
+2025-06-18 21:25:01,569 - INFO - Loading real XRS data for training...
+2025-06-18 21:25:01,569 - INFO - Loading XRS data from: solar_flare_analysis\data\XRS
+2025-06-18 21:25:01,569 - INFO - Processing 8 XRS CSV files...
+2025-06-18 21:25:01,569 - INFO - Processing file 1/8: 2017_xrsa_xrsb.csv
+2025-06-18 21:25:01,924 - INFO -   Sampled 236160 from 236160 original points
+2025-06-18 21:25:02,016 - INFO -   ✓ Processed 213530 samples
+2025-06-18 21:25:02,016 - INFO - Processing file 2/8: 2019_xrsa_xrsb.csv
+2025-06-18 21:25:02,359 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 21:25:02,466 - INFO -   ✓ Processed 258124 samples
+2025-06-18 21:25:02,466 - INFO - Processing file 3/8: 2020_xrsa_xrsb.csv
+2025-06-18 21:25:02,860 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 21:25:02,949 - INFO -   ✓ Processed 248657 samples
+2025-06-18 21:25:02,949 - INFO - Processing file 4/8: 2021_xrsa_xrsb.csv
+2025-06-18 21:25:03,379 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 21:25:03,465 - INFO -   ✓ Processed 254521 samples
+2025-06-18 21:25:03,465 - INFO - Processing file 5/8: 2022_xrsa_xrsb.csv
+2025-06-18 21:25:04,094 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 21:25:04,181 - INFO -   ✓ Processed 257359 samples
+2025-06-18 21:25:04,181 - INFO - Processing file 6/8: 2023_xrsa_xrsb.csv
+2025-06-18 21:25:04,570 - INFO -   Sampled 262800 from 262800 original points
+2025-06-18 21:25:04,649 - INFO -   ✓ Processed 254012 samples
+2025-06-18 21:25:04,649 - INFO - Processing file 7/8: 2024_xrsa_xrsb.csv
+2025-06-18 21:25:05,036 - INFO -   Sampled 263520 from 263520 original points
+2025-06-18 21:25:05,132 - INFO -   ✓ Processed 258070 samples
+2025-06-18 21:25:05,132 - INFO - Processing file 8/8: 2025_xrsa_xrsb.csv
+2025-06-18 21:25:05,250 - INFO -   Sampled 69120 from 69120 original points
+2025-06-18 21:25:05,270 - INFO -   ✓ Processed 64378 samples
+2025-06-18 21:25:05,300 - INFO - ✓ Successfully loaded 1,808,651 XRS data points from 8 files
+2025-06-18 21:25:05,301 - INFO - Applying final preprocessing...
+2025-06-18 21:25:05,455 - INFO - ✓ Data preprocessing completed. Shape: (1808651, 2)
+2025-06-18 21:25:05,470 - INFO - Creating sequences: length=128, step=32, data_len=1808651
+2025-06-18 21:25:09,593 - INFO - ✓ Created 56517 training sequences with 19961 flare events (35.3% flare ratio)
+2025-06-18 21:25:09,593 - INFO - ✓ Loaded 56517 XRS training sequences
+2025-06-18 21:25:09,595 - INFO - ✓ Flare events: 19961 (35.3%)
+2025-06-18 21:25:09,783 - INFO - ============================================================
+2025-06-18 21:25:09,783 - INFO - TRAINING: ContrastiveLearningModel
+2025-06-18 21:25:09,783 - INFO - ============================================================
+2025-06-18 21:25:09,783 - INFO - Training Contrastive Learning Model...
+2025-06-18 21:25:22,480 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-06-18 21:25:25,842 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-06-18 21:25:28,167 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-06-18 21:25:30,001 - INFO - Starting contrastive pretraining...
+2025-06-18 21:38:58,148 - INFO - Starting fine-tuning...
+2025-06-18 21:39:17,629 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 21:39:51,978 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 21:40:12,527 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 21:41:03,888 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 21:41:57,785 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 21:41:57,829 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-06-18 21:41:57,868 - INFO - ✓ Contrastive models saved to models\contrastive_encoder.h5 and models\contrastive_classifier.h5
+2025-06-18 21:41:57,868 - INFO - Creating enhanced seaborn visualization for contrastive...
+2025-06-18 21:42:16,770 - INFO - ✓ Enhanced visualization saved to individual_models_output\contrastive_enhanced_training_results.png
