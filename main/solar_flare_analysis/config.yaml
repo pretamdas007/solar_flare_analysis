@@ -1,0 +1,60 @@
+# Configuration file for Solar Flare Analysis Pipeline
+
+# Data Processing Parameters
+data:
+  sampling_interval: 60  # seconds
+  background_window: 3600  # seconds for background estimation
+  threshold_factor: 3.0  # threshold for flare detection
+  min_duration: 300  # minimum flare duration in seconds
+
+# Model Fitting Parameters
+fitting:
+  method: "differential_evolution"  # or "minimize"
+  max_iterations: 1000
+  tolerance: 1e-8
+  parameter_bounds:
+    A: [1e-9, 1e-3]  # Amplitude bounds
+    B: [0, 3600]     # Peak time bounds (seconds)
+    C: [1, 1800]     # Width bounds (seconds)
+    D: [1e-6, 1e-2]  # Decay rate bounds
+
+# Feature Extraction Parameters
+features:
+  alpha_range: [1.5, 3.0]  # Range for synthetic alpha values
+  nanoflare_threshold: 1e-9  # Flux threshold for nanoflare classification
+  test_size: 0.2  # Fraction of data for testing
+  random_state: 42
+
+# Model Training Parameters
+models:
+  random_forest:
+    n_estimators: 100
+    max_depth: null
+    random_state: 42
+    n_jobs: -1
+  
+  xgboost:
+    n_estimators: 100
+    max_depth: 6
+    learning_rate: 0.1
+    random_state: 42
+  
+  bayesian_nn:
+    hidden_dims: [64, 32]
+    epochs: 100
+    batch_size: 32
+    learning_rate: 0.001
+
+# Output Parameters
+output:
+  plot_dpi: 300
+  figure_size: [10, 6]
+  save_models: true
+  generate_plots: true
+
+# Paths
+paths:
+  data_dir: "data"
+  fits_dir: "fits"
+  models_dir: "models"
+  output_dir: "output"
