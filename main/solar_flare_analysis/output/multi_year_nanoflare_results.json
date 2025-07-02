@@ -1,0 +1,118 @@
+{
+  "analysis_metadata": {
+    "years_analyzed": [
+      2017,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+    ],
+    "successful_years": 7,
+    "total_flares": 4585,
+    "total_alpha_extractions": 4585,
+    "parker_threshold": 2.0
+  },
+  "yearly_results": {
+    "2017": {
+      "num_flares": 330,
+      "num_successful_alphas": 330,
+      "alpha_statistics": {
+        "mean": 2.0640499960626992,
+        "std": 0.16745636860721747,
+        "min": 1.3847949900682475,
+        "max": 2.5077163637044677
+      },
+      "parker_verdict": "False",
+      "error": null
+    },
+    "2019": {
+      "num_flares": 139,
+      "num_successful_alphas": 139,
+      "alpha_statistics": {
+        "mean": 2.1239073999077425,
+        "std": 0.12747400361574318,
+        "min": 1.7990727834552374,
+        "max": 2.4168795468561983
+      },
+      "parker_verdict": "False",
+      "error": null
+    },
+    "2020": {
+      "num_flares": 194,
+      "num_successful_alphas": 194,
+      "alpha_statistics": {
+        "mean": 2.1545062450608015,
+        "std": 0.1326492798781691,
+        "min": 1.7852856035964744,
+        "max": 2.423199763274008
+      },
+      "parker_verdict": "False",
+      "error": null
+    },
+    "2021": {
+      "num_flares": 500,
+      "num_successful_alphas": 500,
+      "alpha_statistics": {
+        "mean": 2.1025679992724036,
+        "std": 0.13698155383031949,
+        "min": 1.6729736659647974,
+        "max": 2.408961524557194
+      },
+      "parker_verdict": "False",
+      "error": null
+    },
+    "2022": {
+      "num_flares": 992,
+      "num_successful_alphas": 992,
+      "alpha_statistics": {
+        "mean": 2.008323135711028,
+        "std": 0.13235648361268307,
+        "min": 1.4871106027520757,
+        "max": 2.4134403997152254
+      },
+      "parker_verdict": "False",
+      "error": null
+    },
+    "2023": {
+      "num_flares": 1142,
+      "num_successful_alphas": 1142,
+      "alpha_statistics": {
+        "mean": 1.9786736171151609,
+        "std": 0.13153932207217134,
+        "min": 1.462403970768043,
+        "max": 2.392223666778101
+      },
+      "parker_verdict": "False",
+      "error": null
+    },
+    "2024": {
+      "num_flares": 1288,
+      "num_successful_alphas": 1288,
+      "alpha_statistics": {
+        "mean": 1.9375169380211337,
+        "std": 0.14608963478342687,
+        "min": 1.3929891643649577,
+        "max": 2.330275207858819
+      },
+      "parker_verdict": "False",
+      "error": null
+    }
+  },
+  "overall_analysis": {
+    "alpha_statistics": {
+      "count": 4585,
+      "mean": 2.005025403709474,
+      "std": 0.153344680955742,
+      "min": 1.3847949900682475,
+      "max": 2.5077163637044677,
+      "median": 2.0104969674918234
+    },
+    "power_law_beta": -3.1211430913996585,
+    "power_law_r_squared": 0.18186631398841835,
+    "parker_verdict": "False",
+    "detection_confidence": 0.9973555251277244,
+    "statistical_significance": -2.788887109279764
+  }
+}

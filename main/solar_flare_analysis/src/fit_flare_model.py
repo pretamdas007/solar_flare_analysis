@@ -1,7 +1,8 @@
 """
-Solar Flare Model Fitting Module
+Enhanced Solar Flare Model Fitting Module
 
-This module implements the Gryciuk et al. flare model fitting to GOES XRS data.
+This module implements the Gryciuk et al. flare model fitting to GOES XRS data
+with enhanced smoothing, fitting methods, and professional seaborn visualizations.
 The model uses a Gaussian convolved with an exponential decay to fit solar flare profiles.
 """
 
@@ -9,9 +10,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from scipy.optimize import minimize, differential_evolution
+from scipy.optimize import minimize, differential_evolution, curve_fit
 from scipy.special import erf
-from scipy.signal import find_peaks
+from scipy.signal import find_peaks, savgol_filter
+from scipy.ndimage import gaussian_filter1d
 import json
 import os
 from pathlib import Path
@@ -20,9 +22,14 @@ from tqdm import tqdm
 import warnings
 warnings.filterwarnings('ignore')
 
-class SolarFlareModel:
+# Set matplotlib backend and style
+plt.style.use('default')
+sns.set_palette("husl")
+
+class EnhancedSolarFlareModel:
     """
-    Implementation of the Gryciuk et al. solar flare model.
+    Enhanced implementation of the Gryciuk et al. solar flare model with smoothing
+    and advanced fitting methods.
     
     The model function is:
     f(t) = (1/2) * sqrt(π) * A * C * exp[D(B-t) + (C²D²)/4] * [erf(Z) - erf((Z-t)/C)]
@@ -39,7 +46,7 @@ class SolarFlareModel:
     
     def model_function(self, t, A, B, C, D):
         """
-        Gryciuk et al. flare model function
+        Gryciuk et al. flare model function with robust error handling
         
         Parameters:
         -----------
@@ -47,8 +54,7 @@ class SolarFlareModel:
             Time array
         A : float
             Amplitude (peak height)
-        B : float
-            Time of peak
+        B : float            Time of peak
         C : float
             Width/duration parameter
         D : float
@@ -73,27 +79,79 @@ class SolarFlareModel:
             # Full model
             flux = 0.5 * np.sqrt(np.pi) * A * C * exp_term * (erf_term1 - erf_term2)
             
+            # Return finite values only
             return np.where(np.isfinite(flux), flux, 0)
-        
-        except (OverflowError, ZeroDivisionError, RuntimeWarning):
+            
+        except Exception as e:
+            # Return zeros if calculation fails
             return np.zeros_like(t)
+    
+    def smooth_data(self, flux, method='savgol', window_length=11, sigma=2):
+        """
+        Apply smoothing to flux data
+        
+        Parameters:
+        -----------
+        flux : array-like
+            Input flux data
+        method : str
+            Smoothing method ('savgol' or 'gaussian')
+        window_length : int
+            Window length for Savitzky-Golay filter
+        sigma : float
+            Standard deviation for Gaussian filter
+            
+        Returns:
+        --------
+        array-like
+            Smoothed flux data
+        """
+        if method == 'savgol' and len(flux) > window_length:
+            # Ensure odd window length
+            if window_length % 2 == 0:
+                window_length += 1
+            window_length = min(window_length, len(flux) - 1)
+            if window_length < 3:                return flux
+            try:
+                return savgol_filter(flux, window_length, polyorder=2)
+            except:
+                return flux
+        elif method == 'gaussian':
+            return gaussian_filter1d(flux, sigma=sigma)
+        else:
+            return flux
     
     def objective_function(self, params, t, flux, weights=None):
         """
         Objective function for optimization (weighted least squares)
+        
+        Parameters:
+        -----------
+        params : array-like
+            Model parameters [A, B, C, D]
+        t : array-like
+            Time array
+        flux : array-like
+            Observed flux
+        weights : array-like, optional
+            Weights for data points
+            
+        Returns:
+        --------
+        float
+            Sum of squared residuals
         """
         A, B, C, D = params
         model_flux = self.model_function(t, A, B, C, D)
         
         if weights is None:
             weights = np.ones_like(flux)
-        
         residuals = weights * (flux - model_flux)
         return np.sum(residuals**2)
     
-    def fit_flare(self, t, flux, method='differential_evolution', weights=None):
+    def fit_flare(self, t, flux, method='differential_evolution', weights=None, smooth=True):
         """
-        Fit the flare model to data
+        Enhanced flare fitting with smoothing and multiple methods
         
         Parameters:
         -----------
@@ -102,9 +160,11 @@ class SolarFlareModel:
         flux : array-like
             Flux measurements
         method : str
-            Optimization method ('differential_evolution' or 'minimize')
+            Optimization method ('differential_evolution', 'minimize', or 'curve_fit')
         weights : array-like, optional
             Weights for fitting
+        smooth : bool
+            Whether to apply smoothing to data
             
         Returns:
         --------
@@ -113,18 +173,31 @@ class SolarFlareModel:
         """
         # Normalize time to start from 0
         t_norm = t - t.min()
+        flux_original = flux.copy()
+        
+        # Apply smoothing if requested
+        if smooth:
+            flux = self.smooth_data(flux, method='savgol')
         
         # Initial guess based on data
         peak_idx = np.argmax(flux)
         A_guess = np.max(flux)
         B_guess = t_norm[peak_idx]
-        C_guess = (t_norm.max() - t_norm.min()) / 4
+        C_guess = (t_norm.max() - t_norm.min()) / 4        
         D_guess = 1e-4
         
         initial_guess = [A_guess, B_guess, C_guess, D_guess]
         
         try:
-            if method == 'differential_evolution':
+            if method == 'curve_fit':
+                popt, pcov = curve_fit(
+                    self.model_function, t_norm, flux, p0=initial_guess,
+                    bounds=([b[0] for b in self.bounds], [b[1] for b in self.bounds]),
+                    maxfev=2000
+                )
+                result_x = popt
+                success = True
+            elif method == 'differential_evolution':
                 result = differential_evolution(
                     self.objective_function,
                     bounds=self.bounds,
@@ -134,7 +207,9 @@ class SolarFlareModel:
                     atol=1e-8,
                     tol=1e-8
                 )
-            else:
+                result_x = result.x
+                success = result.success
+            else:  # minimize
                 result = minimize(
                     self.objective_function,
                     initial_guess,
@@ -142,21 +217,26 @@ class SolarFlareModel:
                     method='L-BFGS-B',
                     bounds=self.bounds
                 )
-            
-            # Calculate fit quality metrics
-            fitted_flux = self.model_function(t_norm, *result.x)
-            r_squared = self.calculate_r_squared(flux, fitted_flux)
-            rmse = np.sqrt(np.mean((flux - fitted_flux)**2))
+                result_x = result.x
+                success = result.success
+              # Calculate fit quality metrics
+            fitted_flux = self.model_function(t_norm, *result_x)
+            fitted_flux_original = self.model_function(t_norm, *result_x)
+            r_squared = self.calculate_r_squared(flux_original, fitted_flux_original)
+            rmse = np.sqrt(np.mean((flux_original - fitted_flux_original)**2))
             
             return {
-                'success': result.success,
-                'parameters': dict(zip(self.parameters, result.x)),
+                'success': success,
+                'parameters': dict(zip(self.parameters, result_x)),
                 'fitted_flux': fitted_flux,
+                'fitted_flux_original': fitted_flux_original,
                 'r_squared': r_squared,
                 'rmse': rmse,
                 'original_time': t,
                 'normalized_time': t_norm,
-                'flux': flux
+                'flux': flux,
+                'flux_original': flux_original,                
+                'smoothed': smooth
             }
             
         except Exception as e:
@@ -165,11 +245,14 @@ class SolarFlareModel:
                 'success': False,
                 'parameters': dict(zip(self.parameters, [np.nan]*4)),
                 'fitted_flux': np.full_like(flux, np.nan),
+                'fitted_flux_original': np.full_like(flux_original, np.nan),
                 'r_squared': np.nan,
                 'rmse': np.nan,
                 'original_time': t,
                 'normalized_time': t_norm,
-                'flux': flux
+                'flux': flux,
+                'flux_original': flux_original,
+                'smoothed': smooth
             }
     
     def calculate_r_squared(self, observed, predicted):
@@ -375,25 +458,26 @@ def process_file(filepath, output_dir, plot=True):
     print(f"Found {len(flare_segments)} flare events")
     
     # Fit model to each flare
-    model = SolarFlareModel()
+    model = EnhancedSolarFlareModel()
     all_fits = []
     
     for i, (start, end) in enumerate(flare_segments):
         t_flare = time_seconds[start:end]
-        flux_flare = flux[start:end]
-        
+        flux_flare = flux[start:end]        
         # Subtract background
         background = np.min(flux_flare)
         flux_flare = flux_flare - background
         
-        fit_result = model.fit_flare(t_flare, flux_flare)
+        # Enhanced fitting with smoothing and multiple methods
+        fit_result = model.fit_flare(t_flare, flux_flare, method='differential_evolution', smooth=True)
         fit_result['flare_id'] = i
         fit_result['file'] = os.path.basename(filepath)
         fit_result['background'] = background
+        fit_result['smoothed'] = True  # Mark that smoothing was applied
         
         all_fits.append(fit_result)
         
-        # Plot if requested
+        # Plot if requested (now uses enhanced 4-panel visualization)
         if plot and fit_result['success']:
             plot_flare_fit(fit_result, output_dir, f"{os.path.basename(filepath)}_flare_{i}")
     
@@ -402,34 +486,102 @@ def process_file(filepath, output_dir, plot=True):
     
     return all_fits
 
-def plot_flare_fit(fit_result, output_dir, filename):
+def plot_enhanced_flare_fit(fit_result, output_dir, filename):
     """
-    Plot flare fit results
+    Create enhanced 4-panel seaborn visualization of flare fit
     """
-    plt.figure(figsize=(10, 6))
+    # Set up the figure with seaborn style
+    plt.style.use('default')
+    sns.set_palette("husl")
+    
+    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+    fig.suptitle('Enhanced Solar Flare Model Analysis with Seaborn', 
+                 fontsize=16, fontweight='bold', y=0.98)
     
     t = fit_result['normalized_time']
     flux = fit_result['flux']
     fitted_flux = fit_result['fitted_flux']
-    
-    plt.plot(t, flux, 'ko-', label='Observed', markersize=3, alpha=0.7)
-    plt.plot(t, fitted_flux, 'r-', label='Fitted Model', linewidth=2)
-    
-    plt.xlabel('Time (seconds)')
-    plt.ylabel('Flux (W/m²)')
-    plt.title(f'Solar Flare Fit - R² = {fit_result["r_squared"]:.3f}')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-    
-    # Add parameter text
     params = fit_result['parameters']
-    param_text = f"A = {params['A']:.2e}\nB = {params['B']:.1f}\nC = {params['C']:.1f}\nD = {params['D']:.2e}"
-    plt.text(0.02, 0.98, param_text, transform=plt.gca().transAxes, 
-             verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
     
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f"{filename}_fit.png"), dpi=300, bbox_inches='tight')
+    # Plot 1: Data and Fit with enhanced styling
+    axes[0, 0].plot(t, flux, 'o', color='steelblue', markersize=4, alpha=0.7, 
+                   label='Observed Data', markeredgecolor='darkblue', markeredgewidth=0.5)
+    axes[0, 0].plot(t, fitted_flux, '-', color='crimson', linewidth=3, 
+                   label='Gryciuk Model Fit', alpha=0.9)
+    
+    axes[0, 0].set_xlabel('Time (seconds)', fontweight='bold')
+    axes[0, 0].set_ylabel('Flux (W/m²)', fontweight='bold')
+    axes[0, 0].set_title('Data vs Model Fit', fontweight='bold', pad=15)
+    axes[0, 0].legend(loc='upper right', framealpha=0.9)
+    axes[0, 0].grid(True, alpha=0.3, linestyle='--')
+    sns.despine(ax=axes[0, 0])
+    
+    # Plot 2: Residuals with enhanced styling
+    residuals = flux - fitted_flux
+    axes[0, 1].plot(t, residuals, 'o', color='darkgreen', markersize=3, alpha=0.7,
+                   markeredgecolor='forestgreen', markeredgewidth=0.5)
+    axes[0, 1].axhline(y=0, color='red', linestyle='--', linewidth=2, alpha=0.8)
+    axes[0, 1].set_xlabel('Time (seconds)', fontweight='bold')
+    axes[0, 1].set_ylabel('Residuals (W/m²)', fontweight='bold')
+    axes[0, 1].set_title('Fit Residuals', fontweight='bold', pad=15)
+    axes[0, 1].grid(True, alpha=0.3, linestyle='--')
+    sns.despine(ax=axes[0, 1])
+    
+    # Plot 3: Parameter values as bar chart
+    param_names = ['A', 'B', 'C', 'D']
+    param_values = [params[p] for p in param_names]
+    
+    bars = axes[1, 0].bar(param_names, param_values, color='steelblue', alpha=0.8,
+                         edgecolor='darkblue', linewidth=1)
+    axes[1, 0].set_ylabel('Parameter Value', fontweight='bold')
+    axes[1, 0].set_title('Fitted Parameters', fontweight='bold', pad=15)
+    sns.despine(ax=axes[1, 0])
+    
+    # Add value labels on bars
+    for bar, val in zip(bars, param_values):
+        height = bar.get_height()
+        axes[1, 0].text(bar.get_x() + bar.get_width()/2., height + height*0.05,
+                       f'{val:.2e}', ha='center', va='bottom', fontweight='bold',
+                       fontsize=9)
+    
+    # Plot 4: Summary information
+    axes[1, 1].axis('off')
+    
+    info_text = "ENHANCED FIT ANALYSIS\\n" + "="*25 + "\\n\\n"
+    info_text += f"📊 Model Performance:\\n"
+    info_text += f"   • R²: {fit_result['r_squared']:.4f}\\n"
+    info_text += f"   • RMSE: {fit_result['rmse']:.2e}\\n\\n"
+    
+    info_text += f"🔧 Parameters:\\n"
+    for param, value in params.items():
+        info_text += f"   • {param}: {value:.3e}\\n"
+    
+    info_text += f"\\n⚙️ Processing:\\n"
+    info_text += f"   • Data points: {len(t)}\\n"
+    info_text += f"   • Duration: {t.max():.1f}s\\n"
+    info_text += f"   • Smoothed: {'Yes' if fit_result.get('smoothed') else 'No'}\\n"
+    
+    # Color-code based on R²
+    r_sq = fit_result['r_squared']
+    bg_color = 'lightgreen' if r_sq > 0.8 else 'lightyellow' if r_sq > 0.5 else 'lightcoral'
+    
+    axes[1, 1].text(0.05, 0.95, info_text, transform=axes[1, 1].transAxes,
+                   fontsize=10, verticalalignment='top', fontfamily='monospace',
+                   bbox=dict(boxstyle='round,pad=0.6', facecolor=bg_color, alpha=0.7))
+    
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    
+    # Save the enhanced plot
+    output_path = os.path.join(output_dir, 'fits', f"{filename}_enhanced_fit.png")
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close()
+
+def plot_flare_fit(fit_result, output_dir, filename):
+    """
+    Compatibility wrapper - now uses enhanced plotting
+    """
+    plot_enhanced_flare_fit(fit_result, output_dir, filename)
 
 def save_fits(fits, output_dir, filename):
     """
@@ -458,16 +610,39 @@ def save_fits(fits, output_dir, filename):
 
 def main():
     """
-    Main function to process GOES data files
+    Main function to process GOES data files with enhanced features
     """
-    parser = argparse.ArgumentParser(description='Fit solar flare models to GOES XRS data')
+    parser = argparse.ArgumentParser(description='Fit solar flare models to GOES XRS data with enhanced features')
     parser.add_argument('--data_dir', default='data', help='Directory containing GOES CSV files')
     parser.add_argument('--output_dir', default='.', help='Output directory for results')
-    parser.add_argument('--plot', action='store_true', help='Generate plots')
+    parser.add_argument('--plot', action='store_true', help='Generate enhanced plots')
+    parser.add_argument('--smooth', action='store_true', default=True, help='Apply data smoothing')
+    parser.add_argument('--smooth_method', default='savgol', choices=['savgol', 'gaussian', 'none'],
+                       help='Smoothing method to use')
+    parser.add_argument('--fit_method', default='auto', 
+                       choices=['auto', 'curve_fit', 'differential_evolution', 'minimize'],
+                       help='Fitting method to use')
     
     args = parser.parse_args()
     
+    # Try to find data directory automatically if default doesn't exist
     data_dir = Path(args.data_dir)
+    if not data_dir.exists():
+        # Try different possible locations
+        possible_data_dirs = [
+            Path('data'),
+            Path('../data'), 
+            Path('./data'),
+            Path('main/solar_flare_analysis/data'),
+            Path('../main/solar_flare_analysis/data')
+        ]
+        
+        for possible_dir in possible_data_dirs:
+            if possible_dir.exists() and list(possible_dir.glob('*.csv')):
+                data_dir = possible_dir
+                print(f"Found data directory: {data_dir.absolute()}")
+                break
+    
     output_dir = Path(args.output_dir)
     
     # Create output directories
@@ -476,13 +651,14 @@ def main():
     
     # Find all CSV files
     csv_files = list(data_dir.glob('*.csv'))
-    
     if not csv_files:
         print(f"No CSV files found in {data_dir}")
         print("Please place GOES XRS data files in the data/ directory")
         return
     
     print(f"Found {len(csv_files)} CSV files to process")
+    print(f"Enhanced features: smoothing={args.smooth}, smooth_method={args.smooth_method}")
+    print(f"Fitting method: {args.fit_method}")
     
     # Process each file
     all_results = []
