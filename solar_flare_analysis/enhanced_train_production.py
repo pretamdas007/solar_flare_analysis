@@ -9,6 +9,7 @@ import os
 import logging
 import pickle
 import json
+import shutil
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -48,23 +49,39 @@ class EnhancedXRSDataLoader:
         self.metadata = {}
         self.scaler = RobustScaler()
         
-    def load_and_process_xrs_data(self, max_files=None, sample_rate=0.5, min_samples_per_file=100):
+    def load_and_process_xrs_data(self, max_files=None, sample_rate=0.5, min_samples_per_file=100, specific_files=None):
         """
         Load XRS data with enhanced preprocessing for ML training
         """
-        logger.info(f"Enhanced XRS data loading from: {self.data_dir}")
-        
-        if not self.data_dir.exists():
-            logger.error(f"Data directory does not exist: {self.data_dir}")
-            return np.array([])
-        
-        csv_files = list(self.data_dir.glob("*.csv"))
-        if not csv_files:
-            logger.error(f"No CSV files found in {self.data_dir}")
-            return np.array([])
+        if specific_files:
+            logger.info(f"Enhanced XRS data loading from specific files: {specific_files}")
             
-        if max_files:
-            csv_files = csv_files[:max_files]
+            csv_files = []
+            for filename in specific_files:
+                file_path = self.data_dir / filename
+                if file_path.exists():
+                    csv_files.append(file_path)
+                    logger.info(f"✓ Found specific file: {filename}")
+                else:
+                    logger.warning(f"✗ Specific file not found: {filename}")
+            
+            if not csv_files:
+                logger.error("None of the specified files were found")
+                return np.array([])
+        else:
+            logger.info(f"Enhanced XRS data loading from: {self.data_dir}")
+            
+            if not self.data_dir.exists():
+                logger.error(f"Data directory does not exist: {self.data_dir}")
+                return np.array([])
+            
+            csv_files = list(self.data_dir.glob("*.csv"))
+            if not csv_files:
+                logger.error(f"No CSV files found in {self.data_dir}")
+                return np.array([])
+                
+            if max_files:
+                csv_files = csv_files[:max_files]
             
         logger.info(f"Processing {len(csv_files)} XRS CSV files...")
         
@@ -419,7 +436,7 @@ class EnhancedMLTrainer:
         self.training_results = {}
         self.data_loader = None
     
-    def train_with_enhanced_xrs_data(self, data_dir="solar_flare_analysis/data/XRS", max_files=5, sequence_length=128):
+    def train_with_enhanced_xrs_data(self, data_dir="solar_flare_analysis/data/XRS", max_files=5, sequence_length=128, specific_files=None):
         """
         Main training method using enhanced XRS data loading
         """
@@ -434,8 +451,9 @@ class EnhancedMLTrainer:
         logger.info("Step 1: Loading and processing XRS data...")
         raw_data = self.data_loader.load_and_process_xrs_data(
             max_files=max_files,
-            sample_rate=0.7,  # Higher sample rate for better training
-            min_samples_per_file=200
+            sample_rate=1.0,  # Use all data from specific files
+            min_samples_per_file=200,
+            specific_files=specific_files
         )
         
         if len(raw_data) == 0:
@@ -521,7 +539,7 @@ class EnhancedMLTrainer:
             
             history = transformer.train(
                 X_train, y_train_multi, X_val, y_val_multi,
-                epochs=5, batch_size=16, verbose=1
+                epochs=1, batch_size=16, verbose=1
             )
             
             results['transformer'] = {
@@ -549,7 +567,7 @@ class EnhancedMLTrainer:
             history = conv_transformer.model.fit(
                 X_train, [y_train, np.random.rand(len(y_train))],
                 validation_data=(X_val, [y_val, np.random.rand(len(y_val))]),
-                epochs=5, batch_size=16, verbose=1
+                epochs=1, batch_size=16, verbose=1
             )
             
             results['conv_transformer'] = {
@@ -589,7 +607,7 @@ class EnhancedMLTrainer:
             history = model.fit(
                 X_train, y_train_mc,
                 validation_data=(X_val, y_val_mc),
-                epochs=5, batch_size=16, verbose=1
+                epochs=1, batch_size=16, verbose=1
             )
             
             results['monte_carlo'] = {
@@ -617,7 +635,7 @@ class EnhancedMLTrainer:
             
             # Pretrain phase with reduced epochs for demo
             logger.info("Starting contrastive pretraining...")
-            pretrain_history = contrastive.pretrain(X_train, epochs=3, batch_size=16)
+            pretrain_history = contrastive.pretrain(X_train, epochs=1, batch_size=16)
             
             # Build classifier for fine-tuning
             classifier = contrastive.build_classifier(n_classes=n_classes)
@@ -626,7 +644,7 @@ class EnhancedMLTrainer:
             logger.info("Starting fine-tuning...")
             finetune_history = contrastive.fine_tune(
                 X_train, y_train, X_val, y_val,
-                n_classes=n_classes, epochs=3, batch_size=16
+                n_classes=n_classes, epochs=1, batch_size=16
             )
             
             results['contrastive'] = {
@@ -665,7 +683,7 @@ class EnhancedMLTrainer:
             logger.info("Training Bayesian model...")
             bayesian_history = bayesian_analyzer.train_bayesian_model(
                 X_train, y_train_bayesian,
-                epochs=5, batch_size=16
+                epochs=1, batch_size=16
             )
             
             # Test Monte Carlo predictions
@@ -713,7 +731,7 @@ class EnhancedMLTrainer:
             graph_history = graph_model.train(
                 X_train, y_train, y_train_energy,
                 X_val, y_val, y_val_energy,
-                epochs=3, batch_size=2, verbose=1  # Even smaller batch size for memory efficiency
+                epochs=1, batch_size=2, verbose=1  # Even smaller batch size for memory efficiency
             )
             
             results['graph_neural'] = {
@@ -750,7 +768,7 @@ class EnhancedMLTrainer:
             hybrid_history = hybrid_model.train(
                 X_train, y_train,
                 X_val, y_val,
-                epochs=3, batch_size=4, verbose=1  # Very small batch size
+                epochs=1, batch_size=4, verbose=1  # Very small batch size
             )
             
             results['hybrid_graph_transformer'] = {
@@ -797,7 +815,7 @@ class EnhancedMLTrainer:
             history = basic_model.model.fit(
                 X_train, y_decomp,
                 validation_data=(X_val, y_val_decomp),
-                epochs=5, batch_size=16, verbose=1
+                epochs=1, batch_size=16, verbose=1
             )
             
             results['basic_decomposition'] = {
@@ -1710,20 +1728,49 @@ class EnhancedMLTrainer:
 
 def main():
     """
-    Enhanced main function with proper XRS data integration
+    Enhanced main function to train with specific XRS files
     """
     print("="*60)
     print("ENHANCED XRS SOLAR FLARE ML TRAINING PIPELINE")
+    print("Training with specific files: 2025_xrsa_xrsb.csv, 2024_xrsa_xrsb.csv")
     print("="*60)
     
     try:
         trainer = EnhancedMLTrainer()
         
-        # Run enhanced training with XRS data
+        # Specify the exact files to use
+        specific_files = ["2025_xrsa_xrsb.csv", "2024_xrsa_xrsb.csv"]
+        
+        # Check if files exist
+        data_dir = Path("solar_flare_analysis/data/XRS")
+        found_files = []
+        missing_files = []
+        
+        for filename in specific_files:
+            file_path = data_dir / filename
+            if file_path.exists():
+                found_files.append(filename)
+                print(f"✅ Found: {filename} ({file_path.stat().st_size / 1024 / 1024:.2f} MB)")
+            else:
+                missing_files.append(filename)
+                print(f"❌ Missing: {filename}")
+        
+        if not found_files:
+            print("❌ None of the specified files were found!")
+            print("Please ensure the files exist in solar_flare_analysis/data/XRS/")
+            return
+        
+        if missing_files:
+            print(f"⚠️  Warning: {len(missing_files)} file(s) missing, proceeding with {len(found_files)} file(s)")
+        
+        print(f"📊 Training with {len(found_files)} XRS files")
+        
+        # Run enhanced training with specific XRS files
         results = trainer.train_with_enhanced_xrs_data(
             data_dir="solar_flare_analysis/data/XRS",
-            max_files=5,
-            sequence_length=128
+            max_files=None,  # Not used when specific_files is provided
+            sequence_length=128,
+            specific_files=found_files
         )
         
         # Print summary
@@ -1742,6 +1789,7 @@ def main():
         print(f"📁 Models saved to: models/")
         print(f"📈 Visualizations saved to: enhanced_output/")
         print(f"📋 Detailed logs in: enhanced_training.log")
+        print(f"🎯 Source files: {', '.join(found_files)}")
         
         print("\n📋 Model Status:")
         for model_name, result in results.items():
@@ -1749,6 +1797,21 @@ def main():
             print(f"  {model_name}: {status}")
             if result.get('status') == 'failed':
                 print(f"    Error: {result.get('error', 'Unknown')[:60]}...")
+        
+        # Display file-specific information
+        if trainer.data_loader and hasattr(trainer.data_loader, 'metadata'):
+            metadata = trainer.data_loader.metadata
+            print("\n📊 File Processing Summary:")
+            print(f"  • Files processed: {metadata.get('processed_files', 0)}/{metadata.get('total_files', 0)}")
+            print(f"  • Total samples: {metadata.get('total_samples', 0):,}")
+            print(f"  • Data shape: {metadata.get('data_shape', 'Unknown')}")
+            
+            if 'file_details' in metadata:
+                print("\n📁 File Details:")
+                for file_info in metadata['file_details']:
+                    print(f"  • {file_info['filename']}: {file_info['samples']:,} samples")
+                    print(f"    XRS-A range: [{file_info['xrs_a_range'][0]:.2e}, {file_info['xrs_a_range'][1]:.2e}]")
+                    print(f"    XRS-B range: [{file_info['xrs_b_range'][0]:.2e}, {file_info['xrs_b_range'][1]:.2e}]")
         
     except Exception as e:
         print(f"❌ Critical error: {e}")

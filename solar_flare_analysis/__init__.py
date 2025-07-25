@@ -7,10 +7,9 @@ including data processing, simulation, and visualization.
 __version__ = "1.0.0"
 
 # Expose top-level modules
-from .src import data_processing, ml_models, visualization
+from .src import  ml_models
 
 __all__ = [
-    "data_processing",
-    "ml_models", 
-    "visualization"
+    
+    "ml_models"
 ]

@@ -1,0 +1,92 @@
+2025-07-17 00:16:00,507 - INFO - ============================================================
+2025-07-17 00:16:00,507 - INFO - Enhanced XRS Data Training Pipeline
+2025-07-17 00:16:00,507 - INFO - ============================================================
+2025-07-17 00:16:00,507 - INFO - Step 1: Loading and processing XRS data...
+2025-07-17 00:16:00,507 - INFO - Enhanced XRS data loading from specific files: ['2025_xrsa_xrsb.csv', '2024_xrsa_xrsb.csv']
+2025-07-17 00:16:00,522 - INFO - ✓ Found specific file: 2025_xrsa_xrsb.csv
+2025-07-17 00:16:00,523 - INFO - ✓ Found specific file: 2024_xrsa_xrsb.csv
+2025-07-17 00:16:00,523 - INFO - Processing 2 XRS CSV files...
+2025-07-17 00:16:00,525 - INFO - Processing file 1/2: 2025_xrsa_xrsb.csv
+2025-07-17 00:16:00,740 - INFO -     Sampled 138241 points from 138241 (rate: 1.0)
+2025-07-17 00:16:00,803 - INFO -   ✓ Processed 128662 samples
+2025-07-17 00:16:00,803 - INFO - Processing file 2/2: 2024_xrsa_xrsb.csv
+2025-07-17 00:16:01,358 - INFO -     Sampled 527040 points from 527040 (rate: 1.0)
+2025-07-17 00:16:01,577 - INFO -   ✓ Processed 516121 samples
+2025-07-17 00:16:01,594 - INFO - ✓ Successfully loaded 644,783 XRS data points from 2 files
+2025-07-17 00:16:01,595 - INFO - Applying final preprocessing for ML training...
+2025-07-17 00:16:01,675 - INFO - ✓ Data preprocessing completed. Shape: (644783, 2)
+2025-07-17 00:16:01,675 - INFO - Step 2: Creating training sequences...
+2025-07-17 00:16:01,675 - INFO - Creating sequences: length=128, step=32, data_len=644783
+2025-07-17 00:16:03,509 - INFO - ✓ Created 20146 training sequences
+2025-07-17 00:16:03,509 - INFO - Step 3: Splitting data for training and validation...
+2025-07-17 00:16:03,559 - INFO - Training data: (16116, 128, 2), Validation data: (4030, 128, 2)
+2025-07-17 00:16:03,559 - INFO - Flare ratio - Train: 0.847, Val: 0.847
+2025-07-17 00:16:03,559 - INFO - Step 4: Training enhanced ML models...
+2025-07-17 00:17:25,449 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-07-17 00:17:32,281 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.logging.TaskLevelStatusMessage is deprecated. Please use tf.compat.v1.logging.TaskLevelStatusMessage instead.
+
+2025-07-17 00:17:34,257 - WARNING - From C:\Users\srabani\Desktop\goesflareenv\.venv\Lib\site-packages\tensorflow_probability\python\internal\backend\numpy\_utils.py:48: The name tf.control_flow_v2_enabled is deprecated. Please use tf.compat.v1.control_flow_v2_enabled instead.
+
+2025-07-17 00:17:45,612 - INFO - ✓ Successfully imported ALL enhanced models
+2025-07-17 00:17:45,629 - INFO - Training TransformerFlareModel...
+2025-07-17 00:19:38,945 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-07-17 00:19:39,180 - INFO - ✓ Transformer model training completed
+2025-07-17 00:19:39,180 - INFO - Training ConvolutionalTransformerModel...
+2025-07-17 00:21:48,173 - INFO - ✓ Convolutional Transformer training completed
+2025-07-17 00:21:48,173 - INFO - Training MonteCarloSolarFlareModel...
+2025-07-17 00:21:48,173 - INFO - Building Monte Carlo Solar Flare ML Model
+2025-07-17 00:21:48,365 - INFO - Model built successfully: 137380 parameters
+2025-07-17 00:27:21,516 - INFO - ✓ Monte Carlo model training completed
+2025-07-17 00:27:21,531 - INFO - Training ContrastiveLearningModel...
+2025-07-17 00:27:21,660 - INFO - Starting contrastive pretraining...
+2025-07-17 00:28:02,351 - INFO - Starting fine-tuning...
+2025-07-17 00:28:13,625 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-07-17 00:28:13,708 - INFO - ✓ Contrastive learning training completed
+2025-07-17 00:28:13,708 - INFO - Training SimpleBayesianFlareAnalyzer...
+2025-07-17 00:28:13,786 - INFO - Training Bayesian model...
+2025-07-17 00:28:25,569 - INFO - Testing Bayesian uncertainty predictions...
+2025-07-17 00:28:26,093 - INFO - ✓ Simple Bayesian model training completed
+2025-07-17 00:28:26,093 - INFO - Training GraphNeuralFlareModel...
+2025-07-17 00:28:26,093 - INFO -     Adapting GNN to sequence length: 128
+2025-07-17 00:28:26,431 - INFO - Training Graph Neural Network...
+2025-07-17 00:35:18,595 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-07-17 00:35:18,928 - INFO - ✓ Graph Neural Network training completed
+2025-07-17 00:35:18,928 - INFO - Training HybridGraphTransformerModel...
+2025-07-17 00:35:18,928 - INFO -     Adapting Hybrid Graph-Transformer to sequence length: 128
+2025-07-17 00:35:19,427 - INFO - Training Hybrid Graph-Transformer...
+2025-07-17 00:45:19,493 - INFO - ✓ Hybrid Graph-Transformer training completed
+2025-07-17 00:45:19,493 - INFO - Saving all successfully trained models...
+2025-07-17 00:45:19,516 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-07-17 00:45:19,783 - INFO - ✓ Saved transformer model to models\transformer_model.h5
+2025-07-17 00:45:19,783 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-07-17 00:45:20,179 - INFO - ✓ Saved conv_transformer model to models\conv_transformer_model.h5
+2025-07-17 00:45:20,183 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-07-17 00:45:20,443 - INFO - ✓ Saved monte_carlo model to models\monte_carlo_model.h5
+2025-07-17 00:45:20,443 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-07-17 00:45:20,561 - INFO - ✓ Saved contrastive model to models\contrastive_classifier.h5
+2025-07-17 00:45:20,563 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-07-17 00:45:20,614 - INFO - ✓ Saved simple_bayesian model to models\simple_bayesian_model.h5
+2025-07-17 00:45:20,632 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-07-17 00:45:20,755 - INFO - ✓ Saved graph_neural model to models\graph_neural_model.h5
+2025-07-17 00:45:20,789 - WARNING - You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`. 
+2025-07-17 00:45:20,974 - INFO - ✓ Saved hybrid_graph_transformer model to models\hybrid_graph_transformer_model.h5
+2025-07-17 00:45:20,975 - INFO - 📁 Total models saved: 7/7
+2025-07-17 00:45:20,976 - INFO - Copying models to root directory...
+2025-07-17 00:45:21,004 - INFO - ✓ Copied contrastive_classifier.h5 to root directory
+2025-07-17 00:45:21,021 - INFO - ✓ Copied conv_transformer_model.h5 to root directory
+2025-07-17 00:45:21,021 - INFO - ✓ Copied graph_neural_model.h5 to root directory
+2025-07-17 00:45:21,033 - INFO - ✓ Copied hybrid_graph_transformer_model.h5 to root directory
+2025-07-17 00:45:21,037 - INFO - ✓ Copied monte_carlo_model.h5 to root directory
+2025-07-17 00:45:21,044 - INFO - ✓ Copied simple_bayesian_model.h5 to root directory
+2025-07-17 00:45:21,050 - INFO - ✓ Copied transformer_model.h5 to root directory
+2025-07-17 00:45:21,053 - INFO - 📁 Total models copied to root: 7
+2025-07-17 00:45:21,060 - INFO - Step 5: Creating visualizations...
+2025-07-17 00:45:21,060 - INFO - Creating professional-grade seaborn visualizations...
+2025-07-17 00:49:23,227 - INFO - Available models in results: ['transformer', 'conv_transformer', 'monte_carlo', 'contrastive', 'simple_bayesian', 'graph_neural', 'hybrid_graph_transformer']
+2025-07-17 00:49:23,242 - INFO - Expected models in complexity_map: ['transformer', 'conv_transformer', 'monte_carlo', 'contrastive', 'simple_bayesian', 'graph_neural', 'hybrid_graph_transformer']
+2025-07-17 00:49:23,242 - INFO - DataFrame shape: (7, 5)
+2025-07-17 00:49:23,242 - INFO - DataFrame columns: ['Model', 'Complexity', 'Performance', 'Status', 'Size']
+2025-07-17 00:49:23,242 - INFO - DataFrame empty: False
+2025-07-17 00:49:31,829 - INFO - ✓ Professional seaborn visualizations saved to enhanced_output
+2025-07-17 00:49:31,847 - INFO - ✓ Training metadata saved to enhanced_output\enhanced_training_metadata.json
