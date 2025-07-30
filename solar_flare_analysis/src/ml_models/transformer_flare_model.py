@@ -47,7 +47,7 @@ class PositionalEncoding(layers.Layer):
         return x + position_embeddings
 
 
-class SolarFlareStormDetector:
+class TransformerFlareModel:
     """
     Advanced Transformer-based model for solar flare detection and solar storm prediction
     Uses multi-head attention to capture complex temporal dependencies with advanced preprocessing

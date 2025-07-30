@@ -11,7 +11,7 @@ warnings.filterwarnings('ignore')
 # Add the current directory to path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from transformer_flare_model import SolarFlareStormDetector
+from transformer_flare_model import TransformerFlareModel
 import matplotlib.pyplot as plt
 
 def main():
@@ -78,7 +78,7 @@ def main():
         # Initialize the model
         print(f"\n🔧 Initializing Solar Flare Storm Detector...")
         
-        model = SolarFlareStormDetector(
+        model = TransformerFlareModel(
             sequence_length=config['sequence_length'],
             n_features=config['n_features'],
             d_model=config['d_model'],
